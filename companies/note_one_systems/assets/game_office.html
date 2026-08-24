@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: #0f172a; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 480px; }
+  
+  /* オフィスゲーム画面コンテナ */
+  .office-game-container {
+    width: 100%;
+    max-width: 900px;
+    height: 460px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 3px solid #38bdf8;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(56, 189, 248, 0.2);
+    overflow: hidden;
+  }
+
+  /* グリッド床（レトロモダン調） */
+  .floor-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  /* 部屋ゾーン枠 */
+  .room-zone {
+    position: absolute;
+    border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.02);
+  }
+  .zone-label {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* 各ゾーンの配置 */
+  .zone-ceo { top: 20px; left: 20px; width: 180px; height: 180px; border-color: rgba(234, 179, 8, 0.4); }
+  .zone-legal-hr { top: 220px; left: 20px; width: 220px; height: 210px; border-color: rgba(99, 102, 241, 0.4); }
+  .zone-center { top: 30px; left: 230px; width: 440px; height: 200px; border-color: rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.05); }
+  .zone-editorial { top: 250px; left: 260px; width: 380px; height: 180px; border-color: rgba(249, 115, 22, 0.4); }
+  .zone-mkt-fin { top: 30px; right: 20px; width: 190px; height: 400px; border-color: rgba(34, 197, 94, 0.4); }
+
+  /* デスク・家具 */
+  .desk {
+    position: absolute;
+    background: #334155;
+    border-radius: 6px;
+    border: 2px solid #475569;
+  }
+  .pc-screen {
+    position: absolute;
+    width: 22px;
+    height: 14px;
+    background: #38bdf8;
+    border-radius: 2px;
+    box-shadow: 0 0 8px #38bdf8;
+    animation: pcGlow 2s infinite alternate;
+  }
+  @keyframes pcGlow {
+    0% { opacity: 0.7; box-shadow: 0 0 4px #38bdf8; }
+    100% { opacity: 1; box-shadow: 0 0 12px #38bdf8; }
+  }
+
+  /* 中央ミーティングテーブル */
+  .meeting-table {
+    position: absolute;
+    top: 70px;
+    left: 70px;
+    width: 300px;
+    height: 90px;
+    background: #1e293b;
+    border: 3px solid #38bdf8;
+    border-radius: 45px;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* 社員キャラクターアバター */
+  .employee-avatar {
+    position: absolute;
+    width: 50px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+  }
+  .employee-avatar:hover {
+    transform: scale(1.25) translateY(-5px);
+  }
+
+  /* キャラクターのアイコン・動き */
+  .avatar-icon {
+    width: 38px;
+    height: 38px;
+    background: #1e293b;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    animation: bobbing 2s infinite ease-in-out;
+  }
+  @keyframes bobbing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .avatar-name {
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 2px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* タイピングエフェクト（作業中） */
+  .typing-effect {
+    position: absolute;
+    bottom: 22px;
+    right: -5px;
+    font-size: 10px;
+    animation: typeFlicker 0.8s infinite;
+  }
+  @keyframes typeFlicker {
+    0%, 100% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* 吹き出し（セリフバブル） */
+  .speech-bubble {
+    position: absolute;
+    bottom: 65px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: #ffffff transparent;
+    display: block;
+    width: 0;
+  }
+  .speech-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: bubblePulse 3.5s infinite;
+  }
+  @keyframes bubblePulse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-2px) scale(1.02); }
+  }
+
+  /* 社員ごとの個別位置設定 */
+  #emp-ichijo   { top: 75px; left: 80px; }       /* CEO */
+  #emp-tachibana{ top: 270px; left: 50px; }      /* 法務 */
+  #emp-ayase    { top: 340px; left: 140px; }     /* 人事 */
+  #emp-kazama   { top: 290px; left: 290px; }     /* リサーチ */
+  #emp-yuki     { top: 290px; left: 380px; }     /* 編集長 */
+  #emp-morikawa { top: 290px; left: 470px; }     /* ライター */
+  #emp-kanzaki  { top: 350px; left: 550px; }     /* QA */
+  #emp-sasaki   { top: 100px; right: 75px; }     /* SNS */
+  #emp-shiraishi{ top: 270px; right: 75px; }     /* 財務 */
+
+  /* ランダム移動アニメーション用クラス */
+  .walk-around {
+    animation: gentleWander 12s infinite alternate ease-in-out;
+  }
+  @keyframes gentleWander {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(15px, -10px); }
+    50% { transform: translate(-10px, 15px); }
+    75% { transform: translate(10px, 10px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* 上部ヘッダーHUD */
+  .office-hud {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 30;
+  }
+  .hud-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+  }
+</style>
+</head>
+<body>
+
+<div class="office-game-container">
+  <div class="floor-grid"></div>
+
+  <!-- HUDステータス -->
+  <div class="office-hud">
+    <div class="hud-live-dot"></div>
+    <span>NoteOneSystems 2D Office Live</span>
+    <span style="color:#f8fafc; font-weight:700;">出社: 9/9名</span>
+  </div>
+
+  <!-- ゾーン枠 -->
+  <div class="room-zone zone-ceo">
+    <span class="zone-label">👑 CEO Suite</span>
+    <div class="desk" style="top:50px; left:40px; width:70px; height:40px;"></div>
+    <div class="pc-screen" style="top:60px; left:65px;"></div>
+  </div>
+
+  <div class="room-zone zone-legal-hr">
+    <span class="zone-label">⚖️ Governance & HR</span>
+    <div class="desk" style="top:40px; left:20px; width:60px; height:35px;"></div>
+    <div class="desk" style="top:110px; left:100px; width:60px; height:35px;"></div>
+  </div>
+
+  <div class="room-zone zone-center">
+    <span class="zone-label">🗣️ Central Glass Strategy Room</span>
+    <div class="meeting-table"><span>💡 戦略企画ミーティングテーブル</span></div>
+  </div>
+
+  <div class="room-zone zone-editorial">
+    <span class="zone-label">✍️ Editorial & Content Studio</span>
+    <div class="desk" style="top:40px; left:20px; width:220px; height:35px;"></div>
+    <div class="pc-screen" style="top:48px; left:35px;"></div>
+    <div class="pc-screen" style="top:48px; left:125px;"></div>
+    <div class="pc-screen" style="top:48px; left:205px;"></div>
+    <div class="desk" style="top:100px; left:270px; width:60px; height:35px;"></div>
+  </div>
+
+  <div class="room-zone zone-mkt-fin">
+    <span class="zone-label">📢 Mkt & Finance</span>
+    <div class="desk" style="top:50px; left:40px; width:65px; height:35px;"></div>
+    <div class="desk" style="top:220px; left:40px; width:65px; height:35px;"></div>
+  </div>
+
+  <!-- 9名のAI社員キャラクター -->
+  <div class="employee-avatar walk-around" id="emp-ichijo" onclick="triggerSpeak('ichijo')">
+    <div class="speech-bubble" id="bubble-ichijo">読者満足度100%を目指します！</div>
+    <div class="avatar-icon" style="border-color:#1E3A8A;">👩‍💼</div>
+    <div class="avatar-name">一条 蓮 (CEO)</div>
+    <div class="typing-effect">💡</div>
+  </div>
+
+  <div class="employee-avatar" id="emp-tachibana" onclick="triggerSpeak('tachibana')">
+    <div class="speech-bubble" id="bubble-tachibana">会社法第7条チェック、適法です！</div>
+    <div class="avatar-icon" style="border-color:#334155;">⚖️</div>
+    <div class="avatar-name">橘 律 (法務)</div>
+    <div class="typing-effect">📜</div>
+  </div>
+
+  <div class="employee-avatar walk-around" id="emp-ayase" onclick="triggerSpeak('ayase')">
+    <div class="speech-bubble" id="bubble-ayase">組織負荷スコア監視中。健全です✨</div>
+    <div class="avatar-icon" style="border-color:#059669;">🤝</div>
+    <div class="avatar-name">綾瀬 七海 (人事)</div>
+    <div class="typing-effect">📊</div>
+  </div>
+
+  <div class="employee-avatar" id="emp-kazama" onclick="triggerSpeak('kazama')">
+    <div class="speech-bubble" id="bubble-kazama">note売れ筋トレンドを分析中…🔍</div>
+    <div class="avatar-icon" style="border-color:#0D9488;">🔍</div>
+    <div class="avatar-name">風間 涼 (リサーチ)</div>
+    <div class="typing-effect">💻</div>
+  </div>
+
+  <div class="employee-avatar walk-around" id="emp-yuki" onclick="triggerSpeak('yuki')">
+    <div class="speech-bubble" id="bubble-yuki">無料/有料ラインの黄金比率を設計中！</div>
+    <div class="avatar-icon" style="border-color:#D97706;">📑</div>
+    <div class="avatar-name">結城 紬 (編集長)</div>
+    <div class="typing-effect">✍️</div>
+  </div>
+
+  <div class="employee-avatar" id="emp-morikawa" onclick="triggerSpeak('morikawa')">
+    <div class="speech-bubble" id="bubble-morikawa">実践テンプレを超高速タイピング中…！</div>
+    <div class="avatar-icon" style="border-color:#EA580C;">✍️</div>
+    <div class="avatar-name">森川 拓真 (ライター)</div>
+    <div class="typing-effect">⚡</div>
+  </div>
+
+  <div class="employee-avatar" id="emp-kanzaki" onclick="triggerSpeak('kanzaki')">
+    <div class="speech-bubble" id="bubble-kanzaki">ファクトチェック95点！合格認定🛡️</div>
+    <div class="avatar-icon" style="border-color:#DC2626;">🛡️</div>
+    <div class="avatar-name">神崎 玲奈 (QA)</div>
+    <div class="typing-effect">🔍</div>
+  </div>
+
+  <div class="employee-avatar walk-around" id="emp-sasaki" onclick="triggerSpeak('sasaki')">
+    <div class="speech-bubble" id="bubble-sasaki">X・Threads・Blueskyに同時発信中📢</div>
+    <div class="avatar-icon" style="border-color:#2563EB;">📢</div>
+    <div class="avatar-name">佐々木 翼 (SNS)</div>
+    <div class="typing-effect">📡</div>
+  </div>
+
+  <div class="employee-avatar" id="emp-shiraishi" onclick="triggerSpeak('shiraishi')">
+    <div class="speech-bubble" id="bubble-shiraishi">ワンコイン500円で売上最大化を試算💰</div>
+    <div class="avatar-icon" style="border-color:#7C3AED;">📊</div>
+    <div class="avatar-name">白石 葵 (財務)</div>
+    <div class="typing-effect">💴</div>
+  </div>
+
+</div>
+
+<script>
+  const speeches = {
+    ichijo: ["全社売上最大化に向けて指揮中！", "完全無料運用の鉄則を遵守します。", "読者満足度100%の記事だけを出します。"],
+    tachibana: ["会社法第7条チェック、適法です！", "著作権法第32条の引用要件クリア。", "note利用規約に100%適合しています。"],
+    ayase: ["社員の負荷スコア監視中。健全です✨", "就業規則Ver 0.9を運用中！", "ボトルネック発生時は増員提案します。"],
+    kazama: ["noteの最新売れ筋をリサーチ中…🔍", "ターゲット読者の悩みを深掘り中！", "競合にない切り口を発見しました。"],
+    yuki: ["無料/有料ラインの黄金比率を設計中！", "読者を惹きつける見出しを構成中。", "森川さん、この型で執筆お願いします！"],
+    morikawa: ["実践テンプレを超高速タイピング中…！", "コピペで使える雛形を執筆中⚡", "読者がすぐ行動できるステップを作成中！"],
+    kanzaki: ["ファクトチェック95点！合格認定🛡️", "誇大広告ゼロを確認しました。", "誤字脱字なし、可読性も抜群です！"],
+    sasaki: ["X・Threads・Blueskyに同時発信中📢", "Instagramカルーセル案を作成完了！", "Mastodonに有益ノウハウを配信中✨"],
+    shiraishi: ["ワンコイン500円で売上最大化を試算💰", "稟議のROIは600%超えを予測！", "月間シミュレーション良好です📈"]
+  };
+
+  const employeeIds = Object.keys(speeches);
+
+  function triggerSpeak(id) {
+    const bubble = document.getElementById('bubble-' + id);
+    const lines = speeches[id];
+    const line = lines[Math.floor(Math.random() * lines.length)];
+    bubble.innerText = line;
+    bubble.classList.add('show');
+    setTimeout(() => {
+      bubble.classList.remove('show');
+    }, 4000);
+  }
+
+  // 3秒ごとにランダムな社員が自動でつぶやく（ゲーム風演出）
+  setInterval(() => {
+    const randomId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+    triggerSpeak(randomId);
+  }, 2800);
+
+  // 初回起動時に何人か喋る
+  setTimeout(() => triggerSpeak('ichijo'), 500);
+  setTimeout(() => triggerSpeak('morikawa'), 1500);
+</script>
+
+</body>
+</html>

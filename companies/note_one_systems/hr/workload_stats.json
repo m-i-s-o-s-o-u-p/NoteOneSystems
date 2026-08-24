@@ -1,0 +1,65 @@
+{
+  "morikawa": {
+    "name": "森川 拓真",
+    "role": "チーフライター",
+    "tasks": 14,
+    "words_generated": 38852,
+    "workload_score": 100
+  },
+  "yuki": {
+    "name": "結城 紬",
+    "role": "統括編集長",
+    "tasks": 14,
+    "words_generated": 8914,
+    "workload_score": 50
+  },
+  "kazama": {
+    "name": "風間 涼",
+    "role": "市場リサーチ担当",
+    "tasks": 14,
+    "words_generated": 9729,
+    "workload_score": 52
+  },
+  "kanzaki": {
+    "name": "神崎 玲奈",
+    "role": "品質管理責任者",
+    "tasks": 14,
+    "words_generated": 6334,
+    "workload_score": 43
+  },
+  "tachibana": {
+    "name": "橘 律",
+    "role": "法務・コンプライアンス顧問",
+    "tasks": 14,
+    "words_generated": 5120,
+    "workload_score": 40
+  },
+  "sasaki": {
+    "name": "佐々木 翼",
+    "role": "マルチSNSマーケター",
+    "tasks": 14,
+    "words_generated": 12487,
+    "workload_score": 59
+  },
+  "shiraishi": {
+    "name": "白石 葵",
+    "role": "財務アナリスト",
+    "tasks": 14,
+    "words_generated": 5528,
+    "workload_score": 41
+  },
+  "ichijo": {
+    "name": "一条 蓮",
+    "role": "代表取締役CEO",
+    "tasks": 14,
+    "words_generated": 3702,
+    "workload_score": 37
+  },
+  "ayase": {
+    "name": "綾瀬 七海",
+    "role": "人事・労務責任者",
+    "tasks": 14,
+    "words_generated": 3400,
+    "workload_score": 36
+  }
+}
