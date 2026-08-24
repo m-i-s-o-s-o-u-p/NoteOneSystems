@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 徹底的な白文字＆高コントラスト・文字被り防止CSS
+# 徹底的な白文字＆セルリアンブルー選択色・高コントラストCSS
 st.markdown("""
 <style>
     .main-header {
@@ -38,7 +38,7 @@ st.markdown("""
         font-size: 1.35rem;
         font-weight: 700;
         color: #FFFFFF !important;
-        border-left: 5px solid #38BDF8;
+        border-left: 5px solid #007BA7;
         padding-left: 12px;
         margin: 24px 0 16px 0;
         letter-spacing: -0.3px;
@@ -56,7 +56,7 @@ st.markdown("""
         background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
         border-radius: 12px;
         padding: 18px;
-        border: 1px solid #38BDF8 !important;
+        border: 1px solid #007BA7 !important;
         margin-bottom: 16px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         color: #F8FAFC !important;
@@ -87,7 +87,7 @@ st.markdown("""
     }
     .chat-bubble {
         background-color: #1E293B !important;
-        border-left: 5px solid #38BDF8;
+        border-left: 5px solid #007BA7;
         padding: 16px 20px;
         border-radius: 8px;
         margin-bottom: 14px;
@@ -102,8 +102,25 @@ st.markdown("""
         justify-content: flex-start !important;
         border-radius: 8px !important;
         font-size: 0.92rem !important;
-        padding: 6px 12px !important;
-        margin-bottom: 2px !important;
+        padding: 7px 12px !important;
+        margin-bottom: 3px !important;
+        border: 1px solid transparent !important;
+        background-color: transparent !important;
+        color: #CBD5E1 !important;
+    }
+    div[data-testid="stSidebar"] button:hover {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+    }
+
+    /* 選択中のメニューボタン：セルリアンブルー（#007BA7） */
+    div[data-testid="stSidebar"] button[kind="primary"],
+    div[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {
+        background-color: #007BA7 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #38BDF8 !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 10px rgba(0, 123, 167, 0.5) !important;
     }
     
     h1, h2, h3, h4, h5, h6 {
@@ -131,7 +148,7 @@ ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 
 # ==========================================
-# サイドバー（ラジオボタンではなく、文字リンク・ボタンでネスト階層を表現）
+# サイドバー（選択中の背景色: セルリアンブルー #007BA7）
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems ,Inc</h2>", unsafe_allow_html=True)
@@ -232,11 +249,6 @@ if page == "🏢 Note One Systems ,Inc":
         with open(html_path, "r", encoding="utf-8") as f:
             game_html = f.read()
         components.html(game_html, height=530)
-    
-    with st.expander("🖼️ 3Dアイソメトリック見取り図（詳細レイアウト）を表示"):
-        img_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/office_floor.jpg")
-        if os.path.exists(img_path):
-            st.image(img_path, caption="Note One Systems 3Dオフィスフロア見取り図", use_container_width=True)
 
     st.markdown("---")
     st.markdown("<div class='section-title'>🖥️ フロア別 執務デスク＆リアルタイム稼働状況</div>", unsafe_allow_html=True)
@@ -321,7 +333,7 @@ if page == "🏢 Note One Systems ,Inc":
             <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>森川 拓真</div>
             <div style='font-size: 0.85rem; color: #FDBA74; font-weight: 700;'>記事制作課 (ライター)</div>
             <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Writer Studio</div>
-            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「コピペで即使える実践テンプレート執筆スタンバイ完了。」</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「コピペで使える実践テンプレート執筆スタンバイ完了。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_c4:
@@ -670,7 +682,7 @@ elif page == "📚 法務課":
     
     for inv in legal_inv["investigations"]:
         st.markdown(f"""
-        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
+        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #007BA7; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
             <div style='display: flex; justify-content: space-between;'>
                 <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']}（ID: {inv['id']}）</strong>
                 <span>{inv['status']}</span>
@@ -780,7 +792,7 @@ elif page == "💻 社内ヘルプデスク":
     for err in err_data.get("errors", []):
         with st.container():
             st.markdown(f"""
-            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #007BA7; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
                 <div style='display: flex; justify-content: space-between;'>
                     <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {err['module']}（ID: {err['id']}）</strong>
                     <span>{err['status']}</span>
