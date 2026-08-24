@@ -18,29 +18,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 徹底的な白文字＆高コントラスト・ダークプレミアムCSS
+# 徹底的な白文字＆高コントラスト・文字被り防止CSS
 st.markdown("""
 <style>
     .main-header {
-        font-size: 2.3rem;
+        font-size: 2.2rem;
         font-weight: 800;
         color: #FFFFFF !important;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.4rem;
         letter-spacing: -0.5px;
     }
     .sub-header {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         color: #94A3B8 !important;
         font-weight: 500;
         margin-bottom: 1.8rem;
     }
     .section-title {
-        font-size: 1.4rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: #FFFFFF !important;
         border-left: 5px solid #38BDF8;
         padding-left: 12px;
-        margin: 28px 0 16px 0;
+        margin: 24px 0 16px 0;
         letter-spacing: -0.3px;
     }
     .content-box {
@@ -95,6 +95,17 @@ st.markdown("""
         color: #F8FAFC !important;
         border: 1px solid #334155;
     }
+    
+    /* サイドバーのテキストリンクボタン風デザイン */
+    div[data-testid="stSidebar"] button {
+        text-align: left !important;
+        justify-content: flex-start !important;
+        border-radius: 8px !important;
+        font-size: 0.92rem !important;
+        padding: 6px 12px !important;
+        margin-bottom: 2px !important;
+    }
+    
     h1, h2, h3, h4, h5, h6 {
         color: #FFFFFF !important;
     }
@@ -113,38 +124,76 @@ if "hr_manager" not in st.session_state:
     st.session_state.hr_manager = HRManager()
 if "api_key" not in st.session_state:
     st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
+if "nav_page" not in st.session_state:
+    st.session_state.nav_page = "🏢 Note One Systems ,Inc"
 
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 
 # ==========================================
-# サイドバー（図を削除し、メニュー自体で正確にネスト階層を表現）
+# サイドバー（ラジオボタンではなく、文字リンク・ボタンでネスト階層を表現）
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems ,Inc</h2>", unsafe_allow_html=True)
     st.caption("AI Enterprise Holdings Platform")
     st.markdown("---")
 
-    menu_list = [
-        "🏢 Note One Systems ,Inc",
-        "🏢 Company Dashboard",
-        "📝 編集部",
-        "   ├ 🔍 市場調査課",
-        "   ├ ✍️ 記事制作課",
-        "   ├ 📢 広報課",
-        "   └ ✨ 品質管理課",
-        "🏛️ 管理部",
-        "   ├ 🤝 人事課",
-        "   ├ 📚 法務課",
-        "   ├ 📊 財務課",
-        "   └ 💳 経理課",
-        "💻 社内ヘルプデスク",
-        "👥 社員プロファイル",
-        "☁️ 24時間無料クラウド設定ガイド"
-    ]
+    # 1. 単独トップ項目
+    if st.button("🏢 Note One Systems ,Inc", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Note One Systems ,Inc" else "secondary"):
+        st.session_state.nav_page = "🏢 Note One Systems ,Inc"
+        st.rerun()
 
-    menu = st.radio("メニューを選択", menu_list)
-    
+    if st.button("🏢 Company Dashboard", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Company Dashboard" else "secondary"):
+        st.session_state.nav_page = "🏢 Company Dashboard"
+        st.rerun()
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # 2. 📝 編集部（4つの課をネスト）
+    st.markdown("<div style='font-size:0.95rem; font-weight:800; color:#38BDF8; padding: 4px 6px;'>📝 編集部</div>", unsafe_allow_html=True)
+    if st.button("　├ 🔍 市場調査課", use_container_width=True, type="primary" if st.session_state.nav_page == "🔍 市場調査課" else "secondary"):
+        st.session_state.nav_page = "🔍 市場調査課"
+        st.rerun()
+    if st.button("　├ ✍️ 記事制作課", use_container_width=True, type="primary" if st.session_state.nav_page == "✍️ 記事制作課" else "secondary"):
+        st.session_state.nav_page = "✍️ 記事制作課"
+        st.rerun()
+    if st.button("　├ 📢 広報課", use_container_width=True, type="primary" if st.session_state.nav_page == "📢 広報課" else "secondary"):
+        st.session_state.nav_page = "📢 広報課"
+        st.rerun()
+    if st.button("　└ ✨ 品質管理課", use_container_width=True, type="primary" if st.session_state.nav_page == "✨ 品質管理課" else "secondary"):
+        st.session_state.nav_page = "✨ 品質管理課"
+        st.rerun()
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # 3. 🏛️ 管理部（4つの課をネスト）
+    st.markdown("<div style='font-size:0.95rem; font-weight:800; color:#A78BFA; padding: 4px 6px;'>🏛️ 管理部</div>", unsafe_allow_html=True)
+    if st.button("　├ 🤝 人事課", use_container_width=True, type="primary" if st.session_state.nav_page == "🤝 人事課" else "secondary"):
+        st.session_state.nav_page = "🤝 人事課"
+        st.rerun()
+    if st.button("　├ 📚 法務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📚 法務課" else "secondary"):
+        st.session_state.nav_page = "📚 法務課"
+        st.rerun()
+    if st.button("　├ 📊 財務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📊 財務課" else "secondary"):
+        st.session_state.nav_page = "📊 財務課"
+        st.rerun()
+    if st.button("　└ 💳 経理課", use_container_width=True, type="primary" if st.session_state.nav_page == "💳 経理課" else "secondary"):
+        st.session_state.nav_page = "💳 経理課"
+        st.rerun()
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # 4. その他単独項目
+    if st.button("💻 社内ヘルプデスク", use_container_width=True, type="primary" if st.session_state.nav_page == "💻 社内ヘルプデスク" else "secondary"):
+        st.session_state.nav_page = "💻 社内ヘルプデスク"
+        st.rerun()
+    if st.button("👥 社員プロファイル", use_container_width=True, type="primary" if st.session_state.nav_page == "👥 社員プロファイル" else "secondary"):
+        st.session_state.nav_page = "👥 社員プロファイル"
+        st.rerun()
+    if st.button("☁️ 24時間無料クラウド設定ガイド", use_container_width=True, type="primary" if st.session_state.nav_page == "☁️ 24時間無料クラウド設定ガイド" else "secondary"):
+        st.session_state.nav_page = "☁️ 24時間無料クラウド設定ガイド"
+        st.rerun()
+
     st.markdown("---")
     st.markdown("<h4 style='color:#FFFFFF !important;'>⚙️ AI頭脳設定（Gemini）</h4>", unsafe_allow_html=True)
     api_key_input = st.text_input(
@@ -166,15 +215,17 @@ with st.sidebar:
     st.caption("💡 **維持費: 0円（完全無料）**")
     st.caption("9名の専門AI社員が24時間稼働中")
 
+# 現在のページ
+page = st.session_state.nav_page
+
 # ==========================================
 # 1. 🏢 Note One Systems ,Inc（本社執務室 / 2Dオフィス）
 # ==========================================
-if menu == "🏢 Note One Systems ,Inc":
+if page == "🏢 Note One Systems ,Inc":
     st.markdown("<div class='main-header'>Note One Systems Headquarter</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の専門AI社員がそれぞれのデスクで自律的に業務を行っています</div>", unsafe_allow_html=True)
 
     st.markdown("<div class='section-title'>Note One Systems Headquarter Office Room</div>", unsafe_allow_html=True)
-    st.caption("💡 レイアウトを最適化しました。二等身のAI社員たちが歩き回り、PCタイピングしながらリアルタイムにつぶやきます。クリックしても会話できます！")
     
     html_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/game_office.html")
     if os.path.exists(html_path):
@@ -319,7 +370,7 @@ if menu == "🏢 Note One Systems ,Inc":
 # ==========================================
 # 2. 🏢 Company Dashboard
 # ==========================================
-elif menu == "🏢 Company Dashboard":
+elif page == "🏢 Company Dashboard":
     st.markdown("<div class='main-header'>🏢 Company Dashboard</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>Note One Systems ,Inc グループ全体の経営概況・全社統括ダッシュボード</div>", unsafe_allow_html=True)
     
@@ -392,289 +443,319 @@ elif menu == "🏢 Company Dashboard":
                 st.warning("会社名を入力してください。")
 
 # ==========================================
-# 3. 📝 編集部 ＆ ネストされた4つの課
+# 3. 🔍 市場調査課（単一画面）
 # ==========================================
-elif menu in ["📝 編集部", "   ├ 🔍 市場調査課", "   ├ ✍️ 記事制作課", "   ├ 📢 広報課", "   └ ✨ 品質管理課"]:
-    st.markdown("<div class='main-header'>📝 編集部</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-header'>市場調査課、記事制作課、広報課、品質管理課が連携して高品質な有料記事を制作・販売します</div>", unsafe_allow_html=True)
-
-    # 1. 🔍 市場調査課
-    st.markdown("<div class='section-title'>🔍 1. 市場調査課（担当: 風間 涼）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.info("💡 **市場調査課のミッション**: noteの最新売れ筋トレンド、競合記事のギャップ、読者ペルソナの深層心理を分析し、売れるテーマを特定します。")
-
-    # 2. ✍️ 記事制作課
-    st.markdown("<div class='section-title'>✍️ 2. 記事制作課（担当: 結城 紬 ＆ 森川 拓真）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 🗣️ 中央ガラス会議室：記事制作指示フォーム")
-        c_in1, c_in2 = st.columns([3, 1])
-        with c_in1:
-            topic_input = st.text_input(
-                "記事のテーマ・キーワード",
-                placeholder="例: 「Notionで劇的に業務効率化する実践テンプレート集」「未経験から月5万円稼ぐAI副業の完全マップ」"
-            )
-            audience_input = st.text_input(
-                "ターゲット読者（任意）",
-                placeholder="例: 「忙しい会社員」「副業を始めたい初心者」"
-            )
-        with c_in2:
-            price_input = st.selectbox(
-                "価格方針",
-                ["自動提案（アナリスト最適化）", "ワンコイン（500円）", "入門価格（300円）", "高付加価値（980円〜）"]
-            )
-            st.write("")
-            start_btn = st.button("🚀 9名を中央会議室に招集して執筆開始", type="primary", use_container_width=True)
-
-        if start_btn:
-            if not topic_input.strip():
-                st.warning("⚠️ 記事のテーマを入力してください。")
-            else:
-                st.markdown("### 🎙️ 中央会議室 リアルタイム戦略会議 ＆ 執筆ライブログ")
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                meeting_container = st.container()
-                
-                pipeline = workflow.run_creation_pipeline(
-                    topic=topic_input,
-                    target_audience=audience_input,
-                    price_preference=price_input
-                )
-                
-                completed_article = None
-                for event in pipeline:
-                    step = event.get("step", 1)
-                    progress_bar.progress(step / 10)
-                    
-                    if event.get("status") == "thinking":
-                        status_text.markdown(f"⏳ **{event.get('message')}**")
-                    elif event.get("status") == "done":
-                        log = event.get("log", {})
-                        with meeting_container:
-                            st.markdown(f"""
-                            <div class='chat-bubble'>
-                                <div style='font-weight: 800; color: #FFFFFF;'>{log.get('icon')} {log.get('name')} <span style='font-size: 0.8rem; color: #94A3B8;'>（{log.get('role')}）</span></div>
-                                <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #F8FAFC;'>{log.get('content')}</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                    elif event.get("status") == "completed":
-                        completed_article = event.get("article")
-                        progress_bar.progress(1.0)
-                        status_text.markdown("✅ **全工程（執筆・法務・QA・5大SNSプロモーション）が完了しました！**")
-                
-                if completed_article:
-                    st.success(f"🎉 記事『{completed_article['title']}』が完成し、品質管理課の台帳に「掲載前」として登録されました！")
-
-    # 3. 📢 広報課
-    st.markdown("<div class='section-title'>📢 3. 広報課（担当: 佐々木 翼）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### ⚙️ 5大SNSアカウント ＆ 自動配信先の設定")
-        cfg_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/sns_config.json")
-        if os.path.exists(cfg_path):
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                sns_cfg = json.load(f)
-        else:
-            sns_cfg = {}
-        
-        col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            x_acc = st.text_input("🐦 X アカウント名", value=sns_cfg.get("x", {}).get("account_name", "@NoteOneSystems"))
-            ig_acc = st.text_input("📸 Instagram アカウント名", value=sns_cfg.get("instagram", {}).get("account_name", "@noteonesystems_official"))
-            th_acc = st.text_input("🧵 Threads アカウント名", value=sns_cfg.get("threads", {}).get("account_name", "@noteonesystems_official"))
-        with col_s2:
-            bs_handle = st.text_input("🦋 Bluesky ハンドル名", value=sns_cfg.get("bluesky", {}).get("handle", "noteonesystems.bsky.social"))
-            mast_inst = st.text_input("🐘 Mastodon インスタンスURL", value=sns_cfg.get("mastodon", {}).get("instance", "https://mstdn.jp"))
-        
-        if st.button("💾 広報課 SNS設定を保存する"):
-            sns_cfg["x"] = {"account_name": x_acc}
-            sns_cfg["instagram"] = {"account_name": ig_acc}
-            sns_cfg["threads"] = {"account_name": th_acc}
-            sns_cfg["bluesky"] = {"handle": bs_handle}
-            sns_cfg["mastodon"] = {"instance": mast_inst}
-            with open(cfg_path, "w", encoding="utf-8") as f:
-                json.dump(sns_cfg, f, ensure_ascii=False, indent=2)
-            st.success("広報課のSNS設定を保存しました。")
-
-    # 4. ✨ 品質管理課
-    st.markdown("<div class='section-title'>✨ 4. 品質管理課（担当: 神崎 玲奈）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 📋 作成記事一覧・ステータス管理 ＆ タイムスタンプ履歴")
-        articles = workflow.list_articles()
-        
-        if not articles:
-            st.info("まだ記事がありません。上部の「記事制作課」から記事を執筆してください。")
-        else:
-            article_titles = [f"【{art.get('status', '掲載前')}】 {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
-            selected_idx = st.selectbox("管理する記事を選択", range(len(articles)), format_func=lambda x: article_titles[x])
-            art = articles[selected_idx]
-            
-            col_stat1, col_stat2 = st.columns([2, 3])
-            with col_stat1:
-                cur_status = art.get("status", "掲載前")
-                st.markdown(f"**現在のステータス:** :green[**{cur_status}**]")
-                new_stat = st.selectbox("ステータスを変更する", ["考案中", "執筆中", "査読中", "掲載前", "掲載済み"], index=["考案中", "執筆中", "査読中", "掲載前", "掲載済み"].index(cur_status) if cur_status in ["考案中", "執筆中", "査読中", "掲載前", "掲載済み"] else 3)
-                if st.button("🔄 ステータスを更新（タイムスタンプ追記）", type="primary"):
-                    workflow.update_article_status(art["id"], new_stat)
-                    st.success(f"ステータスを「{new_stat}」に更新し、タイムスタンプを記録しました！")
-                    st.rerun()
-            
-            with col_stat2:
-                st.markdown("##### ⏱️ ステータス遷移タイムスタンプ履歴")
-                history = art.get("status_history", [])
-                for h in reversed(history):
-                    st.write(f"- **{h.get('timestamp')}** ➔ `【{h.get('status')}】` ({h.get('actor', '')})")
-            
-            st.divider()
-            st.markdown("#### 📄 記事プレビュー（無料エリア / 有料エリア）")
-            content = art.get("content", "")
-            if "🔒 ここから先は有料エリアです" in content:
-                parts = content.split("🔒 ここから先は有料エリアです")
-                st.markdown(parts[0])
-                st.markdown("""
-                <div style='background-color: #1E293B; border: 2px dashed #F59E0B; border-radius: 8px; padding: 14px; margin: 14px 0;'>
-                    <strong style='color: #FCD34D;'>🔒 ここから先は有料エリア（noteの有料ライン設定位置）</strong>
-                </div>
-                """, unsafe_allow_html=True)
-                st.markdown(parts[1])
-            else:
-                st.markdown(content)
-            
-            st.markdown("#### 📢 5大SNS告知文（佐々木 翼 作成）")
-            st.text_area("SNS告知テキスト", value=art.get("marketing", ""), height=250)
-            
-            st.markdown("#### 📋 note貼り付け用 マークダウン全文")
-            st.text_area("記事コード", value=art.get("content", ""), height=300)
+elif page == "🔍 市場調査課":
+    st.markdown("<div class='main-header'>🔍 市場調査課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 風間 涼（Market Research Analyst）</div>", unsafe_allow_html=True)
+    
+    st.info("💡 **市場調査課のミッション**: noteの最新売れ筋トレンド、競合記事のギャップ、読者ペルソナの深層心理を分析し、売れるテーマを特定します。")
+    
+    st.markdown("<div class='section-title'>📊 最新トレンド分析レポート</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='content-box'>
+        <h4 style='color:#38BDF8;'>🔥 今週のnote高成約キーワード</h4>
+        <ul>
+            <li><strong>AI×実務効率化:</strong> 「ChatGPTで残業をゼロにする実践プロンプト集」「Notion×AI 自動化テンプレート」</li>
+            <li><strong>初心者向け副業マップ:</strong> 「知識ゼロからのnote有料記事販売ロードマップ」</li>
+            <li><strong>即戦力テンプレ:</strong> 「コピペで使える企画書・業務マニュアルの型」</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. 🏛️ 管理部 ＆ ネストされた4つの課
+# 4. ✍️ 記事制作課（単一画面）
 # ==========================================
-elif menu in ["🏛️ 管理部", "   ├ 🤝 人事課", "   ├ 📚 法務課", "   ├ 📊 財務課", "   └ 💳 経理課"]:
-    st.markdown("<div class='main-header'>🏛️ 管理部</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-header'>人事課、法務課、財務課、経理課が会社のガバナンスと収益・費用管理を統制します</div>", unsafe_allow_html=True)
+elif page == "✍️ 記事制作課":
+    st.markdown("<div class='main-header'>✍️ 記事制作課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>統括: 結城 紬（編集長） / 執筆: 森川 拓真（チーフライター）</div>", unsafe_allow_html=True)
 
-    # 1. 🤝 人事課
-    st.markdown("<div class='section-title'>🤝 1. 人事課（担当: 綾瀬 七海）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 🏢 組織体制図 ＆ 職務分掌規程")
-        with open(os.path.join(os.path.dirname(__file__), "companies/note_one_systems/org_chart_and_job_descriptions.json"), "r", encoding="utf-8") as f:
-            org_data = json.load(f)
-        
-        st.write(f"**制定者:** {org_data.get('author')} | **バージョン:** {org_data.get('version')}")
-        
-        with st.expander("📋 9名の詳細職務分掌一覧を開く"):
-            for dept in org_data["departments"]:
-                st.markdown(f"**{dept['icon']} {dept['name']}** (統括: {dept['head']})")
-                for role in dept["roles"]:
-                    st.write(f"- **{role['role_name']}（{role['member']}）**: {', '.join(role['responsibilities'][:2])}")
-        
-        st.markdown("#### 📊 社員別 リアルタイム業務負荷監視")
-        stats = st.session_state.hr_manager.get_workload_stats()
-        df_data = []
-        for emp_id, data in stats.items():
-            df_data.append({
-                "社員名": data["name"],
-                "役職": data["role"],
-                "タスク回数": data["tasks"],
-                "生成文字数": f"{data['words_generated']:,} 字",
-                "負荷スコア": f"{data['workload_score']}%"
-            })
-        st.dataframe(pd.DataFrame(df_data), use_container_width=True)
-        
-        proposals = st.session_state.hr_manager.get_staffing_proposals()
-        if proposals:
-            for prop in proposals:
-                st.warning(f"**【増員提案】対象部署: {prop['target_role']}（{prop['target_name']} / 負荷: {prop['workload_score']}%）** ➔ {prop['proposed_role']} の増員（費用0円）")
+    st.markdown("#### 🗣️ 中央ガラス会議室：記事制作指示フォーム")
+    c_in1, c_in2 = st.columns([3, 1])
+    with c_in1:
+        topic_input = st.text_input(
+            "記事のテーマ・キーワード",
+            placeholder="例: 「Notionで劇的に業務効率化する実践テンプレート集」「未経験から月5万円稼ぐAI副業の完全マップ」"
+        )
+        audience_input = st.text_input(
+            "ターゲット読者（任意）",
+            placeholder="例: 「忙しい会社員」「副業を始めたい初心者」"
+        )
+    with c_in2:
+        price_input = st.selectbox(
+            "価格方針",
+            ["自動提案（アナリスト最適化）", "ワンコイン（500円）", "入門価格（300円）", "高付加価値（980円〜）"]
+        )
+        st.write("")
+        start_btn = st.button("🚀 9名を中央会議室に招集して執筆開始", type="primary", use_container_width=True)
 
-    # 2. 📚 法務課
-    st.markdown("<div class='section-title'>📚 2. 法務課（担当: 橘 律）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 📜 他部門からの法的調査・相談管理台帳")
-        legal_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/legal_investigations.json")
-        if os.path.exists(legal_file):
-            with open(legal_file, "r", encoding="utf-8") as f:
-                legal_inv = json.load(f)
+    if start_btn:
+        if not topic_input.strip():
+            st.warning("⚠️ 記事のテーマを入力してください。")
         else:
-            legal_inv = {"investigations": []}
+            st.markdown("### 🎙️ 中央会議室 リアルタイム戦略会議 ＆ 執筆ライブログ")
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            meeting_container = st.container()
+            
+            pipeline = workflow.run_creation_pipeline(
+                topic=topic_input,
+                target_audience=audience_input,
+                price_preference=price_input
+            )
+            
+            completed_article = None
+            for event in pipeline:
+                step = event.get("step", 1)
+                progress_bar.progress(step / 10)
+                
+                if event.get("status") == "thinking":
+                    status_text.markdown(f"⏳ **{event.get('message')}**")
+                elif event.get("status") == "done":
+                    log = event.get("log", {})
+                    with meeting_container:
+                        st.markdown(f"""
+                        <div class='chat-bubble'>
+                            <div style='font-weight: 800; color: #FFFFFF;'>{log.get('icon')} {log.get('name')} <span style='font-size: 0.8rem; color: #94A3B8;'>（{log.get('role')}）</span></div>
+                            <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #F8FAFC;'>{log.get('content')}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                elif event.get("status") == "completed":
+                    completed_article = event.get("article")
+                    progress_bar.progress(1.0)
+                    status_text.markdown("✅ **全工程（執筆・法務・QA・5大SNSプロモーション）が完了しました！**")
+            
+            if completed_article:
+                st.success(f"🎉 記事『{completed_article['title']}』が完成し、品質管理課の台帳に「掲載前」として登録されました！")
+
+# ==========================================
+# 5. 📢 広報課（単一画面）
+# ==========================================
+elif page == "📢 広報課":
+    st.markdown("<div class='main-header'>📢 広報課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 佐々木 翼（Multi-SNS PR Specialist）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### ⚙️ 5大SNSアカウント ＆ 自動配信先の設定")
+    cfg_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/sns_config.json")
+    if os.path.exists(cfg_path):
+        with open(cfg_path, "r", encoding="utf-8") as f:
+            sns_cfg = json.load(f)
+    else:
+        sns_cfg = {}
+    
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        x_acc = st.text_input("🐦 X アカウント名", value=sns_cfg.get("x", {}).get("account_name", "@NoteOneSystems"))
+        ig_acc = st.text_input("📸 Instagram アカウント名", value=sns_cfg.get("instagram", {}).get("account_name", "@noteonesystems_official"))
+        th_acc = st.text_input("🧵 Threads アカウント名", value=sns_cfg.get("threads", {}).get("account_name", "@noteonesystems_official"))
+    with col_s2:
+        bs_handle = st.text_input("🦋 Bluesky ハンドル名", value=sns_cfg.get("bluesky", {}).get("handle", "noteonesystems.bsky.social"))
+        mast_inst = st.text_input("🐘 Mastodon インスタンスURL", value=sns_cfg.get("mastodon", {}).get("instance", "https://mstdn.jp"))
+    
+    if st.button("💾 広報課 SNS設定を保存する", type="primary"):
+        sns_cfg["x"] = {"account_name": x_acc}
+        sns_cfg["instagram"] = {"account_name": ig_acc}
+        sns_cfg["threads"] = {"account_name": th_acc}
+        sns_cfg["bluesky"] = {"handle": bs_handle}
+        sns_cfg["mastodon"] = {"instance": mast_inst}
+        with open(cfg_path, "w", encoding="utf-8") as f:
+            json.dump(sns_cfg, f, ensure_ascii=False, indent=2)
+        st.success("広報課のSNS設定を保存しました。")
+
+# ==========================================
+# 6. ✨ 品質管理課（単一画面）
+# ==========================================
+elif page == "✨ 品質管理課":
+    st.markdown("<div class='main-header'>✨ 品質管理課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 神崎 玲奈（Quality Assurance Director）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### 📋 作成記事一覧・ステータス管理 ＆ タイムスタンプ履歴")
+    articles = workflow.list_articles()
+    
+    if not articles:
+        st.info("まだ記事がありません。「✍️ 記事制作課」から記事を執筆してください。")
+    else:
+        article_titles = [f"【{art.get('status', '掲載前')}】 {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
+        selected_idx = st.selectbox("管理する記事を選択", range(len(articles)), format_func=lambda x: article_titles[x])
+        art = articles[selected_idx]
         
-        for inv in legal_inv["investigations"]:
-            st.markdown(f"""
-            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']}（ID: {inv['id']}）</strong>
-                    <span>{inv['status']}</span>
-                </div>
-                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
-                    🕒 受付: {inv['received_at']} | 調査開始: {inv['started_at']} | 完了: {inv['completed_at']}
-                </div>
-                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>相談元:</strong> {inv['requester_dept']}</div>
-                <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>受付内容:</strong> {inv['inquiry_content']}</div>
-                <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
-                    <strong style='color: #38BDF8;'>⚖️ 橘 律 法的見解:</strong> {inv['legal_opinion']}
-                </div>
+        col_stat1, col_stat2 = st.columns([2, 3])
+        with col_stat1:
+            cur_status = art.get("status", "掲載前")
+            st.markdown(f"**現在のステータス:** :green[**{cur_status}**]")
+            new_stat = st.selectbox("ステータスを変更する", ["考案中", "執筆中", "査読中", "掲載前", "掲載済み"], index=["考案中", "執筆中", "査読中", "掲載前", "掲載済み"].index(cur_status) if cur_status in ["考案中", "執筆中", "査読中", "掲載前", "掲載済み"] else 3)
+            if st.button("🔄 ステータスを更新（タイムスタンプ追記）", type="primary"):
+                workflow.update_article_status(art["id"], new_stat)
+                st.success(f"ステータスを「{new_stat}」に更新し、タイムスタンプを記録しました！")
+                st.rerun()
+        
+        with col_stat2:
+            st.markdown("##### ⏱️ ステータス遷移タイムスタンプ履歴")
+            history = art.get("status_history", [])
+            for h in reversed(history):
+                st.write(f"- **{h.get('timestamp')}** ➔ `【{h.get('status')}】` ({h.get('actor', '')})")
+        
+        st.divider()
+        st.markdown("#### 📄 記事プレビュー（無料エリア / 有料エリア）")
+        content = art.get("content", "")
+        if "🔒 ここから先は有料エリアです" in content:
+            parts = content.split("🔒 ここから先は有料エリアです")
+            st.markdown(parts[0])
+            st.markdown("""
+            <div style='background-color: #1E293B; border: 2px dashed #F59E0B; border-radius: 8px; padding: 14px; margin: 14px 0;'>
+                <strong style='color: #FCD34D;'>🔒 ここから先は有料エリア（noteの有料ライン設定位置）</strong>
             </div>
             """, unsafe_allow_html=True)
-
-    # 3. 📊 財務課
-    st.markdown("<div class='section-title'>📊 3. 財務課（担当: 白石 葵）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 🎯 オーナー売上目標指示 ＆ 逆算ロードマップ")
-        target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
-        if os.path.exists(target_file):
-            with open(target_file, "r", encoding="utf-8") as f:
-                target_data = json.load(f)
+            st.markdown(parts[1])
         else:
-            target_data = {"monthly_target_yen": 100000, "target_articles_monthly": 15}
+            st.markdown(content)
         
-        c_tar1, c_tar2 = st.columns([2, 3])
-        with c_tar1:
-            new_target = st.number_input("月間売上目標金額（円）", min_value=10000, max_value=10000000, value=target_data.get("monthly_target_yen", 100000), step=10000)
-            target_arts = st.slider("月間目標制作本数", min_value=5, max_value=60, value=target_data.get("target_articles_monthly", 15))
-            if st.button("📢 売上目標を指示する", type="primary"):
-                target_data["monthly_target_yen"] = int(new_target)
-                target_data["target_articles_monthly"] = int(target_arts)
-                target_data["updated_at"] = datetime.now().strftime("%Y-%m-%d")
-                with open(target_file, "w", encoding="utf-8") as f:
-                    json.dump(target_data, f, ensure_ascii=False, indent=2)
-                st.success("売上目標を更新しました。")
-                st.rerun()
-        with c_tar2:
-            daily_req = int(new_target / 500 / 30)
-            st.info(f"""
-            **【財務逆算プラン】**
-            - 🎯 **日別必要販売数:** 約 **{max(1, daily_req)}部**（単価500円想定）
-            - 📝 **推奨リリース頻度:** 月 **{target_arts}本**
-            - 💡 **財務アドバイス:** 500円入門記事で読者を集め、月末に1,480円のマガジンを投入するモデルが最も高収益です。
-            """)
-
-    # 4. 💳 経理課
-    st.markdown("<div class='section-title'>💳 4. 経理課（担当: 白石 葵 兼任）</div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("#### 💰 システム運用費用・0円運用管理台帳")
-        acc_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/accounting_data.json")
-        if os.path.exists(acc_file):
-            with open(acc_file, "r", encoding="utf-8") as f:
-                acc_data = json.load(f)
-        else:
-            acc_data = {"monthly_total_cost_yen": 0, "cost_items": []}
+        st.markdown("#### 📢 5大SNS告知文（佐々木 翼 作成）")
+        st.text_area("SNS告知テキスト", value=art.get("marketing", ""), height=250)
         
-        st.success(f"**現在の月間システム運用費用合計:** :green[**¥{acc_data.get('monthly_total_cost_yen', 0):,} （完全無料0円）**]")
-        
-        cost_df = []
-        for item in acc_data.get("cost_items", []):
-            cost_df.append({
-                "カテゴリ": item["category"],
-                "サービス名": item["service_name"],
-                "利用プラン": item["plan"],
-                "月額費用": f"¥{item['monthly_cost_yen']:,}",
-                "稼働状態": item["status"],
-                "備考": item["notes"]
-            })
-        st.dataframe(pd.DataFrame(cost_df), use_container_width=True)
-        st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。")
+        st.markdown("#### 📋 note貼り付け用 マークダウン全文")
+        st.text_area("記事コード", value=art.get("content", ""), height=300)
 
 # ==========================================
-# 5. 💻 社内ヘルプデスク
+# 7. 🤝 人事課（単一画面）
 # ==========================================
-elif menu == "💻 社内ヘルプデスク":
+elif page == "🤝 人事課":
+    st.markdown("<div class='main-header'>🤝 人事課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 綾瀬 七海（HR & Culture Director）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### 🏢 組織体制図 ＆ 職務分掌規程")
+    with open(os.path.join(os.path.dirname(__file__), "companies/note_one_systems/org_chart_and_job_descriptions.json"), "r", encoding="utf-8") as f:
+        org_data = json.load(f)
+    
+    st.write(f"**制定者:** {org_data.get('author')} | **バージョン:** {org_data.get('version')}")
+    
+    with st.expander("📋 9名の詳細職務分掌一覧を開く"):
+        for dept in org_data["departments"]:
+            st.markdown(f"**{dept['icon']} {dept['name']}** (統括: {dept['head']})")
+            for role in dept["roles"]:
+                st.write(f"- **{role['role_name']}（{role['member']}）**: {', '.join(role['responsibilities'][:2])}")
+    
+    st.markdown("#### 📊 社員別 リアルタイム業務負荷監視")
+    stats = st.session_state.hr_manager.get_workload_stats()
+    df_data = []
+    for emp_id, data in stats.items():
+        df_data.append({
+            "社員名": data["name"],
+            "役職": data["role"],
+            "タスク回数": data["tasks"],
+            "生成文字数": f"{data['words_generated']:,} 字",
+            "負荷スコア": f"{data['workload_score']}%"
+        })
+    st.dataframe(pd.DataFrame(df_data), use_container_width=True)
+    
+    proposals = st.session_state.hr_manager.get_staffing_proposals()
+    if proposals:
+        for prop in proposals:
+            st.warning(f"**【増員提案】対象部署: {prop['target_role']}（{prop['target_name']} / 負荷: {prop['workload_score']}%）** ➔ {prop['proposed_role']} の増員（費用0円）")
+
+# ==========================================
+# 8. 📚 法務課（単一画面）
+# ==========================================
+elif page == "📚 法務課":
+    st.markdown("<div class='main-header'>📚 法務課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 橘 律（Legal & Compliance Counsel）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### 📜 他部門からの法的調査・相談管理台帳")
+    legal_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/legal_investigations.json")
+    if os.path.exists(legal_file):
+        with open(legal_file, "r", encoding="utf-8") as f:
+            legal_inv = json.load(f)
+    else:
+        legal_inv = {"investigations": []}
+    
+    for inv in legal_inv["investigations"]:
+        st.markdown(f"""
+        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
+            <div style='display: flex; justify-content: space-between;'>
+                <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']}（ID: {inv['id']}）</strong>
+                <span>{inv['status']}</span>
+            </div>
+            <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
+                🕒 受付: {inv['received_at']} | 調査開始: {inv['started_at']} | 完了: {inv['completed_at']}
+            </div>
+            <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>相談元:</strong> {inv['requester_dept']}</div>
+            <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>受付内容:</strong> {inv['inquiry_content']}</div>
+            <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
+                <strong style='color: #38BDF8;'>⚖️ 橘 律 法的見解:</strong> {inv['legal_opinion']}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ==========================================
+# 9. 📊 財務課（単一画面）
+# ==========================================
+elif page == "📊 財務課":
+    st.markdown("<div class='main-header'>📊 財務課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 白石 葵（Financial Strategist）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### 🎯 オーナー売上目標指示 ＆ 逆算ロードマップ")
+    target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
+    if os.path.exists(target_file):
+        with open(target_file, "r", encoding="utf-8") as f:
+            target_data = json.load(f)
+    else:
+        target_data = {"monthly_target_yen": 100000, "target_articles_monthly": 15}
+    
+    c_tar1, c_tar2 = st.columns([2, 3])
+    with c_tar1:
+        new_target = st.number_input("月間売上目標金額（円）", min_value=10000, max_value=10000000, value=target_data.get("monthly_target_yen", 100000), step=10000)
+        target_arts = st.slider("月間目標制作本数", min_value=5, max_value=60, value=target_data.get("target_articles_monthly", 15))
+        if st.button("📢 売上目標を指示する", type="primary"):
+            target_data["monthly_target_yen"] = int(new_target)
+            target_data["target_articles_monthly"] = int(target_arts)
+            target_data["updated_at"] = datetime.now().strftime("%Y-%m-%d")
+            with open(target_file, "w", encoding="utf-8") as f:
+                json.dump(target_data, f, ensure_ascii=False, indent=2)
+            st.success("売上目標を更新しました。")
+            st.rerun()
+    with c_tar2:
+        daily_req = int(new_target / 500 / 30)
+        st.info(f"""
+        **【財務逆算プラン】**
+        - 🎯 **日別必要販売数:** 約 **{max(1, daily_req)}部**（単価500円想定）
+        - 📝 **推奨リリース頻度:** 月 **{target_arts}本**
+        - 💡 **財務アドバイス:** 500円入門記事で読者を集め、月末に1,480円のマガジンを投入するモデルが最も高収益です。
+        """)
+
+# ==========================================
+# 10. 💳 経理課（単一画面）
+# ==========================================
+elif page == "💳 経理課":
+    st.markdown("<div class='main-header'>💳 経理課</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>担当: 白石 葵（Chief Accountant 兼任）</div>", unsafe_allow_html=True)
+
+    st.markdown("#### 💰 システム運用費用・0円運用管理台帳")
+    acc_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/accounting_data.json")
+    if os.path.exists(acc_file):
+        with open(acc_file, "r", encoding="utf-8") as f:
+            acc_data = json.load(f)
+    else:
+        acc_data = {"monthly_total_cost_yen": 0, "cost_items": []}
+    
+    st.success(f"**現在の月間システム運用費用合計:** :green[**¥{acc_data.get('monthly_total_cost_yen', 0):,} （完全無料0円）**]")
+    
+    cost_df = []
+    for item in acc_data.get("cost_items", []):
+        cost_df.append({
+            "カテゴリ": item["category"],
+            "サービス名": item["service_name"],
+            "利用プラン": item["plan"],
+            "月額費用": f"¥{item['monthly_cost_yen']:,}",
+            "稼働状態": item["status"],
+            "備考": item["notes"]
+        })
+    st.dataframe(pd.DataFrame(cost_df), use_container_width=True)
+    st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。")
+
+# ==========================================
+# 11. 💻 社内ヘルプデスク
+# ==========================================
+elif page == "💻 社内ヘルプデスク":
     st.markdown("<div class='main-header'>💻 社内ヘルプデスク</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>システム内で発生した全エラー・インシデントの管理台帳および解決状況</div>", unsafe_allow_html=True)
 
@@ -714,9 +795,9 @@ elif menu == "💻 社内ヘルプデスク":
             """, unsafe_allow_html=True)
 
 # ==========================================
-# 6. 👥 社員プロファイル
+# 12. 👥 社員プロファイル
 # ==========================================
-elif menu == "👥 社員プロファイル":
+elif page == "👥 社員プロファイル":
     st.markdown("<div class='main-header'>👥 社員別フォルダ ＆ プロファイル管理</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の社員がそれぞれ独立したフォルダでプロンプト・設定を管理されています</div>", unsafe_allow_html=True)
     
@@ -735,9 +816,9 @@ elif menu == "👥 社員プロファイル":
                 st.code(emp['prompt'], language="text")
 
 # ==========================================
-# 7. ☁️ 24時間無料クラウド設定ガイド
+# 13. ☁️ 24時間無料クラウド設定ガイド
 # ==========================================
-elif menu == "☁️ 24時間無料クラウド設定ガイド":
+elif page == "☁️ 24時間無料クラウド設定ガイド":
     st.markdown("<div class='main-header'>☁️ 24時間完全無料クラウド稼働マニュアル</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>Macの電源を落としても、スマホや別PCからいつでもあなたのAI会社にアクセスできるようにする方法</div>", unsafe_allow_html=True)
     
