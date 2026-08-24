@@ -21,7 +21,6 @@ st.set_page_config(
 # 高コントラスト＆視認性強化CSS（文字が背景に溶け込まない設計）
 st.markdown("""
 <style>
-    /* 全体文字色・背景コントラスト */
     .main-header {
         font-size: 2.2rem;
         font-weight: 800;
@@ -91,17 +90,17 @@ st.markdown("""
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         color: #0F172A;
     }
-    .status-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-    .table-header {
-        background-color: #F1F5F9;
-        color: #0F172A;
-        font-weight: 700;
+    .sidebar-tree {
+        background-color: #1E293B;
+        color: #F8FAFC;
+        font-family: monospace;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #475569;
+        white-space: pre;
+        margin-bottom: 16px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -120,22 +119,43 @@ ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 
 # ==========================================
-# サイドバー
+# サイドバー（ご指定のツリー構造に完全準拠）
 # ==========================================
 with st.sidebar:
-    st.markdown("## 🏢 Note One Systems ,Inc")
-    st.caption("AI Enterprise Holdings Platform")
+    st.markdown("### 🏢 Note One Systems ,Inc")
     
-    st.markdown("---")
+    # ツリーマップ表示
+    st.markdown("""
+<div class='sidebar-tree'>🏢 Note One Systems ,Inc
+├── 🏢 Company Dashboard
+├── 🏢 本社執務室
+│
+├── 📝 編集部
+│   ├── 🔍 1. 市場調査課
+│   ├── ✍️ 2. 記事制作課
+│   ├── 📢 3. 広報課
+│   └── ✨ 4. 品質管理課
+│
+├── 🏛️ 管理部
+│   ├── 🤝 1. 人事課
+│   ├── 📚 2. 法務課
+│   ├── 📊 3. 財務課
+│   └── 💳 4. 経理課
+│
+├── 💻 社内ヘルプデスク
+├── 👥 社員プロファイル
+└── ☁️ 24時間無料クラウド設定ガイド</div>
+""", unsafe_allow_html=True)
+
     menu = st.radio(
         "メニューを選択",
         [
             "🏢 Company Dashboard",
-            "🏢 本社執務室",
-            "📝 編集部",
-            "🏛️ 管理部",
-            "💻 社内ヘルプデスク",
-            "👥 社員プロファイル",
+            "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィス)",
+            "📝 編集部 (縦スクロールで順番に配置)",
+            "🏛️ 管理部 (縦スクロールで順番に配置)",
+            "💻 社内ヘルプデスク (全エラー管理: 発生日時、モジュール、原因、解決状況)",
+            "👥 社員プロファイル (9名個別フォルダ・プロンプト管理)",
             "☁️ 24時間無料クラウド設定ガイド"
         ]
     )
@@ -240,7 +260,7 @@ if menu == "🏢 Company Dashboard":
 # ==========================================
 # 2. 本社執務室
 # ==========================================
-elif menu == "🏢 本社執務室":
+elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィス)":
     st.markdown("<div class='main-header'>Note One Systems Headquarter</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の専門AI社員がそれぞれのデスクで自律的に業務を行っています</div>", unsafe_allow_html=True)
 
@@ -252,7 +272,7 @@ elif menu == "🏢 本社執務室":
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             game_html = f.read()
-        components.html(game_html, height=500)
+        components.html(game_html, height=510)
     
     with st.expander("🖼️ 3Dアイソメトリック見取り図（詳細レイアウト）を表示"):
         img_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/office_floor.jpg")
@@ -262,7 +282,6 @@ elif menu == "🏢 本社執務室":
     st.markdown("---")
     st.markdown("<div class='section-title'>🖥️ フロア別 執務デスク＆リアルタイム稼働状況</div>", unsafe_allow_html=True)
     
-    # 縦スクロールで各フロアを表示
     st.markdown("#### 🏛️ 経営統括 ＆ 管理部（人事課・法務課）")
     col_f1, col_f2, col_f3 = st.columns(3)
     with col_f1:
@@ -390,19 +409,19 @@ elif menu == "🏢 本社執務室":
         """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 📝 編集部（市場調査課 ➔ 記事制作課 ➔ 広報課 ➔ 品質管理課）
+# 3. 📝 編集部（縦スクロールで順番に配置）
 # ==========================================
-elif menu == "📝 編集部":
+elif menu == "📝 編集部 (縦スクロールで順番に配置)":
     st.markdown("<div class='main-header'>📝 編集部</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-header'>市場調査課、記事制作課、広報課、品質管理課が一体となり高品質な有料記事を創出します</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>市場調査課、記事制作課、広報課、品質管理課が連携して高品質な有料記事を制作・販売します</div>", unsafe_allow_html=True)
 
     # 1. 🔍 市場調査課
-    st.markdown("<div class='section-title'>🔍 1. 市場調査課（担当: 風間 涼）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>🔍 1. 市場調査課（風間 涼：トレンド・ペルソナ分析）</div>", unsafe_allow_html=True)
     with st.container():
         st.info("💡 **市場調査課のミッション**: noteの最新売れ筋トレンド、競合記事のギャップ、読者ペルソナの深層心理を分析し、売れるテーマを特定します。")
 
     # 2. ✍️ 記事制作課
-    st.markdown("<div class='section-title'>✍️ 2. 記事制作課（担当: 結城 紬 ＆ 森川 拓真）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>✍️ 2. 記事制作課（結城 紬 / 森川 拓真：中央会議室執筆・テンプレ・稟議）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 🗣️ 中央ガラス会議室：記事制作指示フォーム")
         c_in1, c_in2 = st.columns([3, 1])
@@ -463,7 +482,7 @@ elif menu == "📝 編集部":
                     st.success(f"🎉 記事『{completed_article['title']}』が完成し、品質管理課の台帳に「掲載前」として登録されました！")
 
     # 3. 📢 広報課
-    st.markdown("<div class='section-title'>📢 3. 広報課（担当: 佐々木 翼）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>📢 3. 広報課（佐々木 翼：5大SNS告知文・アカウント設定）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### ⚙️ 5大SNSアカウント ＆ 自動配信先の設定")
         cfg_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/sns_config.json")
@@ -493,7 +512,7 @@ elif menu == "📝 編集部":
             st.success("広報課のSNS設定を保存しました。")
 
     # 4. ✨ 品質管理課
-    st.markdown("<div class='section-title'>✨ 4. 品質管理課（担当: 神崎 玲奈）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>✨ 4. 品質管理課（神崎 玲奈：記事ステータス＆タイムスタンプ遷移履歴、品質スコア）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 📋 作成記事一覧・ステータス管理 ＆ タイムスタンプ履歴")
         articles = workflow.list_articles()
@@ -505,7 +524,6 @@ elif menu == "📝 編集部":
             selected_idx = st.selectbox("管理する記事を選択", range(len(articles)), format_func=lambda x: article_titles[x])
             art = articles[selected_idx]
             
-            # ステータス変更操作
             col_stat1, col_stat2 = st.columns([2, 3])
             with col_stat1:
                 cur_status = art.get("status", "掲載前")
@@ -523,8 +541,6 @@ elif menu == "📝 編集部":
                     st.write(f"- **{h.get('timestamp')}** ➔ `【{h.get('status')}】` ({h.get('actor', '')})")
             
             st.divider()
-            
-            # 記事詳細・プレビュー
             st.markdown("#### 📄 記事プレビュー（無料エリア / 有料エリア）")
             content = art.get("content", "")
             if "🔒 ここから先は有料エリアです" in content:
@@ -546,14 +562,14 @@ elif menu == "📝 編集部":
             st.text_area("記事コード", value=art.get("content", ""), height=300)
 
 # ==========================================
-# 4. 🏛️ 管理部（人事課 ➔ 法務課 ➔ 財務課 ➔ 経理課）
+# 4. 🏛️ 管理部（縦スクロールで順番に配置）
 # ==========================================
-elif menu == "🏛️ 管理部":
+elif menu == "🏛️ 管理部 (縦スクロールで順番に配置)":
     st.markdown("<div class='main-header'>🏛️ 管理部</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>人事課、法務課、財務課、経理課が会社のガバナンスと収益・費用管理を統制します</div>", unsafe_allow_html=True)
 
     # 1. 🤝 人事課
-    st.markdown("<div class='section-title'>🤝 1. 人事課（担当: 綾瀬 七海）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>🤝 1. 人事課（綾瀬 七海：体制図・職務分掌・就業規則Ver 0.9・業務負荷監視）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 🏢 組織体制図 ＆ 職務分掌規程")
         with open(os.path.join(os.path.dirname(__file__), "companies/note_one_systems/org_chart_and_job_descriptions.json"), "r", encoding="utf-8") as f:
@@ -586,7 +602,7 @@ elif menu == "🏛️ 管理部":
                 st.warning(f"**【増員提案】対象部署: {prop['target_role']}（{prop['target_name']} / 負荷: {prop['workload_score']}%）** ➔ {prop['proposed_role']} の増員（費用0円）")
 
     # 2. 📚 法務課
-    st.markdown("<div class='section-title'>📚 2. 法務課（担当: 橘 律）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>📚 2. 法務課（橘 律：他部門法的調査台帳［受付/開始/完了日時・内容・見解］）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 📜 他部門からの法的調査・相談管理台帳")
         legal_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/legal_investigations.json")
@@ -615,7 +631,7 @@ elif menu == "🏛️ 管理部":
             """, unsafe_allow_html=True)
 
     # 3. 📊 財務課
-    st.markdown("<div class='section-title'>📊 3. 財務課（担当: 白石 葵）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>📊 3. 財務課（白石 葵：売上目標指示・逆算ロードマップ）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 🎯 オーナー売上目標指示 ＆ 逆算ロードマップ")
         target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
@@ -647,7 +663,7 @@ elif menu == "🏛️ 管理部":
             """)
 
     # 4. 💳 経理課
-    st.markdown("<div class='section-title'>💳 4. 経理課（担当: 白石 葵 兼任）</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>💳 4. 経理課（白石 葵 兼任：システム運用費用管理・0円運用証明）</div>", unsafe_allow_html=True)
     with st.container():
         st.markdown("#### 💰 システム運用費用・0円運用管理台帳")
         acc_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/accounting_data.json")
@@ -673,9 +689,9 @@ elif menu == "🏛️ 管理部":
         st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。")
 
 # ==========================================
-# 5. 💻 社内ヘルプデスク（全エラー管理）
+# 5. 💻 社内ヘルプデスク
 # ==========================================
-elif menu == "💻 社内ヘルプデスク":
+elif menu == "💻 社内ヘルプデスク (全エラー管理: 発生日時、モジュール、原因、解決状況)":
     st.markdown("<div class='main-header'>💻 社内ヘルプデスク</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>システム内で発生した全エラー・インシデントの管理台帳および解決状況</div>", unsafe_allow_html=True)
 
@@ -717,7 +733,7 @@ elif menu == "💻 社内ヘルプデスク":
 # ==========================================
 # 6. 👥 社員プロファイル
 # ==========================================
-elif menu == "👥 社員プロファイル":
+elif menu == "👥 社員プロファイル (9名個別フォルダ・プロンプト管理)":
     st.markdown("<div class='main-header'>👥 社員別フォルダ ＆ プロファイル管理</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の社員がそれぞれ独立したフォルダでプロンプト・設定を管理されています</div>", unsafe_allow_html=True)
     
