@@ -102,7 +102,7 @@ st.markdown("""
         justify-content: flex-start !important;
         border-radius: 8px !important;
         font-size: 0.92rem !important;
-        padding: 7px 12px !important;
+        padding: 7px 14px !important;
         margin-bottom: 3px !important;
         border: 1px solid transparent !important;
         background-color: transparent !important;
@@ -142,65 +142,66 @@ if "hr_manager" not in st.session_state:
 if "api_key" not in st.session_state:
     st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
 if "nav_page" not in st.session_state:
-    st.session_state.nav_page = "🏢 Note One Systems ,Inc"
+    st.session_state.nav_page = "🏢 Company Dashboard"
 
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 
 # ==========================================
-# サイドバー（選択中の背景色: セルリアンブルー #007BA7）
+# サイドバー（Company Dashboard最上部、「├」「└」撤廃）
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems ,Inc</h2>", unsafe_allow_html=True)
     st.caption("AI Enterprise Holdings Platform")
     st.markdown("---")
 
-    # 1. 単独トップ項目
-    if st.button("🏢 Note One Systems ,Inc", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Note One Systems ,Inc" else "secondary"):
-        st.session_state.nav_page = "🏢 Note One Systems ,Inc"
-        st.rerun()
-
+    # 1. 🏢 Company Dashboard（最上部）
     if st.button("🏢 Company Dashboard", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Company Dashboard" else "secondary"):
         st.session_state.nav_page = "🏢 Company Dashboard"
         st.rerun()
 
+    # 2. 🏢 Headquarter Office Room
+    if st.button("🏢 Headquarter Office Room", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Headquarter Office Room" else "secondary"):
+        st.session_state.nav_page = "🏢 Headquarter Office Room"
+        st.rerun()
+
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 2. 📝 編集部（4つの課をネスト）
+    # 3. 📝 編集部
     st.markdown("<div style='font-size:0.95rem; font-weight:800; color:#38BDF8; padding: 4px 6px;'>📝 編集部</div>", unsafe_allow_html=True)
-    if st.button("　├ 🔍 市場調査課", use_container_width=True, type="primary" if st.session_state.nav_page == "🔍 市場調査課" else "secondary"):
+    if st.button("　 🔍 市場調査課", use_container_width=True, type="primary" if st.session_state.nav_page == "🔍 市場調査課" else "secondary"):
         st.session_state.nav_page = "🔍 市場調査課"
         st.rerun()
-    if st.button("　├ ✍️ 記事制作課", use_container_width=True, type="primary" if st.session_state.nav_page == "✍️ 記事制作課" else "secondary"):
+    if st.button("　 ✍️ 記事制作課", use_container_width=True, type="primary" if st.session_state.nav_page == "✍️ 記事制作課" else "secondary"):
         st.session_state.nav_page = "✍️ 記事制作課"
         st.rerun()
-    if st.button("　├ 📢 広報課", use_container_width=True, type="primary" if st.session_state.nav_page == "📢 広報課" else "secondary"):
+    if st.button("　 📢 広報課", use_container_width=True, type="primary" if st.session_state.nav_page == "📢 広報課" else "secondary"):
         st.session_state.nav_page = "📢 広報課"
         st.rerun()
-    if st.button("　└ ✨ 品質管理課", use_container_width=True, type="primary" if st.session_state.nav_page == "✨ 品質管理課" else "secondary"):
+    if st.button("　 ✨ 品質管理課", use_container_width=True, type="primary" if st.session_state.nav_page == "✨ 品質管理課" else "secondary"):
         st.session_state.nav_page = "✨ 品質管理課"
         st.rerun()
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 3. 🏛️ 管理部（4つの課をネスト）
+    # 4. 🏛️ 管理部
     st.markdown("<div style='font-size:0.95rem; font-weight:800; color:#A78BFA; padding: 4px 6px;'>🏛️ 管理部</div>", unsafe_allow_html=True)
-    if st.button("　├ 🤝 人事課", use_container_width=True, type="primary" if st.session_state.nav_page == "🤝 人事課" else "secondary"):
+    if st.button("　 🤝 人事課", use_container_width=True, type="primary" if st.session_state.nav_page == "🤝 人事課" else "secondary"):
         st.session_state.nav_page = "🤝 人事課"
         st.rerun()
-    if st.button("　├ 📚 法務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📚 法務課" else "secondary"):
+    if st.button("　 📚 法務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📚 法務課" else "secondary"):
         st.session_state.nav_page = "📚 法務課"
         st.rerun()
-    if st.button("　├ 📊 財務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📊 財務課" else "secondary"):
+    if st.button("　 📊 財務課", use_container_width=True, type="primary" if st.session_state.nav_page == "📊 財務課" else "secondary"):
         st.session_state.nav_page = "📊 財務課"
         st.rerun()
-    if st.button("　└ 💳 経理課", use_container_width=True, type="primary" if st.session_state.nav_page == "💳 経理課" else "secondary"):
+    if st.button("　 💳 経理課", use_container_width=True, type="primary" if st.session_state.nav_page == "💳 経理課" else "secondary"):
         st.session_state.nav_page = "💳 経理課"
         st.rerun()
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 4. その他単独項目
+    # 5. その他単独項目
     if st.button("💻 社内ヘルプデスク", use_container_width=True, type="primary" if st.session_state.nav_page == "💻 社内ヘルプデスク" else "secondary"):
         st.session_state.nav_page = "💻 社内ヘルプデスク"
         st.rerun()
@@ -236,13 +237,88 @@ with st.sidebar:
 page = st.session_state.nav_page
 
 # ==========================================
-# 1. 🏢 Note One Systems ,Inc（本社執務室 / 2Dオフィス）
+# 1. 🏢 Company Dashboard
 # ==========================================
-if page == "🏢 Note One Systems ,Inc":
-    st.markdown("<div class='main-header'>Note One Systems Headquarter</div>", unsafe_allow_html=True)
+if page == "🏢 Company Dashboard":
+    st.markdown("<div class='main-header'>🏢 Company Dashboard</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>Note One Systems ,Inc グループ全体の経営概況・全社統括ダッシュボード</div>", unsafe_allow_html=True)
+    
+    holdings_info = st.session_state.holdings_manager.get_holdings_info()
+    companies = holdings_info.get("companies", [])
+    articles = workflow.list_articles()
+    
+    target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
+    if os.path.exists(target_file):
+        with open(target_file, "r", encoding="utf-8") as f:
+            target_data = json.load(f)
+    else:
+        target_data = {"monthly_target_yen": 100000, "target_articles_monthly": 15}
+    
+    target_sales = target_data.get("monthly_target_yen", 100000)
+    total_sales = sum([art.get("price", 500) * 10 for art in articles])
+    progress_ratio = min(1.0, total_sales / target_sales) if target_sales > 0 else 0.0
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric(label="傘下の子会社数", value=f"{len(companies)} 社")
+    with col2:
+        st.metric(label="総生産記事数", value=f"{len(articles)} 本")
+    with col3:
+        st.metric(label="月間想定売上 / 目標", value=f"¥{total_sales:,}", delta=f"目標: ¥{target_sales:,} (達成率 {int(progress_ratio*100)}%)")
+    with col4:
+        st.metric(label="システム固定維持費", value="¥0 (完全無料)")
+    
+    st.progress(progress_ratio, text=f"🎯 月間売上目標達成度: {int(progress_ratio*100)}% (¥{total_sales:,} / ¥{target_sales:,})")
+
+    st.markdown("---")
+    st.markdown("<div class='section-title'>📋 傘下のグループ会社一覧</div>", unsafe_allow_html=True)
+    for comp in companies:
+        with st.container():
+            c_col1, c_col2, c_col3 = st.columns([1, 4, 2])
+            with c_col1:
+                st.markdown(f"### {comp.get('icon', '🏢')}")
+            with c_col2:
+                st.markdown(f"**{comp['name']}**")
+                st.write(comp.get('description', ''))
+                if "trade_name_note" in comp:
+                    st.caption(f"🛡️ {comp['trade_name_note']}")
+            with c_col3:
+                st.markdown(f"ステータス: :green[{comp.get('status', '稼働中')}]")
+                st.caption(f"所属社員: 9名 | 制作記事数: {len(articles)} 本")
+            st.divider()
+
+    with st.expander("➕ 新しい子会社を設立する（ホールディングス化）"):
+        st.markdown("#### 新会社設立申請フォーム")
+        new_c_name = st.text_input("会社名（例: KindleOne AI 株式会社、PromptOne AI 株式会社）")
+        new_c_type = st.selectbox("事業モデル", ["note記事販売", "電子書籍(Kindle)出版", "AIプロンプト販売", "SNS運用代行", "その他"])
+        new_c_icon = st.selectbox("会社アイコン", ["✍️", "📚", "🤖", "📈", "💡", "🎨"])
+        new_c_desc = st.text_area("事業内容・ビジョン")
+        
+        if st.button("🚀 新会社を設立・ホールディングスに統合", type="primary"):
+            if new_c_name.strip():
+                c_id = f"company_{int(datetime.now().timestamp())}"
+                success = st.session_state.holdings_manager.add_company(
+                    company_id=c_id,
+                    name=new_c_name,
+                    company_type=new_c_type,
+                    icon=new_c_icon,
+                    description=new_c_desc,
+                    employees=[{"id": "ceo", "name": "AI統括リーダー", "role": "CEO", "icon": "👩‍💼"}]
+                )
+                if success:
+                    st.success(f"🎉 新会社「{new_c_name}」が設立されました！")
+                    st.rerun()
+            else:
+                st.warning("会社名を入力してください。")
+
+# ==========================================
+# 2. 🏢 Headquarter Office Room
+# ==========================================
+elif page == "🏢 Headquarter Office Room":
+    st.markdown("<div class='main-header'>Headquarter</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の専門AI社員がそれぞれのデスクで自律的に業務を行っています</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>Note One Systems Headquarter Office Room</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Office Room</div>", unsafe_allow_html=True)
     
     html_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/game_office.html")
     if os.path.exists(html_path):
@@ -378,81 +454,6 @@ if page == "🏢 Note One Systems ,Inc":
             <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」</div>
         </div>
         """, unsafe_allow_html=True)
-
-# ==========================================
-# 2. 🏢 Company Dashboard
-# ==========================================
-elif page == "🏢 Company Dashboard":
-    st.markdown("<div class='main-header'>🏢 Company Dashboard</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-header'>Note One Systems ,Inc グループ全体の経営概況・全社統括ダッシュボード</div>", unsafe_allow_html=True)
-    
-    holdings_info = st.session_state.holdings_manager.get_holdings_info()
-    companies = holdings_info.get("companies", [])
-    articles = workflow.list_articles()
-    
-    target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
-    if os.path.exists(target_file):
-        with open(target_file, "r", encoding="utf-8") as f:
-            target_data = json.load(f)
-    else:
-        target_data = {"monthly_target_yen": 100000, "target_articles_monthly": 15}
-    
-    target_sales = target_data.get("monthly_target_yen", 100000)
-    total_sales = sum([art.get("price", 500) * 10 for art in articles])
-    progress_ratio = min(1.0, total_sales / target_sales) if target_sales > 0 else 0.0
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric(label="傘下の子会社数", value=f"{len(companies)} 社")
-    with col2:
-        st.metric(label="総生産記事数", value=f"{len(articles)} 本")
-    with col3:
-        st.metric(label="月間想定売上 / 目標", value=f"¥{total_sales:,}", delta=f"目標: ¥{target_sales:,} (達成率 {int(progress_ratio*100)}%)")
-    with col4:
-        st.metric(label="システム固定維持費", value="¥0 (完全無料)")
-    
-    st.progress(progress_ratio, text=f"🎯 月間売上目標達成度: {int(progress_ratio*100)}% (¥{total_sales:,} / ¥{target_sales:,})")
-
-    st.markdown("---")
-    st.markdown("<div class='section-title'>📋 傘下のグループ会社一覧</div>", unsafe_allow_html=True)
-    for comp in companies:
-        with st.container():
-            c_col1, c_col2, c_col3 = st.columns([1, 4, 2])
-            with c_col1:
-                st.markdown(f"### {comp.get('icon', '🏢')}")
-            with c_col2:
-                st.markdown(f"**{comp['name']}**")
-                st.write(comp.get('description', ''))
-                if "trade_name_note" in comp:
-                    st.caption(f"🛡️ {comp['trade_name_note']}")
-            with c_col3:
-                st.markdown(f"ステータス: :green[{comp.get('status', '稼働中')}]")
-                st.caption(f"所属社員: 9名 | 制作記事数: {len(articles)} 本")
-            st.divider()
-
-    with st.expander("➕ 新しい子会社を設立する（ホールディングス化）"):
-        st.markdown("#### 新会社設立申請フォーム")
-        new_c_name = st.text_input("会社名（例: KindleOne AI 株式会社、PromptOne AI 株式会社）")
-        new_c_type = st.selectbox("事業モデル", ["note記事販売", "電子書籍(Kindle)出版", "AIプロンプト販売", "SNS運用代行", "その他"])
-        new_c_icon = st.selectbox("会社アイコン", ["✍️", "📚", "🤖", "📈", "💡", "🎨"])
-        new_c_desc = st.text_area("事業内容・ビジョン")
-        
-        if st.button("🚀 新会社を設立・ホールディングスに統合", type="primary"):
-            if new_c_name.strip():
-                c_id = f"company_{int(datetime.now().timestamp())}"
-                success = st.session_state.holdings_manager.add_company(
-                    company_id=c_id,
-                    name=new_c_name,
-                    company_type=new_c_type,
-                    icon=new_c_icon,
-                    description=new_c_desc,
-                    employees=[{"id": "ceo", "name": "AI統括リーダー", "role": "CEO", "icon": "👩‍💼"}]
-                )
-                if success:
-                    st.success(f"🎉 新会社「{new_c_name}」が設立されました！")
-                    st.rerun()
-            else:
-                st.warning("会社名を入力してください。")
 
 # ==========================================
 # 3. 🔍 市場調査課（単一画面）
