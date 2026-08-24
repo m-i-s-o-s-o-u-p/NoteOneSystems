@@ -1,0 +1,52 @@
+{
+  "title": "NoteOneSystems 株式会社 経理課：システム運用費用・経費管理台帳",
+  "author": "経理課（白石 葵 兼任）",
+  "updated_at": "2026-08-24",
+  "monthly_total_cost_yen": 0,
+  "cost_items": [
+    {
+      "category": "クラウドインフラ費",
+      "service_name": "Streamlit Community Cloud",
+      "plan": "Always Free (無料枠)",
+      "monthly_cost_yen": 0,
+      "status": "🟢 完全無料稼働中",
+      "notes": "24時間365日のWebサーバー運用（サーバー代0円）"
+    },
+    {
+      "category": "ソースコード・データ保管費",
+      "service_name": "GitHub",
+      "plan": "Free Plan (無料枠)",
+      "monthly_cost_yen": 0,
+      "status": "🟢 完全無料稼働中",
+      "notes": "プログラム・記事データのリポジトリ管理（保管料0円）"
+    },
+    {
+      "category": "AI頭脳・テキスト生成費",
+      "service_name": "Google Gemini API (Google AI Studio)",
+      "plan": "Free Tier (開発者無料枠)",
+      "monthly_cost_yen": 0,
+      "status": "🟢 完全無料枠内運用",
+      "notes": "9名のAI社員による記事執筆・審査・プロモーション（API利用料0円）"
+    },
+    {
+      "category": "SNS自動配信API費",
+      "service_name": "X (Twitter) / Bluesky / Mastodon API",
+      "plan": "Free Tier / Open API",
+      "monthly_cost_yen": 0,
+      "status": "🟢 完全無料枠内運用",
+      "notes": "月間1,500件までの告知自動配信（費用0円）"
+    },
+    {
+      "category": "決済・販売プラットフォーム費",
+      "service_name": "note.com",
+      "plan": "一般クリエイター (初期・月額無料)",
+      "monthly_cost_yen": 0,
+      "status": "🟢 売上発生時手数料のみ",
+      "notes": "固定費0円。売上発生時のみ決済手数料（約10〜15%）が差引かれます"
+    }
+  ],
+  "zero_cost_proof": {
+    "conclusion": "✅ 確定事項：現在、すべてのシステムは維持費0円（完全無料）で運用されています。",
+    "policy": "就業規則第4条に基づき、代表者（オーナー）の稟議承認がない限り、1円たりとも有料課金は発生しません。"
+  }
+}

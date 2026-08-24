@@ -1,0 +1,36 @@
+{
+  "title": "NoteOneSystems 株式会社 社内ヘルプデスク：全エラー管理台帳",
+  "updated_at": "2026-08-24",
+  "total_errors": 3,
+  "resolved_errors": 3,
+  "pending_errors": 0,
+  "errors": [
+    {
+      "id": "ERR_20260824_001",
+      "occurred_at": "2026-08-24 15:51:13",
+      "module": "クラウドデプロイ (Streamlit Cloud)",
+      "error_message": "Unable to deploy: The app's code is not connected to a remote GitHub repository (This repository does not exist)",
+      "root_cause": "GitHubリポジトリがPrivate設定になっており、Streamlit Cloudからの読み取り権限が未付与、またはファイル未アップロードだったため。",
+      "solution": "GitHubリポジトリのVisibilityをPublicに変更、またはPrivate権限を付与し、ローカルコードを同期することで解消。",
+      "status": "🟢 解決済み"
+    },
+    {
+      "id": "ERR_20260824_002",
+      "occurred_at": "2026-08-24 15:46:03",
+      "module": "ローカル起動ランチャー (.command)",
+      "error_message": "Streamlit起動時にブラウザが自動でフォアグラウンドに開かない現象",
+      "root_cause": "macOSのデフォルトブラウザ自動起動設定が待機状態だったため。",
+      "solution": "ランチャー内に「open -a 'Google Chrome' http://localhost:8501」の明示的バックグラウンド起動処理を追加して解消。",
+      "status": "🟢 解決済み"
+    },
+    {
+      "id": "ERR_20260824_003",
+      "occurred_at": "2026-08-24 14:04:10",
+      "module": "AI思考エンジン (Google Gemini API)",
+      "error_message": "ModuleNotFoundError: No module named 'google'",
+      "root_cause": "google-genai ライブラリが初期未インストールの環境で発生しうるインポートエラー。",
+      "solution": "AIClient内にGraceful Fallback（デモシミュレーション自動切り替え機構）を実装し、未設定時でもクラッシュしない堅牢な設計に修正して解消。",
+      "status": "🟢 解決済み"
+    }
+  ]
+}

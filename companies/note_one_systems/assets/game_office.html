@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: #0f172a; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 490px; }
+  
+  .office-game-container {
+    width: 100%;
+    max-width: 900px;
+    height: 480px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 3px solid #38bdf8;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(56, 189, 248, 0.2);
+    overflow: hidden;
+  }
+
+  .floor-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .room-zone {
+    position: absolute;
+    border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.02);
+  }
+  .zone-label {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .zone-ceo { top: 20px; left: 20px; width: 180px; height: 180px; border-color: rgba(234, 179, 8, 0.4); }
+  .zone-legal-hr { top: 220px; left: 20px; width: 220px; height: 230px; border-color: rgba(99, 102, 241, 0.4); }
+  .zone-center { top: 30px; left: 230px; width: 440px; height: 200px; border-color: rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.05); }
+  .zone-editorial { top: 250px; left: 260px; width: 380px; height: 200px; border-color: rgba(249, 115, 22, 0.4); }
+  .zone-mkt-fin { top: 30px; right: 20px; width: 190px; height: 420px; border-color: rgba(34, 197, 94, 0.4); }
+
+  .desk {
+    position: absolute;
+    background: #334155;
+    border-radius: 6px;
+    border: 2px solid #475569;
+  }
+  .pc-screen {
+    position: absolute;
+    width: 22px;
+    height: 14px;
+    background: #38bdf8;
+    border-radius: 2px;
+    box-shadow: 0 0 8px #38bdf8;
+    animation: pcGlow 2s infinite alternate;
+  }
+  @keyframes pcGlow {
+    0% { opacity: 0.7; box-shadow: 0 0 4px #38bdf8; }
+    100% { opacity: 1; box-shadow: 0 0 12px #38bdf8; }
+  }
+
+  .meeting-table {
+    position: absolute;
+    top: 70px;
+    left: 70px;
+    width: 300px;
+    height: 90px;
+    background: #1e293b;
+    border: 3px solid #38bdf8;
+    border-radius: 45px;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* 二等身人型キャラクターアバター (Chibi Humanoid Character) */
+  .chibi-avatar {
+    position: absolute;
+    width: 48px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+  }
+  .chibi-avatar:hover {
+    transform: scale(1.3) translateY(-6px);
+  }
+
+  /* 二等身の頭部（大きめの頭） */
+  .chibi-head {
+    width: 32px;
+    height: 30px;
+    border-radius: 12px;
+    border: 2px solid #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    position: relative;
+    animation: headBob 2s infinite ease-in-out;
+  }
+  @keyframes headBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  /* 二等身の胴体（小さな体・手足） */
+  .chibi-body {
+    width: 20px;
+    height: 18px;
+    border-radius: 4px;
+    margin-top: 1px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.4);
+    display: flex;
+    justify-content: center;
+  }
+  .chibi-legs {
+    display: flex;
+    gap: 4px;
+    margin-top: -1px;
+  }
+  .chibi-leg {
+    width: 5px;
+    height: 7px;
+    background: #0f172a;
+    border-radius: 2px;
+    animation: legWalk 1s infinite alternate ease-in-out;
+  }
+  @keyframes legWalk {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-2px); }
+  }
+
+  .avatar-name {
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.9);
+    padding: 1px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* 吹き出し（セリフバブル） */
+  .speech-bubble {
+    position: absolute;
+    bottom: 75px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 30;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: #ffffff transparent;
+    display: block;
+    width: 0;
+  }
+  .speech-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: bubblePulse 3.5s infinite;
+  }
+  @keyframes bubblePulse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-2px) scale(1.02); }
+  }
+
+  /* 社員ごとの個別位置設定 */
+  #emp-ichijo   { top: 70px; left: 85px; }
+  #emp-tachibana{ top: 270px; left: 45px; }
+  #emp-ayase    { top: 340px; left: 145px; }
+  #emp-kazama   { top: 290px; left: 290px; }
+  #emp-yuki     { top: 290px; left: 380px; }
+  #emp-morikawa { top: 290px; left: 470px; }
+  #emp-kanzaki  { top: 360px; left: 550px; }
+  #emp-sasaki   { top: 100px; right: 75px; }
+  #emp-shiraishi{ top: 280px; right: 75px; }
+
+  .walk-around {
+    animation: gentleWander 12s infinite alternate ease-in-out;
+  }
+  @keyframes gentleWander {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(12px, -8px); }
+    50% { transform: translate(-8px, 12px); }
+    75% { transform: translate(8px, 8px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .office-hud {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 30;
+  }
+  .hud-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+  }
+</style>
+</head>
+<body>
+
+<div class="office-game-container">
+  <div class="floor-grid"></div>
+
+  <div class="office-hud">
+    <div class="hud-live-dot"></div>
+    <span>Note One Systems Headquarter Office Room</span>
+    <span style="color:#f8fafc; font-weight:700;">出社: 9/9名 (二等身AI社員)</span>
+  </div>
+
+  <div class="room-zone zone-ceo">
+    <span class="zone-label">👑 CEO Suite</span>
+    <div class="desk" style="top:50px; left:40px; width:70px; height:40px;"></div>
+    <div class="pc-screen" style="top:60px; left:65px;"></div>
+  </div>
+
+  <div class="room-zone zone-legal-hr">
+    <span class="zone-label">🏛️ 管理部（人事課・法務課）</span>
+    <div class="desk" style="top:40px; left:20px; width:60px; height:35px;"></div>
+    <div class="desk" style="top:110px; left:100px; width:60px; height:35px;"></div>
+  </div>
+
+  <div class="room-zone zone-center">
+    <span class="zone-label">🗣️ Central Glass Strategy Room</span>
+    <div class="meeting-table"><span>💡 戦略企画ミーティングテーブル</span></div>
+  </div>
+
+  <div class="room-zone zone-editorial">
+    <span class="zone-label">📝 編集部（市場調査・制作・広報・品質）</span>
+    <div class="desk" style="top:40px; left:20px; width:220px; height:35px;"></div>
+    <div class="pc-screen" style="top:48px; left:35px;"></div>
+    <div class="pc-screen" style="top:48px; left:125px;"></div>
+    <div class="pc-screen" style="top:48px; left:205px;"></div>
+    <div class="desk" style="top:110px; left:270px; width:60px; height:35px;"></div>
+  </div>
+
+  <div class="room-zone zone-mkt-fin">
+    <span class="zone-label">📊 財務課 ＆ 💳 経理課</span>
+    <div class="desk" style="top:50px; left:40px; width:65px; height:35px;"></div>
+    <div class="desk" style="top:230px; left:40px; width:65px; height:35px;"></div>
+  </div>
+
+  <!-- 9名の二等身人型キャラクターアバター -->
+  <!-- 1. 一条 蓮 (CEO) -->
+  <div class="chibi-avatar walk-around" id="emp-ichijo" onclick="triggerSpeak('ichijo')">
+    <div class="speech-bubble" id="bubble-ichijo">読者満足度100%を目指します！</div>
+    <div class="chibi-head" style="background:#1E3A8A; border-color:#93C5FD;">👩‍💼</div>
+    <div class="chibi-body" style="background:#1E3A8A;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">一条 (CEO)</div>
+  </div>
+
+  <!-- 2. 橘 律 (法務課) -->
+  <div class="chibi-avatar" id="emp-tachibana" onclick="triggerSpeak('tachibana')">
+    <div class="speech-bubble" id="bubble-tachibana">会社法第7条チェック、適法です！</div>
+    <div class="chibi-head" style="background:#334155; border-color:#94A3B8;">⚖️</div>
+    <div class="chibi-body" style="background:#334155;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">橘 (法務)</div>
+  </div>
+
+  <!-- 3. 綾瀬 七海 (人事課) -->
+  <div class="chibi-avatar walk-around" id="emp-ayase" onclick="triggerSpeak('ayase')">
+    <div class="speech-bubble" id="bubble-ayase">組織負荷スコア監視中。健全です✨</div>
+    <div class="chibi-head" style="background:#059669; border-color:#6EE7B7;">🤝</div>
+    <div class="chibi-body" style="background:#059669;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">綾瀬 (人事)</div>
+  </div>
+
+  <!-- 4. 風間 涼 (市場調査課) -->
+  <div class="chibi-avatar" id="emp-kazama" onclick="triggerSpeak('kazama')">
+    <div class="speech-bubble" id="bubble-kazama">note売れ筋トレンドを分析中…🔍</div>
+    <div class="chibi-head" style="background:#0D9488; border-color:#5EEAD4;">🔍</div>
+    <div class="chibi-body" style="background:#0D9488;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">風間 (調査)</div>
+  </div>
+
+  <!-- 5. 結城 紬 (記事制作課・編集長) -->
+  <div class="chibi-avatar walk-around" id="emp-yuki" onclick="triggerSpeak('yuki')">
+    <div class="speech-bubble" id="bubble-yuki">無料/有料ラインの黄金比率を設計中！</div>
+    <div class="chibi-head" style="background:#D97706; border-color:#FCD34D;">📑</div>
+    <div class="chibi-body" style="background:#D97706;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">結城 (編集)</div>
+  </div>
+
+  <!-- 6. 森川 拓真 (記事制作課・ライター) -->
+  <div class="chibi-avatar" id="emp-morikawa" onclick="triggerSpeak('morikawa')">
+    <div class="speech-bubble" id="bubble-morikawa">実践テンプレを超高速タイピング中…！</div>
+    <div class="chibi-head" style="background:#EA580C; border-color:#FDBA74;">✍️</div>
+    <div class="chibi-body" style="background:#EA580C;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">森川 (執筆)</div>
+  </div>
+
+  <!-- 7. 神崎 玲奈 (品質管理課) -->
+  <div class="chibi-avatar" id="emp-kanzaki" onclick="triggerSpeak('kanzaki')">
+    <div class="speech-bubble" id="bubble-kanzaki">ファクトチェック95点！合格認定🛡️</div>
+    <div class="chibi-head" style="background:#DC2626; border-color:#FCA5A5;">🛡️</div>
+    <div class="chibi-body" style="background:#DC2626;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">神崎 (品質)</div>
+  </div>
+
+  <!-- 8. 佐々木 翼 (広報課) -->
+  <div class="chibi-avatar walk-around" id="emp-sasaki" onclick="triggerSpeak('sasaki')">
+    <div class="speech-bubble" id="bubble-sasaki">X・Threads・Blueskyに同時発信中📢</div>
+    <div class="chibi-head" style="background:#2563EB; border-color:#93C5FD;">📢</div>
+    <div class="chibi-body" style="background:#2563EB;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">佐々木 (広報)</div>
+  </div>
+
+  <!-- 9. 白石 葵 (財務課 ＆ 経理課) -->
+  <div class="chibi-avatar" id="emp-shiraishi" onclick="triggerSpeak('shiraishi')">
+    <div class="speech-bubble" id="bubble-shiraishi">システム維持費0円（完全無料）確認済💰</div>
+    <div class="chibi-head" style="background:#7C3AED; border-color:#C4B5FD;">📊</div>
+    <div class="chibi-body" style="background:#7C3AED;"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">白石 (財務・経理)</div>
+  </div>
+
+</div>
+
+<script>
+  const speeches = {
+    ichijo: ["全社売上最大化に向けて指揮中！", "完全無料運用の鉄則を遵守します。", "読者満足度100%の記事だけを出します。"],
+    tachibana: ["会社法第7条チェック、適法です！", "他部門からの法的調査を完了しました。", "note利用規約に100%適合しています。"],
+    ayase: ["社員の負荷スコア監視中。健全です✨", "就業規則Ver 0.9を運用中！", "ボトルネック発生時は増員提案します。"],
+    kazama: ["noteの最新売れ筋を市場調査中…🔍", "ターゲット読者の悩みを深掘り中！", "競合にない独自テーマを発掘しました。"],
+    yuki: ["無料/有料ラインの黄金比率を設計中！", "読者を惹きつける見出しを構成中。", "森川さん、この型で執筆お願いします！"],
+    morikawa: ["実践テンプレを超高速タイピング中…！", "コピペで使える雛形を執筆中⚡", "読者がすぐ行動できるステップを作成中！"],
+    kanzaki: ["記事ステータスを更新しました🛡️", "ファクトチェック95点！合格認定！", "誤字脱字なし、可読性も抜群です！"],
+    sasaki: ["X・Threads・Blueskyに同時発信中📢", "Instagramカルーセル案を作成完了！", "Mastodonに有益ノウハウを配信中✨"],
+    shiraishi: ["システム維持費0円（完全無料）確認済💰", "ワンコイン500円で売上最大化を試算！", "月間シミュレーション良好です📈"]
+  };
+
+  const employeeIds = Object.keys(speeches);
+
+  function triggerSpeak(id) {
+    const bubble = document.getElementById('bubble-' + id);
+    const lines = speeches[id];
+    const line = lines[Math.floor(Math.random() * lines.length)];
+    bubble.innerText = line;
+    bubble.classList.add('show');
+    setTimeout(() => {
+      bubble.classList.remove('show');
+    }, 4000);
+  }
+
+  setInterval(() => {
+    const randomId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+    triggerSpeak(randomId);
+  }, 2800);
+
+  setTimeout(() => triggerSpeak('ichijo'), 500);
+  setTimeout(() => triggerSpeak('morikawa'), 1500);
+</script>
+
+</body>
+</html>

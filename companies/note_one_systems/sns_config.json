@@ -1,0 +1,30 @@
+{
+  "x": {
+    "account_name": "@NoteOneSystems",
+    "api_key": "",
+    "api_secret": "",
+    "access_token": "",
+    "access_token_secret": "",
+    "status": "ワンクリック手動/シミュレーション運用中（API設定可能）"
+  },
+  "instagram": {
+    "account_name": "@noteonesystems_official",
+    "token": "",
+    "status": "カルーセル画像・キャプション自動生成中"
+  },
+  "threads": {
+    "account_name": "@noteonesystems_official",
+    "token": "",
+    "status": "思考ログ・ストーリーテリング自動生成中"
+  },
+  "bluesky": {
+    "handle": "noteonesystems.bsky.social",
+    "app_password": "",
+    "status": "無料AT Protocol対応（即自動投稿可能）"
+  },
+  "mastodon": {
+    "instance": "https://mstdn.jp",
+    "token": "",
+    "status": "無料REST API対応（即自動投稿可能）"
+  }
+}

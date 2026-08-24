@@ -1,0 +1,17 @@
+{
+  "name": "AI Virtual Holdings Inc.（バーチャルAI企業ホールディングス）",
+  "vision": "完全自動・費用0円で複数のデジタル事業を展開する次世代AI持株会社",
+  "founded_date": "2026-08-24",
+  "companies": [
+    {
+      "id": "note_one_systems",
+      "name": "NoteOneSystems 株式会社",
+      "type": "note_publishing",
+      "icon": "✍️",
+      "description": "9名の専門AI社員によるnote有料記事の企画・執筆・法務QA・5大SNS自動宣伝を行うAI企業",
+      "trade_name_note": "対外的な販売者名・ブランド名: NoteOneSystems",
+      "status": "稼働中",
+      "created_at": "2026-08-24"
+    }
+  ]
+}
