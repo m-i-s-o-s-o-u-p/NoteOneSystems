@@ -18,89 +18,105 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 高コントラスト＆視認性強化CSS（文字が背景に溶け込まない設計）
+# 徹底的な白文字＆高コントラスト・ダークプレミアムCSS
 st.markdown("""
 <style>
+    /* メインタイトル・見出し（白字でクッキリ） */
     .main-header {
-        font-size: 2.2rem;
+        font-size: 2.3rem;
         font-weight: 800;
-        color: #0F172A;
+        color: #FFFFFF !important;
         margin-bottom: 0.3rem;
+        letter-spacing: -0.5px;
     }
     .sub-header {
-        font-size: 1.05rem;
-        color: #334155;
+        font-size: 1.1rem;
+        color: #94A3B8 !important;
         font-weight: 500;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.8rem;
     }
     .section-title {
-        font-size: 1.35rem;
+        font-size: 1.4rem;
         font-weight: 700;
-        color: #0F172A;
-        border-left: 5px solid #2563EB;
+        color: #FFFFFF !important;
+        border-left: 5px solid #38BDF8;
         padding-left: 12px;
-        margin: 24px 0 14px 0;
+        margin: 28px 0 16px 0;
+        letter-spacing: -0.3px;
     }
+    
+    /* カードコンテナ（ダーク背景＋白文字） */
     .content-box {
-        background-color: #FFFFFF;
-        border: 1px solid #CBD5E1;
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+        padding: 22px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        color: #F8FAFC !important;
     }
     .desk-card {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
         border-radius: 12px;
-        padding: 16px;
-        border: 1px solid #94A3B8;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        padding: 18px;
+        border: 1px solid #38BDF8 !important;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        color: #F8FAFC !important;
     }
     .status-live {
         display: inline-flex;
         align-items: center;
-        background-color: #DCFCE7;
-        color: #14532D;
+        background-color: #064E3B;
+        color: #4ADE80;
         font-size: 0.8rem;
         font-weight: 700;
         padding: 4px 10px;
         border-radius: 9999px;
-        border: 1px solid #86EFAC;
+        border: 1px solid #059669;
     }
     .pulse-dot {
         width: 8px;
         height: 8px;
-        background-color: #16A34A;
+        background-color: #4ADE80;
         border-radius: 50%;
         margin-right: 6px;
         animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
     }
     .chat-bubble {
-        background-color: #FFFFFF;
-        border-left: 5px solid #2563EB;
-        padding: 14px 18px;
+        background-color: #1E293B !important;
+        border-left: 5px solid #38BDF8;
+        padding: 16px 20px;
         border-radius: 8px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        color: #0F172A;
+        margin-bottom: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        color: #F8FAFC !important;
+        border: 1px solid #334155;
     }
     .sidebar-tree {
-        background-color: #1E293B;
+        background-color: #0F172A;
         color: #F8FAFC;
         font-family: monospace;
         font-size: 0.82rem;
         line-height: 1.45;
         padding: 12px;
         border-radius: 8px;
-        border: 1px solid #475569;
+        border: 1px solid #334155;
         white-space: pre;
         margin-bottom: 16px;
+    }
+    
+    /* Streamlit全体の標準テキスト色も明るい白文字に統一 */
+    h1, h2, h3, h4, h5, h6 {
+        color: #FFFFFF !important;
+    }
+    p, span, label {
+        color: #E2E8F0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -119,12 +135,11 @@ ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 
 # ==========================================
-# サイドバー（ご指定のツリー構造に完全準拠）
+# サイドバー（木構造ツリー表示）
 # ==========================================
 with st.sidebar:
-    st.markdown("### 🏢 Note One Systems ,Inc")
+    st.markdown("<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems ,Inc</h2>", unsafe_allow_html=True)
     
-    # ツリーマップ表示
     st.markdown("""
 <div class='sidebar-tree'>🏢 Note One Systems ,Inc
 ├── 🏢 Company Dashboard
@@ -161,7 +176,7 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.markdown("### ⚙️ AI頭脳設定（Gemini）")
+    st.markdown("<h4 style='color:#FFFFFF !important;'>⚙️ AI頭脳設定（Gemini）</h4>", unsafe_allow_html=True)
     api_key_input = st.text_input(
         "Gemini API Key (無料枠)",
         value=st.session_state.api_key,
@@ -192,7 +207,6 @@ if menu == "🏢 Company Dashboard":
     companies = holdings_info.get("companies", [])
     articles = workflow.list_articles()
     
-    # 売上目標の読み込み
     target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
     if os.path.exists(target_file):
         with open(target_file, "r", encoding="utf-8") as f:
@@ -264,7 +278,6 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
     st.markdown("<div class='main-header'>Note One Systems Headquarter</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9名の専門AI社員がそれぞれのデスクで自律的に業務を行っています</div>", unsafe_allow_html=True)
 
-    # 二等身人型キャラクターアバターによる2Dゲーム画面
     st.markdown("<div class='section-title'>Note One Systems Headquarter Ofiice Room</div>", unsafe_allow_html=True)
     st.caption("💡 二等身のAI社員たちが歩き回り、PCタイピングしながらリアルタイムにつぶやきます。クリックしても会話できます！")
     
@@ -291,10 +304,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>👩‍💼</span>
                 <span class='status-live'><span class='pulse-dot'></span>執務中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.15rem; color: #0F172A; margin-top: 4px;'>一条 蓮</div>
-            <div style='font-size: 0.85rem; color: #1E3A8A; font-weight: 700;'>代表取締役CEO</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 CEO Private Suite</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #EEF2FF; padding: 8px; border-radius: 6px;'>💬 「全社売上最大化と、完全無料運用の規律を監督しています。」</div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>一条 蓮</div>
+            <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>代表取締役CEO</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 CEO Private Suite</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「全社売上最大化と、完全無料運用の規律を監督しています。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_f2:
@@ -304,10 +317,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>⚖️</span>
                 <span class='status-live'><span class='pulse-dot'></span>法務監視中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.15rem; color: #0F172A; margin-top: 4px;'>橘 律</div>
-            <div style='font-size: 0.85rem; color: #334155; font-weight: 700;'>法務課 / 法務顧問</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 Legal Department</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #F1F5F9; padding: 8px; border-radius: 6px;'>💬 「会社法・著作権法・note規約の適合性を常時スクリーニングしています。」</div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>橘 律</div>
+            <div style='font-size: 0.85rem; color: #CBD5E1; font-weight: 700;'>法務課 / 法務顧問</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Legal Department</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「会社法・著作権法・note規約の適合性を常時スクリーニングしています。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_f3:
@@ -317,10 +330,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>🤝</span>
                 <span class='status-live'><span class='pulse-dot'></span>負荷監視中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.15rem; color: #0F172A; margin-top: 4px;'>綾瀬 七海</div>
-            <div style='font-size: 0.85rem; color: #059669; font-weight: 700;'>人事課 / 人事責任者</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 HR Department</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #ECFDF5; padding: 8px; border-radius: 6px;'>💬 「各社員の業務負荷スコアを測定し、過負荷を未然に防止しています。」</div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>綾瀬 七海</div>
+            <div style='font-size: 0.85rem; color: #6EE7B7; font-weight: 700;'>人事課 / 人事責任者</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 HR Department</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「各社員の業務負荷スコアを測定し、過負荷を未然に防止しています。」</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -333,10 +346,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>🔍</span>
                 <span class='status-live'><span class='pulse-dot'></span>調査中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.1rem; color: #0F172A; margin-top: 4px;'>風間 涼</div>
-            <div style='font-size: 0.85rem; color: #0D9488; font-weight: 700;'>市場調査課</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 Research Desk</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #F0FDFA; padding: 6px; border-radius: 6px;'>💬 「note売れ筋トレンドと読者ペルソナを分析中です。」</div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>風間 涼</div>
+            <div style='font-size: 0.85rem; color: #5EEAD4; font-weight: 700;'>市場調査課</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Research Desk</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「note売れ筋トレンドと読者ペルソナを分析中です。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_c2:
@@ -346,10 +359,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>📑</span>
                 <span class='status-live'><span class='pulse-dot'></span>構成中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.1rem; color: #0F172A; margin-top: 4px;'>結城 紬</div>
-            <div style='font-size: 0.85rem; color: #D97706; font-weight: 700;'>記事制作課 (編集長)</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 Editorial Studio</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #FFFBEB; padding: 6px; border-radius: 6px;'>💬 「購入率を高める有料ラインの境界線を設計しています。」</div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>結城 紬</div>
+            <div style='font-size: 0.85rem; color: #FCD34D; font-weight: 700;'>記事制作課 (編集長)</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Editorial Studio</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「購入率を高める有料ラインの境界線を設計しています。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_c3:
@@ -359,10 +372,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>✍️</span>
                 <span class='status-live'><span class='pulse-dot'></span>執筆待機</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.1rem; color: #0F172A; margin-top: 4px;'>森川 拓真</div>
-            <div style='font-size: 0.85rem; color: #EA580C; font-weight: 700;'>記事制作課 (ライター)</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 Writer Studio</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #FFF7ED; padding: 6px; border-radius: 6px;'>💬 「コピペで即使える実践テンプレート執筆スタンバイ完了。」</div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>森川 拓真</div>
+            <div style='font-size: 0.85rem; color: #FDBA74; font-weight: 700;'>記事制作課 (ライター)</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Writer Studio</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「コピペで即使える実践テンプレート執筆スタンバイ完了。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_c4:
@@ -372,10 +385,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>🛡️</span>
                 <span class='status-live'><span class='pulse-dot'></span>QA待機</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.1rem; color: #0F172A; margin-top: 4px;'>神崎 玲奈</div>
-            <div style='font-size: 0.85rem; color: #DC2626; font-weight: 700;'>品質管理課 (QA)</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 QA Inspection Booth</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #FEF2F2; padding: 6px; border-radius: 6px;'>💬 「信憑性と100点採点スコアリングの準備万全です。」</div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>神崎 玲奈</div>
+            <div style='font-size: 0.85rem; color: #FCA5A5; font-weight: 700;'>品質管理課 (QA)</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 QA Inspection Booth</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 「信憑性と100点採点スコアリングの準備万全です。」</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -388,10 +401,10 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>📢</span>
                 <span class='status-live'><span class='pulse-dot'></span>5大SNS待機</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.15rem; color: #0F172A; margin-top: 4px;'>佐々木 翼</div>
-            <div style='font-size: 0.85rem; color: #2563EB; font-weight: 700;'>広報課</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 PR Hub</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #EFF6FF; padding: 8px; border-radius: 6px;'>💬 「X・IG・Threads・Bluesky・Mastodonへの自動プロモーション待機中。」</div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>佐々木 翼</div>
+            <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>広報課</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 PR Hub</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「X・IG・Threads・Bluesky・Mastodonへの自動プロモーション待機中。」</div>
         </div>
         """, unsafe_allow_html=True)
     with col_m2:
@@ -401,15 +414,15 @@ elif menu == "🏢 本社執務室 (Note One Systems Headquarter / 2Dオフィ�
                 <span style='font-size: 1.6rem;'>📊</span>
                 <span class='status-live'><span class='pulse-dot'></span>財務・経理分析中</span>
             </div>
-            <div style='font-weight: 800; font-size: 1.15rem; color: #0F172A; margin-top: 4px;'>白石 葵</div>
-            <div style='font-size: 0.85rem; color: #7C3AED; font-weight: 700;'>財務課 ＆ 経理課</div>
-            <div style='font-size: 0.75rem; color: #475569; margin-top: 6px;'>📍 Finance & Accounting</div>
-            <div style='font-size: 0.8rem; color: #1E293B; margin-top: 6px; background: #F5F3FF; padding: 8px; border-radius: 6px;'>💬 「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」</div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>白石 葵</div>
+            <div style='font-size: 0.85rem; color: #C4B5FD; font-weight: 700;'>財務課 ＆ 経理課</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Finance & Accounting</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」</div>
         </div>
         """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 📝 編集部（縦スクロールで順番に配置）
+# 3. 📝 編集部
 # ==========================================
 elif menu == "📝 編集部 (縦スクロールで順番に配置)":
     st.markdown("<div class='main-header'>📝 編集部</div>", unsafe_allow_html=True)
@@ -469,8 +482,8 @@ elif menu == "📝 編集部 (縦スクロールで順番に配置)":
                         with meeting_container:
                             st.markdown(f"""
                             <div class='chat-bubble'>
-                                <div style='font-weight: 800; color: #0F172A;'>{log.get('icon')} {log.get('name')} <span style='font-size: 0.8rem; color: #475569;'>（{log.get('role')}）</span></div>
-                                <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #1E293B;'>{log.get('content')}</div>
+                                <div style='font-weight: 800; color: #FFFFFF;'>{log.get('icon')} {log.get('name')} <span style='font-size: 0.8rem; color: #94A3B8;'>（{log.get('role')}）</span></div>
+                                <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #F8FAFC;'>{log.get('content')}</div>
                             </div>
                             """, unsafe_allow_html=True)
                     elif event.get("status") == "completed":
@@ -547,8 +560,8 @@ elif menu == "📝 編集部 (縦スクロールで順番に配置)":
                 parts = content.split("🔒 ここから先は有料エリアです")
                 st.markdown(parts[0])
                 st.markdown("""
-                <div style='background-color: #FFFBEB; border: 2px dashed #F59E0B; border-radius: 8px; padding: 14px; margin: 14px 0;'>
-                    <strong style='color: #B45309;'>🔒 ここから先は有料エリア（noteの有料ライン設定位置）</strong>
+                <div style='background-color: #1E293B; border: 2px dashed #F59E0B; border-radius: 8px; padding: 14px; margin: 14px 0;'>
+                    <strong style='color: #FCD34D;'>🔒 ここから先は有料エリア（noteの有料ライン設定位置）</strong>
                 </div>
                 """, unsafe_allow_html=True)
                 st.markdown(parts[1])
@@ -562,7 +575,7 @@ elif menu == "📝 編集部 (縦スクロールで順番に配置)":
             st.text_area("記事コード", value=art.get("content", ""), height=300)
 
 # ==========================================
-# 4. 🏛️ 管理部（縦スクロールで順番に配置）
+# 4. 🏛️ 管理部
 # ==========================================
 elif menu == "🏛️ 管理部 (縦スクロールで順番に配置)":
     st.markdown("<div class='main-header'>🏛️ 管理部</div>", unsafe_allow_html=True)
@@ -614,18 +627,18 @@ elif menu == "🏛️ 管理部 (縦スクロールで順番に配置)":
         
         for inv in legal_inv["investigations"]:
             st.markdown(f"""
-            <div style='background-color: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #334155; border-radius: 8px; padding: 14px; margin-bottom: 12px;'>
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
                 <div style='display: flex; justify-content: space-between;'>
-                    <strong style='font-size: 1.05rem; color: #0F172A;'>📋 {inv['category']}（ID: {inv['id']}）</strong>
+                    <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']}（ID: {inv['id']}）</strong>
                     <span>{inv['status']}</span>
                 </div>
-                <div style='font-size: 0.8rem; color: #475569; margin: 4px 0;'>
+                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
                     🕒 受付: {inv['received_at']} | 調査開始: {inv['started_at']} | 完了: {inv['completed_at']}
                 </div>
-                <div style='font-size: 0.85rem; color: #1E293B;'><strong>相談元:</strong> {inv['requester_dept']}</div>
-                <div style='font-size: 0.85rem; color: #1E293B; margin-top: 4px;'><strong>受付内容:</strong> {inv['inquiry_content']}</div>
-                <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 0.85rem; color: #0F172A;'>
-                    <strong>⚖️ 橘 律 法的見解:</strong> {inv['legal_opinion']}
+                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>相談元:</strong> {inv['requester_dept']}</div>
+                <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>受付内容:</strong> {inv['inquiry_content']}</div>
+                <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
+                    <strong style='color: #38BDF8;'>⚖️ 橘 律 法的見解:</strong> {inv['legal_opinion']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -716,17 +729,17 @@ elif menu == "💻 社内ヘルプデスク (全エラー管理: 発生日時、
     for err in err_data.get("errors", []):
         with st.container():
             st.markdown(f"""
-            <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; border-left: 5px solid #2563EB; border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);'>
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
                 <div style='display: flex; justify-content: space-between;'>
-                    <strong style='font-size: 1.1rem; color: #0F172A;'>⚠️ {err['module']}（ID: {err['id']}）</strong>
+                    <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {err['module']}（ID: {err['id']}）</strong>
                     <span>{err['status']}</span>
                 </div>
-                <div style='font-size: 0.8rem; color: #475569; margin: 4px 0;'>🕒 発生日時: {err['occurred_at']}</div>
-                <div style='background-color: #FEF2F2; border: 1px solid #FCA5A5; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #991B1B; margin: 6px 0;'>
+                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 発生日時: {err['occurred_at']}</div>
+                <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
                     {err['error_message']}
                 </div>
-                <div style='font-size: 0.9rem; color: #1E293B;'><strong>🔍 原因分析:</strong> {err['root_cause']}</div>
-                <div style='font-size: 0.9rem; color: #15803D; margin-top: 4px;'><strong>🛠️ 対処手順・解決法:</strong> {err['solution']}</div>
+                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 原因分析:</strong> {err['root_cause']}</div>
+                <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ 対処手順・解決法:</strong> {err['solution']}</div>
             </div>
             """, unsafe_allow_html=True)
 
