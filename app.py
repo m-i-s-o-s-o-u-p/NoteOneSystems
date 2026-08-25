@@ -16,6 +16,7 @@ import core.i18n
 import companies.note_one_systems.workflow
 import companies.note_one_systems.office_chat_manager
 import companies.note_one_systems.market_research_manager
+import companies.note_one_systems.office_game_builder
 
 importlib.reload(core.ai_client)
 importlib.reload(core.holdings_manager)
@@ -25,6 +26,7 @@ importlib.reload(core.i18n)
 importlib.reload(companies.note_one_systems.workflow)
 importlib.reload(companies.note_one_systems.office_chat_manager)
 importlib.reload(companies.note_one_systems.market_research_manager)
+importlib.reload(companies.note_one_systems.office_game_builder)
 
 from core.ai_client import AIClient
 from core.holdings_manager import HoldingsManager
@@ -33,6 +35,7 @@ from core.hr_manager import HRManager
 from companies.note_one_systems.workflow import NoteOneWorkflow
 from companies.note_one_systems.office_chat_manager import OfficeChatManager
 from companies.note_one_systems.market_research_manager import MarketResearchManager
+from companies.note_one_systems.office_game_builder import get_office_game_html
 from core.i18n import t
 
 # Helper to ensure double asterisks are completely stripped from any rendered text
@@ -521,11 +524,8 @@ elif page_id == "office":
 
     st.markdown(f"<div class='section-title'>{t('office_sec_title', lang)}</div>", unsafe_allow_html=True)
     
-    html_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/game_office.html")
-    if os.path.exists(html_path):
-        with open(html_path, "r", encoding="utf-8") as f:
-            game_html = f.read()
-        components.html(game_html, height=545)
+    game_html = get_office_game_html(lang)
+    components.html(game_html, height=545)
 
     # -------------------------------------------------------------
     # 👑 Executive Approval Center (縦並び / 承認待ちのみ表示)
