@@ -115,9 +115,9 @@ MESSAGES = {
         "pr_hub_title": "⚙️ 5大SNSアカウント ＆ 自動配信先の設定",
         "pr_save_btn": "💾 広報課 SNS設定を保存する",
 
-        # 6. QA & Executive Approval
-        "qa_title": "✨ 品質管理課 ＆ 👑 オーナー最終承認センター",
-        "qa_sub": "担当: 神崎 玲奈（Quality Assurance Director） ＆ オーナー最終決裁",
+        # 6. QA (Quality Assurance)
+        "qa_title": "✨ 品質管理課",
+        "qa_sub": "担当: 神崎 玲奈（Quality Assurance Director）",
         "qa_approval_header": "👑 オーナー最終承認ゲートウェイ（Executive Approval Gateway）",
         "qa_approval_sub": "記事およびSNS広告は、オーナーの最終承認が出るまで投稿・配信が完全ロックされます。",
         "qa_locked_warning": "🔒 【投稿ロック中】オーナーの最終承認が出るまで、note投稿用コードのコピーやSNS配信は実行できません。",
@@ -195,7 +195,7 @@ MESSAGES = {
         "nav_market_research": "🔍 Market Research Division",
         "nav_content_creation": "✍️ Content Creation Division",
         "nav_pr": "📢 Public Relations Division",
-        "nav_qa": "✨ Quality Assurance & Executive Approval",
+        "nav_qa": "✨ Quality Assurance Division",
         "nav_hr": "🤝 Human Resources Division",
         "nav_legal": "📚 Legal & Compliance Division",
         "nav_finance": "📊 Financial Strategy Division",
@@ -294,9 +294,9 @@ MESSAGES = {
         "pr_hub_title": "⚙️ 5 Major Social Media Accounts & Auto-Syndication Hub",
         "pr_save_btn": "💾 Save Social Media Configuration",
 
-        # 6. QA & Executive Approval
-        "qa_title": "✨ Quality Assurance & 👑 Executive Approval Center",
-        "qa_sub": "Lead: Reina Kanzaki (QA Director) & Owner Executive Decision",
+        # 6. QA (Quality Assurance)
+        "qa_title": "✨ Quality Assurance Division",
+        "qa_sub": "Lead: Reina Kanzaki (QA Director)",
         "qa_approval_header": "👑 Executive Approval Gateway (Final Sign-off)",
         "qa_approval_sub": "Articles and social media campaigns remain strictly locked until explicit owner sign-off.",
         "qa_locked_warning": "🔒 [Publishing Locked] Copying note Markdown source and social broadcasting are disabled until you approve this draft.",
