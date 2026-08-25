@@ -35,6 +35,12 @@ from companies.note_one_systems.office_chat_manager import OfficeChatManager
 from companies.note_one_systems.market_research_manager import MarketResearchManager
 from core.i18n import t
 
+# Helper to ensure double asterisks are completely stripped from any rendered text
+def clean_txt(val: str) -> str:
+    if not val or not isinstance(val, str):
+        return ""
+    return val.replace("**", "")
+
 # Page Configuration
 st.set_page_config(
     page_title="Note One Systems, Inc. | AI Enterprise Platform",
@@ -104,7 +110,7 @@ st.markdown("""
         color: #F8FAFC !important;
     }
     
-    /* 📄 White Paper Styling for Review & Executive Approval Areas */
+    /* 📄 Paper-White Styling: High contrast white background with jet black text */
     .review-paper-white {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
@@ -113,7 +119,7 @@ st.markdown("""
         padding: 24px;
         margin: 16px 0;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        line-height: 1.7;
+        line-height: 1.75;
     }
     .review-paper-white h1, 
     .review-paper-white h2, 
@@ -440,7 +446,7 @@ if page_id == "dashboard":
                 st.warning("会社名を入力してください。" if lang == "ja" else "Please enter a valid company name.")
 
 # ==========================================
-# 2. 🏢 Office Room (With Executive Approval Center)
+# 2. 🏢 Office Room (With Vertical Executive Approval Center)
 # ==========================================
 elif page_id == "office":
     st.markdown(f"<div class='main-header'>{t('office_main_header', lang)}</div>", unsafe_allow_html=True)
@@ -455,210 +461,212 @@ elif page_id == "office":
         components.html(game_html, height=545)
 
     # -------------------------------------------------------------
-    # 👑 Executive Approval Center (Integrated in Office Room)
+    # 👑 Executive Approval Center (縦並び / Vertical Layout)
     # -------------------------------------------------------------
     st.markdown("---")
     st.markdown(f"<div class='section-title'>{t('qa_approval_header', lang)}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('qa_approval_sub', lang)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 18px;'>{t('qa_approval_sub', lang)}</div>", unsafe_allow_html=True)
 
-    tab_art_app, tab_topic_app = st.tabs([
-        "📄 記事・広告 最終決裁 (Article & Ad Approvals)" if lang == "ja" else "📄 Article & Ad Approvals",
-        "🔍 調査トピック 企画決裁 (Research Topic Approvals)" if lang == "ja" else "🔍 Research Topic Approvals"
-    ])
+    # ==============================================================
+    # 1. 📄 記事・広告 最終決裁セクション (Article & Ad Approvals)
+    # ==============================================================
+    st.markdown(f"### 📄 {'記事・広告 最終決裁' if lang=='ja' else 'Article & Ad Approvals'}")
+    articles = workflow.list_articles()
+    if not articles:
+        st.info(t("qa_no_articles", lang))
+    else:
+        article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {clean_txt(art.get('title', ''))}" for art in articles]
+        selected_idx = st.selectbox(f"{t('qa_select_label', lang)} (Office)", range(len(articles)), format_func=lambda x: article_titles[x], key="office_art_select")
+        art = articles[selected_idx]
+        cur_status = art.get("status", "Pending Owner Approval")
+        is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
 
-    # --- 1. Article & Ad Approval Tab ---
-    with tab_art_app:
-        articles = workflow.list_articles()
-        if not articles:
-            st.info(t("qa_no_articles", lang))
-        else:
-            article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
-            selected_idx = st.selectbox(f"{t('qa_select_label', lang)} (Office)", range(len(articles)), format_func=lambda x: article_titles[x], key="office_art_select")
-            art = articles[selected_idx]
-            cur_status = art.get("status", "Pending Owner Approval")
-            is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
-
-            if is_locked:
-                st.markdown(f"""
-                <div class='approval-box-locked'>
-                    <div style='display: flex; justify-content: space-between; align-items: center;'>
-                        <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
-                        <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
-                    </div>
-                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                        {t('qa_locked_warning', lang)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class='approval-box-approved'>
-                    <div style='display: flex; justify-content: space-between; align-items: center;'>
-                        <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {cur_status}</h3>
-                        <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'承認済み' if lang=='ja' else 'Approved'}</span>
-                    </div>
-                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                        {t('qa_unlocked_success', lang)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            col_o_ap1, col_o_ap2, col_o_ap3 = st.columns([2, 2, 1])
-            with col_o_ap1:
-                if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True, key="off_btn_app_art"):
-                    workflow.approve_article(art["id"])
-                    st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
-                    st.rerun()
-            with col_o_ap2:
-                with st.popover(t("qa_btn_revision", lang), use_container_width=True):
-                    st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                    fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
-                    if st.button("📨 送信", type="primary", key="off_submit_rev_art"):
-                        if fb_txt.strip():
-                            workflow.request_revision(art["id"], fb_txt)
-                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
-                            st.rerun()
-                        else:
-                            st.error("修正指示内容を入力してください。")
-            with col_o_ap3:
-                if st.button(t("qa_btn_reject", lang), use_container_width=True, key="off_btn_rej_art"):
-                    workflow.reject_article(art["id"])
-                    st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
-                    st.rerun()
-
-            # 📄 査読エリア: 背景「白」＆ 文字「黒」の高視認性ペーパースタイル
-            st.markdown(f"<div class='section-title'>📄 {'査読・審査書類（原稿プレビュー＆法的評価）' if lang=='ja' else 'Document Review Dossier (Manuscript & Audit)'}</div>", unsafe_allow_html=True)
-            
-            with st.container():
-                col_chk1, col_chk2 = st.columns(2)
-                with col_chk1:
-                    st.markdown(f"""
-                    <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-                        <h4 style='color: #0369A1 !important; margin-top:0;'>⚖️ {'法務課 スクリーニング審査 (橘 律)' if lang=='ja' else 'Legal Screening (Ritsu Tachibana)'}</h4>
-                        <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{art.get('legal_check', '審査中')}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_chk2:
-                    st.markdown(f"""
-                    <div class='review-paper-white' style='border-left: 6px solid #D97706 !important;'>
-                        <h4 style='color: #B45309 !important; margin-top:0;'>🛡️ {'品質管理課 100点採点スコア (神崎 玲奈)' if lang=='ja' else 'QA Quality Score (Reina Kanzaki)'}</h4>
-                        <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{art.get('qa_score', '採点中')}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                # SNS告知文査読
-                st.markdown(f"""
-                <div class='review-paper-white' style='border-left: 6px solid #2563EB !important;'>
-                    <h4 style='color: #1D4ED8 !important; margin-top:0;'>📢 {'5大SNS告知文（佐々木 翼 作成）' if lang=='ja' else 'Multi-SNS Promotional Copy (Tsubasa Sasaki)'}</h4>
-                    <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #CBD5E1;'>{art.get('marketing', '')}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-                # 本文原稿査読
-                content = art.get("content", "")
-                paywall_badge_html = f"<div style='background-color: #FEF3C7; border: 2px dashed #F59E0B; border-radius: 8px; padding: 12px; margin: 16px 0; color: #92400E; font-weight: 800; text-align: center;'>{t('qa_paywall_badge', lang)}</div>"
-                
-                if "🔒 ここから先は有料エリアです" in content or "🔒 [Paywall] Premium Section Starts Here" in content:
-                    delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in content else "🔒 [Paywall] Premium Section Starts Here"
-                    parts = content.split(delimiter)
-                    body_render = f"<div>{parts[0]}</div>{paywall_badge_html}<div>{parts[1]}</div>"
-                else:
-                    body_render = f"<div>{content}</div>"
-
-                st.markdown(f"""
-                <div class='review-paper-white' style='border-left: 6px solid #10B981 !important;'>
-                    <h3 style='color: #047857 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 {'note完成原稿プレビュー（査読エリア）' if lang=='ja' else 'note Manuscript Preview (Editorial Review)'}</h3>
-                    <div style='font-size: 1rem; color: #0F172A; margin-top: 14px; white-space: pre-wrap;'>{body_render}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-    # --- 2. Market Research Topic Approval Tab ---
-    with tab_topic_app:
-        topics = market_manager.list_topics()
-        if not topics:
-            st.info("調査トピックがありません。" if lang=="ja" else "No research topics available.")
-        else:
-            topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {tp.get('category', '')} | {tp.get('title', '')}" for tp in topics]
-            sel_tp_idx = st.selectbox(f"{t('mr_select_topic_label', lang)} (Office)", range(len(topics)), format_func=lambda x: topic_titles[x], key="office_tp_select")
-            tp = topics[sel_tp_idx]
-            tp_status = tp.get("status", "Pending Owner Approval")
-            tp_locked = tp_status in ["Pending Owner Approval", "Revision Requested"]
-
-            if tp_locked:
-                st.markdown(f"""
-                <div class='approval-box-locked'>
-                    <div style='display: flex; justify-content: space-between; align-items: center;'>
-                        <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {tp_status}</h3>
-                        <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認待ち' if lang=='ja' else 'Pending'}</span>
-                    </div>
-                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                        {t('mr_topic_locked_warning', lang)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class='approval-box-approved'>
-                    <div style='display: flex; justify-content: space-between; align-items: center;'>
-                        <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {tp_status}</h3>
-                        <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認済み' if lang=='ja' else 'Approved'}</span>
-                    </div>
-                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                        {t('mr_topic_unlocked_success', lang)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            col_o_tp1, col_o_tp2, col_o_tp3 = st.columns([2, 2, 1])
-            with col_o_tp1:
-                if st.button(t("mr_btn_approve_topic", lang), type="primary", use_container_width=True, key="off_btn_app_tp"):
-                    market_manager.approve_topic(tp["id"])
-                    st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
-                    st.rerun()
-            with col_o_tp2:
-                with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
-                    st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
-                    if st.button("📨 送信", type="primary", key="off_submit_rev_tp"):
-                        if rev_fb.strip():
-                            market_manager.request_revision(tp["id"], rev_fb)
-                            st.warning("風間アナリストに再調査指示を伝達しました。")
-                            st.rerun()
-                        else:
-                            st.error("指示内容を入力してください。")
-            with col_o_tp3:
-                if st.button(t("mr_btn_reject_topic", lang), use_container_width=True, key="off_btn_rej_tp"):
-                    market_manager.reject_topic(tp["id"])
-                    st.info("トピックを却下しました。")
-                    st.rerun()
-
-            if not tp_locked:
-                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-                if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True, key="off_send_tp_cc"):
-                    st.session_state.prefill_topic = tp.get("title", "")
-                    st.session_state.prefill_audience = tp.get("target_audience", "")
-                    st.session_state.active_page_id = "content_creation"
-                    st.rerun()
-
-            # 📄 トピック査読エリア: 背景「白」＆ 文字「黒」
+        if is_locked:
             st.markdown(f"""
-            <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-                <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画査読書類 (風間 涼 提出)' if lang=='ja' else 'Market Research Review Dossier (Ryo Kazama)'}</h3>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;'>
-                    <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
-                        <strong style='color:#0369A1;'>🎯 ターゲット読者 ＆ カテゴリ</strong>
-                        <p style='margin:6px 0;'><strong>カテゴリ:</strong> {tp.get('category', '実務ノウハウ')}</p>
-                        <p style='margin:6px 0;'><strong>想定読者:</strong> {tp.get('target_audience', '')}</p>
-                        <p style='margin:6px 0;'><strong>推奨価格:</strong> ¥{tp.get('recommended_price', 500):,}</p>
-                    </div>
-                    <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
-                        <strong style='color:#047857;'>🔥 市場ニーズ ＆ 競合差別化</strong>
-                        <p style='margin:6px 0;'><strong>市場ニーズ:</strong> {tp.get('demand_summary', '')}</p>
-                        <p style='margin:6px 0;'><strong>競合差別化:</strong> {tp.get('competitor_gap', '')}</p>
-                    </div>
+            <div class='approval-box-locked'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
+                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('qa_locked_warning', lang)}
                 </div>
             </div>
             """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class='approval-box-approved'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {cur_status}</h3>
+                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'承認済み' if lang=='ja' else 'Approved'}</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('qa_unlocked_success', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        col_o_ap1, col_o_ap2, col_o_ap3 = st.columns([2, 2, 1])
+        with col_o_ap1:
+            if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True, key="off_btn_app_art"):
+                workflow.approve_article(art["id"])
+                st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
+                st.rerun()
+        with col_o_ap2:
+            with st.popover(t("qa_btn_revision", lang), use_container_width=True):
+                st.markdown(f"#### {t('qa_btn_revision', lang)}")
+                fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
+                if st.button("📨 送信", type="primary", key="off_submit_rev_art"):
+                    if fb_txt.strip():
+                        workflow.request_revision(art["id"], fb_txt)
+                        st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                        st.rerun()
+                    else:
+                        st.error("修正指示内容を入力してください。")
+        with col_o_ap3:
+            if st.button(t("qa_btn_reject", lang), use_container_width=True, key="off_btn_rej_art"):
+                workflow.reject_article(art["id"])
+                st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
+                st.rerun()
+
+        # 📄 審査書類・原稿プレビュー（背景白・文字黒、**完全排除）
+        st.markdown(f"<div class='section-title'>📄 {'審査書類・原稿プレビュー' if lang=='ja' else 'Manuscript & Review Dossier'}</div>", unsafe_allow_html=True)
+        
+        with st.container():
+            col_chk1, col_chk2 = st.columns(2)
+            with col_chk1:
+                st.markdown(f"""
+                <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
+                    <h4 style='color: #0369A1 !important; margin-top:0;'>⚖️ {'法務課 スクリーニング審査 (橘 律)' if lang=='ja' else 'Legal Screening (Ritsu Tachibana)'}</h4>
+                    <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{clean_txt(art.get('legal_check', '審査中'))}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with col_chk2:
+                st.markdown(f"""
+                <div class='review-paper-white' style='border-left: 6px solid #D97706 !important;'>
+                    <h4 style='color: #B45309 !important; margin-top:0;'>🛡️ {'品質管理課 100点採点スコア (神崎 玲奈)' if lang=='ja' else 'QA Quality Score (Reina Kanzaki)'}</h4>
+                    <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{clean_txt(art.get('qa_score', '採点中'))}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # SNS告知文
+            st.markdown(f"""
+            <div class='review-paper-white' style='border-left: 6px solid #2563EB !important;'>
+                <h4 style='color: #1D4ED8 !important; margin-top:0;'>📢 {'5大SNS告知文（佐々木 翼 作成）' if lang=='ja' else 'Multi-SNS Promotional Copy (Tsubasa Sasaki)'}</h4>
+                <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #CBD5E1;'>{clean_txt(art.get('marketing', ''))}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # 本文原稿（**完全排除、クリーンプレビュー）
+            clean_content = clean_txt(art.get("content", ""))
+            paywall_badge_html = f"<div style='background-color: #FEF3C7; border: 2px dashed #F59E0B; border-radius: 8px; padding: 12px; margin: 16px 0; color: #92400E; font-weight: 800; text-align: center;'>{t('qa_paywall_badge', lang)}</div>"
+            
+            if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
+                delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
+                parts = clean_content.split(delimiter)
+                body_render = f"<div>{parts[0]}</div>{paywall_badge_html}<div>{parts[1]}</div>"
+            else:
+                body_render = f"<div>{clean_content}</div>"
+
+            st.markdown(f"""
+            <div class='review-paper-white' style='border-left: 6px solid #10B981 !important;'>
+                <h3 style='color: #047857 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 {'note完成原稿プレビュー' if lang=='ja' else 'note Manuscript Preview'}</h3>
+                <div style='font-size: 1rem; color: #0F172A; margin-top: 14px; white-space: pre-wrap;'>{body_render}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+    st.markdown("---")
+
+    # ==============================================================
+    # 2. 🔍 調査トピック 企画決裁セクション (Research Topic Approvals)
+    # ==============================================================
+    st.markdown(f"### 🔍 {'調査トピック 企画決裁' if lang=='ja' else 'Research Topic Approvals'}")
+    topics = market_manager.list_topics()
+    if not topics:
+        st.info("調査トピックがありません。" if lang=="ja" else "No research topics available.")
+    else:
+        topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {clean_txt(tp.get('category', ''))} | {clean_txt(tp.get('title', ''))}" for tp in topics]
+        sel_tp_idx = st.selectbox(f"{t('mr_select_topic_label', lang)} (Office)", range(len(topics)), format_func=lambda x: topic_titles[x], key="office_tp_select")
+        tp = topics[sel_tp_idx]
+        tp_status = tp.get("status", "Pending Owner Approval")
+        tp_locked = tp_status in ["Pending Owner Approval", "Revision Requested"]
+
+        if tp_locked:
+            st.markdown(f"""
+            <div class='approval-box-locked'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {tp_status}</h3>
+                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認待ち' if lang=='ja' else 'Pending'}</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('mr_topic_locked_warning', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class='approval-box-approved'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {tp_status}</h3>
+                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認済み' if lang=='ja' else 'Approved'}</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('mr_topic_unlocked_success', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        col_o_tp1, col_o_tp2, col_o_tp3 = st.columns([2, 2, 1])
+        with col_o_tp1:
+            if st.button(t("mr_btn_approve_topic", lang), type="primary", use_container_width=True, key="off_btn_app_tp"):
+                market_manager.approve_topic(tp["id"])
+                st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
+                st.rerun()
+        with col_o_tp2:
+            with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
+                st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
+                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
+                if st.button("📨 送信", type="primary", key="off_submit_rev_tp"):
+                    if rev_fb.strip():
+                        market_manager.request_revision(tp["id"], rev_fb)
+                        st.warning("風間アナリストに再調査指示を伝達しました。")
+                        st.rerun()
+                    else:
+                        st.error("指示内容を入力してください。")
+        with col_o_tp3:
+            if st.button(t("mr_btn_reject_topic", lang), use_container_width=True, key="off_btn_rej_tp"):
+                market_manager.reject_topic(tp["id"])
+                st.info("トピックを却下しました。")
+                st.rerun()
+
+        if not tp_locked:
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True, key="off_send_tp_cc"):
+                st.session_state.prefill_topic = clean_txt(tp.get("title", ""))
+                st.session_state.prefill_audience = clean_txt(tp.get("target_audience", ""))
+                st.session_state.active_page_id = "content_creation"
+                st.rerun()
+
+        # 📄 市場調査・企画提案書（背景白・文字黒）
+        st.markdown(f"""
+        <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
+            <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画提案書 (風間 涼 提出)' if lang=='ja' else 'Market Research Proposal (Ryo Kazama)'}</h3>
+            <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;'>
+                <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
+                    <strong style='color:#0369A1;'>🎯 ターゲット読者 ＆ カテゴリ</strong>
+                    <p style='margin:6px 0;'><strong>カテゴリ:</strong> {clean_txt(tp.get('category', '実務ノウハウ'))}</p>
+                    <p style='margin:6px 0;'><strong>想定読者:</strong> {clean_txt(tp.get('target_audience', ''))}</p>
+                    <p style='margin:6px 0;'><strong>推奨価格:</strong> ¥{tp.get('recommended_price', 500):,}</p>
+                </div>
+                <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
+                    <strong style='color:#047857;'>🔥 市場ニーズ ＆ 競合差別化</strong>
+                    <p style='margin:6px 0;'><strong>市場ニーズ:</strong> {clean_txt(tp.get('demand_summary', ''))}</p>
+                    <p style='margin:6px 0;'><strong>競合差別化:</strong> {clean_txt(tp.get('competitor_gap', ''))}</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # -------------------------------------------------------------
     # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
@@ -723,7 +731,7 @@ elif page_id == "office":
             st.markdown(f"""
             <div class='user-query-card'>
                 <div style='font-size: 0.8rem; color: #94A3B8;'>🕒 {item.get('timestamp', '')} | <strong>{t('consult_user_prefix', lang)}</strong></div>
-                <div style='font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-top: 4px;'>{item['user']}</div>
+                <div style='font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-top: 4px;'>{clean_txt(item['user'])}</div>
             </div>
             <div class='chat-bubble'>
                 <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
@@ -732,7 +740,7 @@ elif page_id == "office":
                     </div>
                     <span class='status-live'><span class='pulse-dot'></span>{t('consult_status_done', lang)}</span>
                 </div>
-                <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{resp.get('content', '')}</div>
+                <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{clean_txt(resp.get('content', ''))}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -895,7 +903,7 @@ elif page_id == "market_research":
             if rs_kw.strip():
                 with st.spinner("風間アナリストがnote市場・競合ギャップを調査中..."):
                     new_tp = market_manager.conduct_research(rs_kw, rs_aud)
-                    st.success(f"🎉 新規トピック『{new_tp['title']}』の市場調査が完了し、承認待ちとして登録されました！")
+                    st.success(f"🎉 新規トピック『{clean_txt(new_tp['title'])}』の市場調査が完了し、承認待ちとして登録されました！")
                     st.rerun()
             else:
                 st.warning("調査キーワードを入力してください。")
@@ -911,7 +919,7 @@ elif page_id == "market_research":
     if not topics:
         st.info("調査トピックがありません。上記フォームから新規調査を指示してください。")
     else:
-        topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {tp.get('category', '')} | {tp.get('title', '')}" for tp in topics]
+        topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {clean_txt(tp.get('category', ''))} | {clean_txt(tp.get('title', ''))}" for tp in topics]
         sel_tp_idx = st.selectbox(t("mr_select_topic_label", lang), range(len(topics)), format_func=lambda x: topic_titles[x])
         tp = topics[sel_tp_idx]
         tp_status = tp.get("status", "Pending Owner Approval")
@@ -972,28 +980,28 @@ elif page_id == "market_research":
         if not tp_locked:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True):
-                st.session_state.prefill_topic = tp.get("title", "")
-                st.session_state.prefill_audience = tp.get("target_audience", "")
+                st.session_state.prefill_topic = clean_txt(tp.get("title", ""))
+                st.session_state.prefill_audience = clean_txt(tp.get("target_audience", ""))
                 st.session_state.active_page_id = "content_creation"
                 st.rerun()
 
         st.markdown("---")
 
-        # 📄 査読エリア: 背景「白」＆ 文字「黒」
+        # 📄 市場調査・企画提案書（背景白・文字黒、**完全排除）
         st.markdown(f"""
         <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-            <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画査読書類 (風間 涼 提出)' if lang=='ja' else 'Market Research Review Dossier (Ryo Kazama)'}</h3>
+            <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画提案書 (風間 涼 提出)' if lang=='ja' else 'Market Research Proposal (Ryo Kazama)'}</h3>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;'>
                 <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
                     <strong style='color:#0369A1;'>🎯 ターゲット読者 ＆ カテゴリ</strong>
-                    <p style='margin:6px 0;'><strong>カテゴリ:</strong> {tp.get('category', '実務ノウハウ')}</p>
-                    <p style='margin:6px 0;'><strong>想定読者:</strong> {tp.get('target_audience', '')}</p>
+                    <p style='margin:6px 0;'><strong>カテゴリ:</strong> {clean_txt(tp.get('category', '実務ノウハウ'))}</p>
+                    <p style='margin:6px 0;'><strong>想定読者:</strong> {clean_txt(tp.get('target_audience', ''))}</p>
                     <p style='margin:6px 0;'><strong>推奨価格:</strong> ¥{tp.get('recommended_price', 500):,}</p>
                 </div>
                 <div style='background:#F8FAFC; padding:14px; border-radius:8px; border:1px solid #CBD5E1;'>
                     <strong style='color:#047857;'>🔥 市場ニーズ ＆ 競合差別化</strong>
-                    <p style='margin:6px 0;'><strong>市場ニーズ:</strong> {tp.get('demand_summary', '')}</p>
-                    <p style='margin:6px 0;'><strong>競合差別化:</strong> {tp.get('competitor_gap', '')}</p>
+                    <p style='margin:6px 0;'><strong>市場ニーズ:</strong> {clean_txt(tp.get('demand_summary', ''))}</p>
+                    <p style='margin:6px 0;'><strong>競合差別化:</strong> {clean_txt(tp.get('competitor_gap', ''))}</p>
                 </div>
             </div>
         </div>
@@ -1003,8 +1011,8 @@ elif page_id == "market_research":
         st.markdown("##### ⏱️ 企画ステータス遷移タイムスタンプ履歴")
         history = tp.get("status_history", [])
         for h in reversed(history):
-            note_str = f" - <em>{h.get('note')}</em>" if h.get('note') else ""
-            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({h.get('actor', '')}){note_str}", unsafe_allow_html=True)
+            note_str = f" - <em>{clean_txt(h.get('note'))}</em>" if h.get('note') else ""
+            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({clean_txt(h.get('actor', ''))}){note_str}", unsafe_allow_html=True)
 
 # ==========================================
 # 4. ✍️ Content Creation Division
@@ -1014,7 +1022,7 @@ elif page_id == "content_creation":
     st.markdown(f"<div class='sub-header'>{t('cc_sub', lang)}</div>", unsafe_allow_html=True)
 
     if st.session_state.prefill_topic:
-        st.success(f"📥 **市場調査課から承認済みトピックを引き継ぎました:** 『{st.session_state.prefill_topic}』")
+        st.success(f"📥 **市場調査課から承認済みトピックを引き継ぎました:** 『{clean_txt(st.session_state.prefill_topic)}』")
 
     st.markdown(f"#### {t('cc_form_title', lang)}")
     c_in1, c_in2 = st.columns([3, 1])
@@ -1059,14 +1067,14 @@ elif page_id == "content_creation":
                 progress_bar.progress(step / 10)
                 
                 if event.get("status") == "thinking":
-                    status_text.markdown(f"⏳ **{event.get('message')}**")
+                    status_text.markdown(f"⏳ **{clean_txt(event.get('message'))}**")
                 elif event.get("status") == "done":
                     log = event.get("log", {})
                     with meeting_container:
                         st.markdown(f"""
                         <div class='chat-bubble'>
                             <div style='font-weight: 800; color: #FFFFFF;'>{log.get('icon')} {log.get('name')} <span style='font-size: 0.8rem; color: #94A3B8;'>({log.get('role')})</span></div>
-                            <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #F8FAFC;'>{log.get('content')}</div>
+                            <div style='white-space: pre-wrap; margin-top: 6px; font-size: 0.95rem; color: #F8FAFC;'>{clean_txt(log.get('content'))}</div>
                         </div>
                         """, unsafe_allow_html=True)
                 elif event.get("status") == "completed":
@@ -1078,7 +1086,7 @@ elif page_id == "content_creation":
                 # Clear prefill
                 st.session_state.prefill_topic = ""
                 st.session_state.prefill_audience = ""
-                st.success(f"🎉 記事『{completed_article['title']}』が作成されました！「🏢 {t('nav_office', lang)}」または「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{completed_article['title']}' created! Please review and approve in '🏢 {t('nav_office', lang)}' or '✨ {t('nav_qa', lang)}'.")
+                st.success(f"🎉 記事『{clean_txt(completed_article['title'])}』が作成されました！「🏢 {t('nav_office', lang)}」または「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{clean_txt(completed_article['title'])}' created! Please review and approve in '🏢 {t('nav_office', lang)}' or '✨ {t('nav_qa', lang)}'.")
 
 # ==========================================
 # 5. 📢 Public Relations Division
@@ -1126,7 +1134,7 @@ elif page_id == "qa":
     if not articles:
         st.info(t("qa_no_articles", lang))
     else:
-        article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
+        article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {clean_txt(art.get('title', ''))}" for art in articles]
         selected_idx = st.selectbox(t("qa_select_label", lang), range(len(articles)), format_func=lambda x: article_titles[x])
         art = articles[selected_idx]
         cur_status = art.get("status", "Pending Owner Approval")
@@ -1190,47 +1198,47 @@ elif page_id == "qa":
                 st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
                 st.rerun()
 
-        # 📄 査読エリア: 背景「白」＆ 文字「黒」の高視認性ペーパースタイル
-        st.markdown(f"<div class='section-title'>📄 {'査読・審査書類（原稿プレビュー＆法的評価）' if lang=='ja' else 'Document Review Dossier (Manuscript & Audit)'}</div>", unsafe_allow_html=True)
+        # 📄 審査書類・原稿プレビュー（背景白・文字黒、**完全排除）
+        st.markdown(f"<div class='section-title'>📄 {'審査書類・原稿プレビュー' if lang=='ja' else 'Manuscript & Review Dossier'}</div>", unsafe_allow_html=True)
 
         col_chk1, col_chk2 = st.columns(2)
         with col_chk1:
             st.markdown(f"""
             <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
                 <h4 style='color: #0369A1 !important; margin-top:0;'>⚖️ {'法務課 スクリーニング審査 (橘 律)' if lang=='ja' else 'Legal Screening (Ritsu Tachibana)'}</h4>
-                <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{art.get('legal_check', '審査中')}</div>
+                <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{clean_txt(art.get('legal_check', '審査中'))}</div>
             </div>
             """, unsafe_allow_html=True)
         with col_chk2:
             st.markdown(f"""
             <div class='review-paper-white' style='border-left: 6px solid #D97706 !important;'>
                 <h4 style='color: #B45309 !important; margin-top:0;'>🛡️ {'品質管理課 100点採点スコア (神崎 玲奈)' if lang=='ja' else 'QA Quality Score (Reina Kanzaki)'}</h4>
-                <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{art.get('qa_score', '採点中')}</div>
+                <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B;'>{clean_txt(art.get('qa_score', '採点中'))}</div>
             </div>
             """, unsafe_allow_html=True)
 
-        # 5大SNS広告文査読
+        # 5大SNS広告文
         st.markdown(f"""
         <div class='review-paper-white' style='border-left: 6px solid #2563EB !important;'>
             <h4 style='color: #1D4ED8 !important; margin-top:0;'>📢 {'5大SNS告知文（佐々木 翼 作成）' if lang=='ja' else 'Multi-SNS Promotional Copy (Tsubasa Sasaki)'}</h4>
-            <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #CBD5E1;'>{art.get('marketing', '')}</div>
+            <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #CBD5E1;'>{clean_txt(art.get('marketing', ''))}</div>
         </div>
         """, unsafe_allow_html=True)
 
-        # 本文原稿査読
-        content = art.get("content", "")
+        # 本文原稿（**完全排除、クリーンプレビュー）
+        clean_content = clean_txt(art.get("content", ""))
         paywall_badge_html = f"<div style='background-color: #FEF3C7; border: 2px dashed #F59E0B; border-radius: 8px; padding: 12px; margin: 16px 0; color: #92400E; font-weight: 800; text-align: center;'>{t('qa_paywall_badge', lang)}</div>"
         
-        if "🔒 ここから先は有料エリアです" in content or "🔒 [Paywall] Premium Section Starts Here" in content:
-            delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in content else "🔒 [Paywall] Premium Section Starts Here"
-            parts = content.split(delimiter)
+        if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
+            delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
+            parts = clean_content.split(delimiter)
             body_render = f"<div>{parts[0]}</div>{paywall_badge_html}<div>{parts[1]}</div>"
         else:
-            body_render = f"<div>{content}</div>"
+            body_render = f"<div>{clean_content}</div>"
 
         st.markdown(f"""
         <div class='review-paper-white' style='border-left: 6px solid #10B981 !important;'>
-            <h3 style='color: #047857 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 {'note完成原稿プレビュー（査読エリア）' if lang=='ja' else 'note Manuscript Preview (Editorial Review)'}</h3>
+            <h3 style='color: #047857 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 {'note完成原稿プレビュー' if lang=='ja' else 'note Manuscript Preview'}</h3>
             <div style='font-size: 1rem; color: #0F172A; margin-top: 14px; white-space: pre-wrap;'>{body_render}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1241,8 +1249,8 @@ elif page_id == "qa":
         st.markdown(f"##### {t('qa_history_title', lang)}")
         history = art.get("status_history", [])
         for h in reversed(history):
-            note_str = f" - <em>{h.get('note')}</em>" if h.get('note') else ""
-            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({h.get('actor', '')}){note_str}", unsafe_allow_html=True)
+            note_str = f" - <em>{clean_txt(h.get('note'))}</em>" if h.get('note') else ""
+            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({clean_txt(h.get('actor', ''))}){note_str}", unsafe_allow_html=True)
         
         st.divider()
 
@@ -1253,7 +1261,7 @@ elif page_id == "qa":
             st.code("🔒 LOCKED: Awaiting Owner Final Approval (承認ボタンを押すとロックが解除されます)", language="text")
         else:
             st.success("✅ 【ロック解除済】以下のマークダウンをnoteの記事エディタにそのまま貼り付けて公開できます！")
-            st.text_area("Markdown Source (note editor ready)", value=art.get("content", ""), height=300, key="qa_md_source_main")
+            st.text_area("Markdown Source (note editor ready)", value=clean_content, height=300, key="qa_md_source_main")
 
 # ==========================================
 # 7. 🤝 Human Resources Division
@@ -1311,16 +1319,16 @@ elif page_id == "legal":
         st.markdown(f"""
         <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
             <div style='display: flex; justify-content: space-between;'>
-                <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']} (ID: {inv['id']})</strong>
+                <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {clean_txt(inv['category'])} (ID: {inv['id']})</strong>
                 <span>{inv['status']}</span>
             </div>
             <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
                 🕒 {'受付' if lang=='ja' else 'Received'}: {inv['received_at']} | {'調査開始' if lang=='ja' else 'Review Started'}: {inv['started_at']} | {'完了' if lang=='ja' else 'Completed'}: {inv['completed_at']}
             </div>
-            <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>{'相談元:' if lang=='ja' else 'Originating Unit:'}</strong> {inv['requester_dept']}</div>
-            <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>{'受付内容:' if lang=='ja' else 'Inquiry Summary:'}</strong> {inv['inquiry_content']}</div>
+            <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>{'相談元:' if lang=='ja' else 'Originating Unit:'}</strong> {clean_txt(inv['requester_dept'])}</div>
+            <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>{'受付内容:' if lang=='ja' else 'Inquiry Summary:'}</strong> {clean_txt(inv['inquiry_content'])}</div>
             <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
-                <strong style='color: #38BDF8;'>⚖️ {'橘 律 法的見解:' if lang=='ja' else 'Formal Legal Opinion:'}</strong> {inv['legal_opinion']}
+                <strong style='color: #38BDF8;'>⚖️ {'橘 律 法的見解:' if lang=='ja' else 'Formal Legal Opinion:'}</strong> {clean_txt(inv['legal_opinion'])}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1429,15 +1437,15 @@ elif page_id == "helpdesk":
             st.markdown(f"""
             <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
                 <div style='display: flex; justify-content: space-between;'>
-                    <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {err['module']} (ID: {err['id']})</strong>
+                    <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {clean_txt(err['module'])} (ID: {err['id']})</strong>
                     <span>{err['status']}</span>
                 </div>
                 <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 {'発生日時' if lang=='ja' else 'Occurred'}: {err['occurred_at']}</div>
                 <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
-                    {err['error_message']}
+                    {clean_txt(err['error_message'])}
                 </div>
-                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {err['root_cause']}</div>
-                <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {err['solution']}</div>
+                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {clean_txt(err['root_cause'])}</div>
+                <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {clean_txt(err['solution'])}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1460,7 +1468,7 @@ elif page_id == "profiles":
                 st.markdown(f"**{'スキル:' if lang=='ja' else 'Core Competencies:'}** {', '.join(emp['skills'])}")
             with col_e2:
                 st.markdown(f"**{'システムプロンプト (prompt.txt):' if lang=='ja' else 'System Prompt (prompt.txt):'}**")
-                st.code(emp['prompt'], language="text")
+                st.code(clean_txt(emp['prompt']), language="text")
 
 # ==========================================
 # 13. ☁️ 24/7 Free Cloud Setup Guide

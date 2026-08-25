@@ -3,6 +3,12 @@ import json
 import time
 from datetime import datetime
 
+def clean_article_text(text: str) -> str:
+    """Removes double asterisks (**) completely so raw bold syntax never appears on articles."""
+    if not text:
+        return ""
+    return text.replace("**", "")
+
 class NoteOneWorkflow:
     def __init__(self, ai_client):
         self.ai_client = ai_client
@@ -18,7 +24,9 @@ class NoteOneWorkflow:
         self.employees = {emp["id"]: emp for emp in self.company_info["employees"]}
 
     def get_prompt(self, emp_id):
-        return self.employees.get(emp_id, {}).get("prompt", "")
+        prompt = self.employees.get(emp_id, {}).get("prompt", "")
+        # Enforce clean writing rule without double asterisks
+        return prompt + "\n【重要執筆規程】強調に太字のアスタリスク『**』は絶対に使用しないでください。カギ括弧『』や「」または見出し構造を用いて読みやすく執筆してください。"
 
     def run_creation_pipeline(self, topic: str, target_audience: str = "", price_preference: str = "auto"):
         """
@@ -161,16 +169,16 @@ class NoteOneWorkflow:
         art_id = f"art_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         article_data = {
             "id": art_id,
-            "title": title,
+            "title": clean_article_text(title),
             "topic": topic,
             "price": price,
             "target_audience": target_audience,
-            "content": res_article,
-            "research": res_analysis,
-            "outline": res_outline,
-            "legal_check": res_legal,
-            "qa_score": res_qa,
-            "marketing": res_marketing,
+            "content": clean_article_text(res_article),
+            "research": clean_article_text(res_analysis),
+            "outline": clean_article_text(res_outline),
+            "legal_check": clean_article_text(res_legal),
+            "qa_score": clean_article_text(res_qa),
+            "marketing": clean_article_text(res_marketing),
             "status": "Pending Owner Approval",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "status_history": [
@@ -202,7 +210,11 @@ class NoteOneWorkflow:
             if f.endswith(".json"):
                 try:
                     with open(os.path.join(self.articles_dir, f), "r", encoding="utf-8") as fp:
-                        articles.append(json.load(fp))
+                        data = json.load(fp)
+                        for k in ["content", "marketing", "legal_check", "qa_score", "title"]:
+                            if k in data and isinstance(data[k], str):
+                                data[k] = clean_article_text(data[k])
+                        articles.append(data)
                 except Exception:
                     pass
         return articles
@@ -211,7 +223,11 @@ class NoteOneWorkflow:
         file_path = os.path.join(self.articles_dir, f"{article_id}.json")
         if os.path.exists(file_path):
             with open(file_path, "r", encoding="utf-8") as fp:
-                return json.load(fp)
+                data = json.load(fp)
+                for k in ["content", "marketing", "legal_check", "qa_score", "title"]:
+                    if k in data and isinstance(data[k], str):
+                        data[k] = clean_article_text(data[k])
+                return data
         return None
 
     def approve_article(self, article_id: str, approver_name: str = "Owner (オーナー)"):
