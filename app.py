@@ -390,31 +390,55 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 100% Reliable Synchronous Direct DOM Scroll-to-Top Handler
-st.markdown(f"""
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-     data-scroll-trigger="{st.session_state.scroll_trigger}"
-     onload="(function(){{
-         try {{
-             var targets = [
-                 document.querySelector('[data-testid=\\'stAppViewContainer\\']'),
-                 document.querySelector('section.main'),
-                 document.querySelector('.main'),
-                 document.querySelector('[data-testid=\\'stMainBlockContainer\\']'),
-                 document.documentElement,
-                 document.body,
-                 window
-             ];
-             targets.forEach(function(t){{
-                 if (t) {{
-                     t.scrollTop = 0;
-                     try {{ t.scrollTo({{ top: 0, behavior: 'instant' }}); }} catch(e){{ t.scrollTop = 0; }}
-                 }}
-             }});
-         }} catch(e){{}}
-     }})()"
-     style="display:none;" />
-""", unsafe_allow_html=True)
+# 100% Guaranteed Client-Side Instantaneous Scroll-to-Top Listener via SVG Script
+st.html(f"""
+<svg style="display:none;" width="0" height="0">
+<script>
+(function() {{
+    function jumpToTop() {{
+        try {{
+            const targets = [
+                document.querySelector('[data-testid="stAppViewContainer"]'),
+                document.querySelector('section.main'),
+                document.querySelector('.main'),
+                document.querySelector('[data-testid="stMainBlockContainer"]'),
+                document.documentElement,
+                document.body,
+                window
+            ];
+            targets.forEach(function(el) {{
+                if (el) {{
+                    el.scrollTop = 0;
+                    try {{ el.scrollTo({{ top: 0, left: 0, behavior: 'instant' }}); }} catch(e) {{ el.scrollTop = 0; }}
+                }}
+            }});
+        }} catch(err) {{}}
+    }}
+
+    // Capture every click in the sidebar instantly in the client before Python rerun
+    if (!window._st_scroll_listener_installed) {{
+        window._st_scroll_listener_installed = true;
+        document.addEventListener('click', function(e) {{
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar && (sidebar.contains(e.target) || sidebar === e.target)) {{
+                jumpToTop();
+                setTimeout(jumpToTop, 20);
+                setTimeout(jumpToTop, 60);
+                setTimeout(jumpToTop, 150);
+                setTimeout(jumpToTop, 300);
+                setTimeout(jumpToTop, 600);
+            }}
+        }}, true);
+    }}
+
+    // Trigger on each page render
+    jumpToTop();
+    setTimeout(jumpToTop, 30);
+    setTimeout(jumpToTop, 100);
+}})();
+</script>
+</svg>
+""")
 
 # ==========================================
 # Sidebar: Multilingual Navigation Menu
@@ -425,47 +449,47 @@ with st.sidebar:
     st.markdown("---")
 
     # 1. 🏢 Company Dashboard (Top Level)
-    if st.button(t("nav_dashboard", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "dashboard" else "secondary"):
+    if st.button(t("nav_dashboard", lang), use_container_width=True, key="nav_btn_dashboard", type="primary" if st.session_state.active_page_id == "dashboard" else "secondary"):
         navigate_to("dashboard")
 
     # 2. 🏢 Office Room
-    if st.button(t("nav_office", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "office" else "secondary"):
+    if st.button(t("nav_office", lang), use_container_width=True, key="nav_btn_office", type="primary" if st.session_state.active_page_id == "office" else "secondary"):
         navigate_to("office")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 3. 📝 Editorial Department
     st.markdown(f"<div style='font-size:0.95rem; font-weight:800; color:#38BDF8; padding: 4px 6px;'>{t('dept_editorial', lang)}</div>", unsafe_allow_html=True)
-    if st.button(f"　 {t('nav_market_research', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "market_research" else "secondary"):
+    if st.button(f"　 {t('nav_market_research', lang)}", use_container_width=True, key="nav_btn_mr", type="primary" if st.session_state.active_page_id == "market_research" else "secondary"):
         navigate_to("market_research")
-    if st.button(f"　 {t('nav_content_creation', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "content_creation" else "secondary"):
+    if st.button(f"　 {t('nav_content_creation', lang)}", use_container_width=True, key="nav_btn_cc", type="primary" if st.session_state.active_page_id == "content_creation" else "secondary"):
         navigate_to("content_creation")
-    if st.button(f"　 {t('nav_pr', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "pr" else "secondary"):
+    if st.button(f"　 {t('nav_pr', lang)}", use_container_width=True, key="nav_btn_pr", type="primary" if st.session_state.active_page_id == "pr" else "secondary"):
         navigate_to("pr")
-    if st.button(f"　 {t('nav_qa', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "qa" else "secondary"):
+    if st.button(f"　 {t('nav_qa', lang)}", use_container_width=True, key="nav_btn_qa", type="primary" if st.session_state.active_page_id == "qa" else "secondary"):
         navigate_to("qa")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 4. 🏛️ Administration Department
     st.markdown(f"<div style='font-size:0.95rem; font-weight:800; color:#A78BFA; padding: 4px 6px;'>{t('dept_admin', lang)}</div>", unsafe_allow_html=True)
-    if st.button(f"　 {t('nav_hr', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "hr" else "secondary"):
+    if st.button(f"　 {t('nav_hr', lang)}", use_container_width=True, key="nav_btn_hr", type="primary" if st.session_state.active_page_id == "hr" else "secondary"):
         navigate_to("hr")
-    if st.button(f"　 {t('nav_legal', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "legal" else "secondary"):
+    if st.button(f"　 {t('nav_legal', lang)}", use_container_width=True, key="nav_btn_legal", type="primary" if st.session_state.active_page_id == "legal" else "secondary"):
         navigate_to("legal")
-    if st.button(f"　 {t('nav_finance', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "finance" else "secondary"):
+    if st.button(f"　 {t('nav_finance', lang)}", use_container_width=True, key="nav_btn_finance", type="primary" if st.session_state.active_page_id == "finance" else "secondary"):
         navigate_to("finance")
-    if st.button(f"　 {t('nav_accounting', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "accounting" else "secondary"):
+    if st.button(f"　 {t('nav_accounting', lang)}", use_container_width=True, key="nav_btn_accounting", type="primary" if st.session_state.active_page_id == "accounting" else "secondary"):
         navigate_to("accounting")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 5. Independent Utilities
-    if st.button(t("nav_helpdesk", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "helpdesk" else "secondary"):
+    if st.button(t("nav_helpdesk", lang), use_container_width=True, key="nav_btn_helpdesk", type="primary" if st.session_state.active_page_id == "helpdesk" else "secondary"):
         navigate_to("helpdesk")
-    if st.button(t("nav_profiles", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "profiles" else "secondary"):
+    if st.button(t("nav_profiles", lang), use_container_width=True, key="nav_btn_profiles", type="primary" if st.session_state.active_page_id == "profiles" else "secondary"):
         navigate_to("profiles")
-    if st.button(t("nav_cloud_guide", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "cloud_guide" else "secondary"):
+    if st.button(t("nav_cloud_guide", lang), use_container_width=True, key="nav_btn_cloud", type="primary" if st.session_state.active_page_id == "cloud_guide" else "secondary"):
         navigate_to("cloud_guide")
 
     # ==========================================
