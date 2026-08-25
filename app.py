@@ -390,55 +390,57 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 100% Guaranteed Client-Side Instantaneous Scroll-to-Top Listener via SVG Script
-st.html(f"""
-<svg style="display:none;" width="0" height="0">
+# 100% Guaranteed Scroll-to-Top Handler targeting the exact [data-testid="stMain"] container
+components.html(f"""
+<div id="scroll-anchor-{st.session_state.scroll_trigger}"></div>
 <script>
 (function() {{
-    function jumpToTop() {{
+    function scrollToTopNow() {{
         try {{
-            const targets = [
-                document.querySelector('[data-testid="stAppViewContainer"]'),
-                document.querySelector('section.main'),
-                document.querySelector('.main'),
-                document.querySelector('[data-testid="stMainBlockContainer"]'),
-                document.documentElement,
-                document.body,
-                window
-            ];
-            targets.forEach(function(el) {{
-                if (el) {{
-                    el.scrollTop = 0;
-                    try {{ el.scrollTo({{ top: 0, left: 0, behavior: 'instant' }}); }} catch(e) {{ el.scrollTop = 0; }}
-                }}
-            }});
-        }} catch(err) {{}}
-    }}
-
-    // Capture every click in the sidebar instantly in the client before Python rerun
-    if (!window._st_scroll_listener_installed) {{
-        window._st_scroll_listener_installed = true;
-        document.addEventListener('click', function(e) {{
-            const sidebar = document.querySelector('[data-testid="stSidebar"]');
-            if (sidebar && (sidebar.contains(e.target) || sidebar === e.target)) {{
-                jumpToTop();
-                setTimeout(jumpToTop, 20);
-                setTimeout(jumpToTop, 60);
-                setTimeout(jumpToTop, 150);
-                setTimeout(jumpToTop, 300);
-                setTimeout(jumpToTop, 600);
+            const pDoc = window.parent.document;
+            const mainContainer = pDoc.querySelector('[data-testid="stMain"]') ||
+                                  pDoc.querySelector('.stMain') ||
+                                  pDoc.querySelector('[data-testid="stAppViewContainer"]') ||
+                                  pDoc.querySelector('section.main');
+            if (mainContainer) {{
+                mainContainer.scrollTop = 0;
+                try {{ mainContainer.scrollTo({{ top: 0, left: 0, behavior: 'instant' }}); }} catch(e) {{ mainContainer.scrollTop = 0; }}
             }}
-        }}, true);
+            pDoc.documentElement.scrollTop = 0;
+            pDoc.body.scrollTop = 0;
+            window.parent.scrollTo(0, 0);
+        }} catch(e) {{}}
     }}
 
-    // Trigger on each page render
-    jumpToTop();
-    setTimeout(jumpToTop, 30);
-    setTimeout(jumpToTop, 100);
+    // 1. Install permanent click listener on parent document for all sidebar buttons
+    try {{
+        const pWin = window.parent;
+        const pDoc = pWin.document;
+        if (!pWin._st_sidebar_scroll_installed) {{
+            pWin._st_sidebar_scroll_installed = true;
+            pDoc.addEventListener('click', function(e) {{
+                const sidebar = pDoc.querySelector('[data-testid="stSidebar"]') ||
+                                pDoc.querySelector('section[data-testid="stSidebar"]');
+                if (sidebar && sidebar.contains(e.target)) {{
+                    scrollToTopNow();
+                    setTimeout(scrollToTopNow, 20);
+                    setTimeout(scrollToTopNow, 60);
+                    setTimeout(scrollToTopNow, 120);
+                    setTimeout(scrollToTopNow, 250);
+                    setTimeout(scrollToTopNow, 500);
+                }}
+            }}, true);
+        }}
+    }} catch(e) {{}}
+
+    // 2. Trigger on this frame mount
+    scrollToTopNow();
+    setTimeout(scrollToTopNow, 30);
+    setTimeout(scrollToTopNow, 100);
+    setTimeout(scrollToTopNow, 250);
 }})();
 </script>
-</svg>
-""")
+""", height=0)
 
 # ==========================================
 # Sidebar: Multilingual Navigation Menu
