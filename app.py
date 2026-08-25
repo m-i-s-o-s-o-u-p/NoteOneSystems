@@ -332,10 +332,10 @@ if page_id == "dashboard":
     if pending_topics or pending_articles:
         warn_msg = []
         if pending_topics:
-            warn_msg.append(f"🔍 調査トピック承認待ち: {len(pending_topics)} 件")
+            warn_msg.append(f"🔍 調査トピック承認待ち: {len(pending_topics)} 件" if lang=="ja" else f"🔍 Topics Awaiting Approval: {len(pending_topics)}")
         if pending_articles:
-            warn_msg.append(f"📄 記事・広告承認待ち: {len(pending_articles)} 件")
-        st.warning(f"🔔 **【オーナー決裁アラート】{' / '.join(warn_msg)}** ➔ 各部門で最終承認を行ってください。")
+            warn_msg.append(f"📄 記事・広告承認待ち: {len(pending_articles)} 件" if lang=="ja" else f"📄 Articles Awaiting Approval: {len(pending_articles)}")
+        st.warning(f"🔔 **【オーナー決裁アラート】{' / '.join(warn_msg)}** ➔ 「🏢 Office Room」または各部門で最終決裁を行ってください。")
 
     target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
     if os.path.exists(target_file):
@@ -405,7 +405,7 @@ if page_id == "dashboard":
                 st.warning("会社名を入力してください。" if lang == "ja" else "Please enter a valid company name.")
 
 # ==========================================
-# 2. 🏢 Office Room
+# 2. 🏢 Office Room (With Executive Approval Center)
 # ==========================================
 elif page_id == "office":
     st.markdown(f"<div class='main-header'>{t('office_main_header', lang)}</div>", unsafe_allow_html=True)
@@ -418,6 +418,159 @@ elif page_id == "office":
         with open(html_path, "r", encoding="utf-8") as f:
             game_html = f.read()
         components.html(game_html, height=545)
+
+    # -------------------------------------------------------------
+    # 👑 Executive Approval Center (Integrated in Office Room)
+    # -------------------------------------------------------------
+    st.markdown("---")
+    st.markdown(f"<div class='section-title'>{t('qa_approval_header', lang)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('qa_approval_sub', lang)}</div>", unsafe_allow_html=True)
+
+    tab_art_app, tab_topic_app = st.tabs([
+        "📄 記事・広告 最終決裁 (Article & Ad Approvals)" if lang == "ja" else "📄 Article & Ad Approvals",
+        "🔍 調査トピック 企画決裁 (Research Topic Approvals)" if lang == "ja" else "🔍 Research Topic Approvals"
+    ])
+
+    # --- 1. Article & Ad Approval Tab ---
+    with tab_art_app:
+        articles = workflow.list_articles()
+        if not articles:
+            st.info(t("qa_no_articles", lang))
+        else:
+            article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
+            selected_idx = st.selectbox(f"{t('qa_select_label', lang)} (Office)", range(len(articles)), format_func=lambda x: article_titles[x], key="office_art_select")
+            art = articles[selected_idx]
+            cur_status = art.get("status", "Pending Owner Approval")
+            is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
+
+            if is_locked:
+                st.markdown(f"""
+                <div class='approval-box-locked'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
+                        <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
+                    </div>
+                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                        {t('qa_locked_warning', lang)}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class='approval-box-approved'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {cur_status}</h3>
+                        <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'承認済み' if lang=='ja' else 'Approved'}</span>
+                    </div>
+                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                        {t('qa_unlocked_success', lang)}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            col_o_ap1, col_o_ap2, col_o_ap3 = st.columns([2, 2, 1])
+            with col_o_ap1:
+                if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True, key="off_btn_app_art"):
+                    workflow.approve_article(art["id"])
+                    st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
+                    st.rerun()
+            with col_o_ap2:
+                with st.popover(t("qa_btn_revision", lang), use_container_width=True):
+                    st.markdown(f"#### {t('qa_btn_revision', lang)}")
+                    fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
+                    if st.button("📨 送信", type="primary", key="off_submit_rev_art"):
+                        if fb_txt.strip():
+                            workflow.request_revision(art["id"], fb_txt)
+                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            st.rerun()
+                        else:
+                            st.error("修正指示内容を入力してください。")
+            with col_o_ap3:
+                if st.button(t("qa_btn_reject", lang), use_container_width=True, key="off_btn_rej_art"):
+                    workflow.reject_article(art["id"])
+                    st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
+                    st.rerun()
+
+            with st.expander("📄 記事本文・法務判定・QAスコア・SNS告知文の詳細プレビュー" if lang == "ja" else "📄 Full Article Preview, Legal Review, QA Score & SNS Copy"):
+                col_chk1, col_chk2 = st.columns(2)
+                with col_chk1:
+                    st.markdown("#### ⚖️ 法務課 スクリーニング審査 (橘 律)")
+                    st.markdown(f"<div style='background-color:#0F172A; border:1px solid #334155; border-left:4px solid #38BDF8; border-radius:8px; padding:12px; color:#F8FAFC;'>{art.get('legal_check', '審査中')}</div>", unsafe_allow_html=True)
+                with col_chk2:
+                    st.markdown("#### 🛡️ 品質管理課 100点採点スコア (神崎 玲奈)")
+                    st.markdown(f"<div style='background-color:#0F172A; border:1px solid #334155; border-left:4px solid #F59E0B; border-radius:8px; padding:12px; color:#F8FAFC;'>{art.get('qa_score', '採点中')}</div>", unsafe_allow_html=True)
+                st.markdown("#### 📢 5大SNS告知文 (佐々木 翼)")
+                st.text_area("SNS Promotion Copy", value=art.get("marketing", ""), height=150, disabled=is_locked, key="off_sns_copy")
+                st.markdown("#### 📋 記事本文プレビュー")
+                st.markdown(art.get("content", ""))
+
+    # --- 2. Market Research Topic Approval Tab ---
+    with tab_topic_app:
+        topics = market_manager.list_topics()
+        if not topics:
+            st.info("調査トピックがありません。" if lang=="ja" else "No research topics available.")
+        else:
+            topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {tp.get('category', '')} | {tp.get('title', '')}" for tp in topics]
+            sel_tp_idx = st.selectbox(f"{t('mr_select_topic_label', lang)} (Office)", range(len(topics)), format_func=lambda x: topic_titles[x], key="office_tp_select")
+            tp = topics[sel_tp_idx]
+            tp_status = tp.get("status", "Pending Owner Approval")
+            tp_locked = tp_status in ["Pending Owner Approval", "Revision Requested"]
+
+            if tp_locked:
+                st.markdown(f"""
+                <div class='approval-box-locked'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {tp_status}</h3>
+                        <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認待ち' if lang=='ja' else 'Pending'}</span>
+                    </div>
+                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                        {t('mr_topic_locked_warning', lang)}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class='approval-box-approved'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {tp_status}</h3>
+                        <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'企画承認済み' if lang=='ja' else 'Approved'}</span>
+                    </div>
+                    <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                        {t('mr_topic_unlocked_success', lang)}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            col_o_tp1, col_o_tp2, col_o_tp3 = st.columns([2, 2, 1])
+            with col_o_tp1:
+                if st.button(t("mr_btn_approve_topic", lang), type="primary", use_container_width=True, key="off_btn_app_tp"):
+                    market_manager.approve_topic(tp["id"])
+                    st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
+                    st.rerun()
+            with col_o_tp2:
+                with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
+                    st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
+                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
+                    if st.button("📨 送信", type="primary", key="off_submit_rev_tp"):
+                        if rev_fb.strip():
+                            market_manager.request_revision(tp["id"], rev_fb)
+                            st.warning("風間アナリストに再調査指示を伝達しました。")
+                            st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
+            with col_o_tp3:
+                if st.button(t("mr_btn_reject_topic", lang), use_container_width=True, key="off_btn_rej_tp"):
+                    market_manager.reject_topic(tp["id"])
+                    st.info("トピックを却下しました。")
+                    st.rerun()
+
+            if not tp_locked:
+                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+                if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True, key="off_send_tp_cc"):
+                    st.session_state.prefill_topic = tp.get("title", "")
+                    st.session_state.prefill_audience = tp.get("target_audience", "")
+                    st.session_state.active_page_id = "content_creation"
+                    st.rerun()
 
     # -------------------------------------------------------------
     # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
@@ -838,7 +991,7 @@ elif page_id == "content_creation":
                 # Clear prefill
                 st.session_state.prefill_topic = ""
                 st.session_state.prefill_audience = ""
-                st.success(f"🎉 記事『{completed_article['title']}』が作成されました！「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{completed_article['title']}' created! Please review and approve in '✨ {t('nav_qa', lang)}'.")
+                st.success(f"🎉 記事『{completed_article['title']}』が作成されました！「🏢 {t('nav_office', lang)}」または「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{completed_article['title']}' created! Please review and approve in '🏢 {t('nav_office', lang)}' or '✨ {t('nav_qa', lang)}'.")
 
 # ==========================================
 # 5. 📢 Public Relations Division
@@ -904,7 +1057,7 @@ elif page_id == "qa":
             <div class='approval-box-locked'>
                 <div style='display: flex; justify-content: space-between; align-items: center;'>
                     <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
-                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>決裁待ち</span>
+                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
                 </div>
                 <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
                     {t('qa_locked_warning', lang)}
@@ -916,7 +1069,7 @@ elif page_id == "qa":
             <div class='approval-box-approved'>
                 <div style='display: flex; justify-content: space-between; align-items: center;'>
                     <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {cur_status}</h3>
-                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>承認済み</span>
+                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'承認済み' if lang=='ja' else 'Approved'}</span>
                 </div>
                 <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
                     {t('qa_unlocked_success', lang)}
@@ -927,7 +1080,7 @@ elif page_id == "qa":
         # 👑 オーナー決裁アクションパネル
         app_col1, app_col2, app_col3 = st.columns([2, 2, 1])
         with app_col1:
-            if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True):
+            if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True, key="qa_btn_app_main"):
                 workflow.approve_article(art["id"])
                 st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
                 st.rerun()
@@ -935,8 +1088,8 @@ elif page_id == "qa":
         with app_col2:
             with st.popover(t("qa_btn_revision", lang), use_container_width=True):
                 st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang))
-                if st.button("📨 修正指示を送信する", type="primary"):
+                feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
+                if st.button("📨 修正指示を送信する", type="primary", key="qa_submit_rev_main"):
                     if feedback_txt.strip():
                         workflow.request_revision(art["id"], feedback_txt)
                         st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
@@ -945,7 +1098,7 @@ elif page_id == "qa":
                         st.error("修正指示内容を入力してください。")
 
         with app_col3:
-            if st.button(t("qa_btn_reject", lang), use_container_width=True):
+            if st.button(t("qa_btn_reject", lang), use_container_width=True, key="qa_btn_rej_main"):
                 workflow.reject_article(art["id"])
                 st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
                 st.rerun()
@@ -1002,7 +1155,7 @@ elif page_id == "qa":
         st.markdown(f"#### {t('qa_sns_copy_title', lang)}")
         if is_locked:
             st.info("🔒 【保護中】オーナー最終承認が完了すると、ここからSNSへの直接投稿が可能になります。")
-        st.text_area("Social Promotion Copy", value=art.get("marketing", ""), height=200, disabled=is_locked)
+        st.text_area("Social Promotion Copy", value=art.get("marketing", ""), height=200, disabled=is_locked, key="qa_sns_copy_main")
         
         # マークダウン全文
         st.markdown(f"#### {t('qa_markdown_title', lang)}")
@@ -1011,7 +1164,7 @@ elif page_id == "qa":
             st.code("🔒 LOCKED: Awaiting Owner Final Approval (承認ボタンを押すとロックが解除されます)", language="text")
         else:
             st.success("✅ 【ロック解除済】以下のマークダウンをnoteの記事エディタにそのまま貼り付けて公開できます！")
-            st.text_area("Markdown Source (note editor ready)", value=art.get("content", ""), height=300)
+            st.text_area("Markdown Source (note editor ready)", value=art.get("content", ""), height=300, key="qa_md_source_main")
 
 # ==========================================
 # 7. 🤝 Human Resources Division
@@ -1251,7 +1404,7 @@ elif page_id == "cloud_guide":
         ### 🎯 3 Steps to Deploy 100% Free on Cloud
         
         #### 1️⃣ Step 1: Push Code to GitHub (Free)
-        1. Visit [GitHub](https://github.com/)指示
+        1. Visit [GitHub](https://github.com/)
         2. Upload the files in this workspace (`ai_holdings_platform`).
 
         #### 2️⃣ Step 2: Connect to Streamlit Community Cloud (Free)
