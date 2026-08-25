@@ -73,6 +73,16 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
 
     sns_raw = clean_txt(art.get("marketing", ""))
     sns_blocks = []
+    
+    # Platform badge color styling map
+    badge_styles = {
+        "X": ("#0F1419", "#FFFFFF", "🐦"),
+        "Instagram": ("#E1306C", "#FFFFFF", "📸"),
+        "Threads": ("#000000", "#FFFFFF", "🧵"),
+        "Bluesky": ("#0284C7", "#FFFFFF", "🦋"),
+        "Mastodon": ("#6364FF", "#FFFFFF", "🐘")
+    }
+
     for sec in sns_raw.split("【"):
         if not sec.strip():
             continue
@@ -80,10 +90,20 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
         lines = sec_str.split("\n", 1)
         s_title = lines[0].strip()
         s_body = lines[1].strip() if len(lines) > 1 else ""
+        
+        # Determine badge color
+        bg_col, txt_col, icon = ("#1E293B", "#FFFFFF", "📢")
+        for k, v in badge_styles.items():
+            if k.lower() in s_title.lower():
+                bg_col, txt_col, icon = v
+                break
+
         sns_blocks.append(f"""
-        <div style="margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #E2E8F0;">
-            <div style="font-weight: 800; color: #1D4ED8; font-size: 0.95rem; margin-bottom: 6px;">{s_title}</div>
-            <div style="color: #1E293B; font-size: 0.92rem; line-height: 1.7; white-space: pre-wrap;">{s_body}</div>
+        <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                <span style="background: {bg_col}; color: {txt_col}; font-weight: 800; font-size: 0.8rem; padding: 3px 10px; border-radius: 4px; margin-right: 8px;">{icon} {s_title}</span>
+            </div>
+            <div style="color: #1E293B; font-size: 0.92rem; line-height: 1.75; white-space: pre-wrap;">{s_body}</div>
         </div>
         """)
     sns_html = "".join(sns_blocks)
