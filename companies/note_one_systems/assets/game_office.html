@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <style>
@@ -45,7 +45,7 @@
     letter-spacing: 0.5px;
   }
 
-  /* ゾーンレイアウト */
+  /* Zone Layout */
   .zone-ceo       { top: 20px; left: 20px; width: 220px; height: 180px; border-color: rgba(234, 179, 8, 0.4); }
   .zone-admin     { top: 220px; left: 20px; width: 260px; height: 270px; border-color: rgba(99, 102, 241, 0.4); }
   .zone-center    { top: 20px; left: 260px; width: 340px; height: 180px; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.03); }
@@ -91,7 +91,7 @@
     font-weight: 700;
   }
 
-  /* 二等身キャラクター */
+  /* Chibi Avatars */
   .chibi-avatar {
     position: absolute;
     width: 54px;
@@ -167,7 +167,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
 
-  /* 最前面表示・見切れ防止の吹き出し (Z-Index 9999) */
+  /* Highest Z-Index Speech Bubble */
   .speech-bubble {
     position: absolute;
     bottom: 78px;
@@ -203,7 +203,7 @@
     transform: translateY(0) scale(1);
   }
 
-  /* キャラクター位置 */
+  /* Employee Coordinates */
   #emp-ichijo   { top: 75px; left: 100px; }
   #emp-tachibana{ top: 270px; left: 50px; }
   #emp-ayase    { top: 385px; left: 50px; }
@@ -227,7 +227,7 @@
     100% { transform: translate(0, 0); }
   }
 
-  /* HUD（文字削除・バッジのみに最適化） */
+  /* HUD */
   .office-hud {
     position: absolute;
     top: 12px;
@@ -259,22 +259,22 @@
 <div class="office-game-container">
   <div class="floor-grid"></div>
 
-  <!-- HUD: ご指示通り「出社: 9/9名」のみ表示 -->
+  <!-- HUD: Live in Office: 9/9 -->
   <div class="office-hud">
     <div class="hud-live-dot"></div>
-    <span>出社: 9/9名</span>
+    <span>Live in Office: 9/9</span>
   </div>
 
   <!-- 1. CEO Zone -->
   <div class="room-zone zone-ceo">
-    <span class="zone-label">👑 CEO Suite</span>
+    <span class="zone-label">👑 Executive Suite</span>
     <div class="desk" style="top:55px; left:50px; width:80px; height:45px;"></div>
     <div class="pc-screen" style="top:67px; left:80px;"></div>
   </div>
 
-  <!-- 2. 管理部 Zone -->
+  <!-- 2. Administration Zone -->
   <div class="room-zone zone-admin">
-    <span class="zone-label">🏛️ 管理部</span>
+    <span class="zone-label">🏛️ Administration</span>
     <div class="desk" style="top:45px; left:20px; width:70px; height:40px;"></div>
     <div class="pc-screen" style="top:55px; left:45px;"></div>
 
@@ -287,22 +287,22 @@
 
   <!-- 3. Central Strategy Zone -->
   <div class="room-zone zone-center">
-    <span class="zone-label">🗣️ Central Glass Room</span>
+    <span class="zone-label">🗣️ Strategy Glass Room</span>
     <div class="meeting-table">
-      <span style="font-size:12px; color:#FFFFFF;">💡 戦略ミーティングテーブル</span>
+      <span style="font-size:12px; color:#FFFFFF;">💡 Central Strategy Table</span>
     </div>
   </div>
 
-  <!-- 4. 広報課 Zone -->
+  <!-- 4. Public Relations Zone -->
   <div class="room-zone zone-pr-mkt">
-    <span class="zone-label">📢 広報課</span>
+    <span class="zone-label">📢 Public Relations</span>
     <div class="desk" style="top:55px; left:60px; width:80px; height:45px;"></div>
     <div class="pc-screen" style="top:67px; left:90px;"></div>
   </div>
 
-  <!-- 5. 編集部 Zone -->
+  <!-- 5. Editorial Zone -->
   <div class="room-zone zone-editorial">
-    <span class="zone-label">📝 編集部</span>
+    <span class="zone-label">📝 Editorial Dept</span>
     
     <div class="desk" style="top:45px; left:25px; width:80px; height:40px;"></div>
     <div class="pc-screen" style="top:55px; left:55px;"></div>
@@ -317,92 +317,92 @@
     <div class="pc-screen" style="top:165px; left:185px; background:#EF4444; box-shadow:0 0 10px #EF4444;"></div>
   </div>
 
-  <!-- 9名の二等身キャラクター -->
+  <!-- 9 Chibi Characters -->
   <div class="chibi-avatar walk-around" id="emp-ichijo" onclick="triggerSpeak('ichijo')">
-    <div class="speech-bubble" id="bubble-ichijo">読者満足度100%を目指します！</div>
+    <div class="speech-bubble" id="bubble-ichijo">Maximizing global revenue & enterprise value.</div>
     <div class="chibi-head" style="background:#1E3A8A; border-color:#93C5FD;">👩‍💼</div>
     <div class="chibi-body" style="background:#1E3A8A;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">一条 (CEO)</div>
+    <div class="avatar-name">Ichijo (CEO)</div>
   </div>
 
   <div class="chibi-avatar" id="emp-tachibana" onclick="triggerSpeak('tachibana')">
-    <div class="speech-bubble" id="bubble-tachibana">法的調査台帳を確認、適法です！</div>
+    <div class="speech-bubble" id="bubble-tachibana">Legal inquiry ledger verified: Fully compliant.</div>
     <div class="chibi-head" style="background:#334155; border-color:#94A3B8;">⚖️</div>
     <div class="chibi-body" style="background:#334155;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">橘 (法務課)</div>
+    <div class="avatar-name">Tachibana (Legal)</div>
   </div>
 
   <div class="chibi-avatar walk-around" id="emp-ayase" onclick="triggerSpeak('ayase')">
-    <div class="speech-bubble" id="bubble-ayase">組織負荷スコア監視中。健全です✨</div>
+    <div class="speech-bubble" id="bubble-ayase">Monitoring workload metrics: Healthy distribution ✨</div>
     <div class="chibi-head" style="background:#059669; border-color:#6EE7B7;">🤝</div>
     <div class="chibi-body" style="background:#059669;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">綾瀬 (人事課)</div>
+    <div class="avatar-name">Ayase (HR)</div>
   </div>
 
   <div class="chibi-avatar" id="emp-shiraishi" onclick="triggerSpeak('shiraishi')">
-    <div class="speech-bubble" id="bubble-shiraishi">月間維持費0円（完全無料）確認済💰</div>
+    <div class="speech-bubble" id="bubble-shiraishi">Monthly fixed costs verified at ¥0 (Zero Cost) 💰</div>
     <div class="chibi-head" style="background:#7C3AED; border-color:#C4B5FD;">📊</div>
     <div class="chibi-body" style="background:#7C3AED;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">白石 (財務・経理)</div>
+    <div class="avatar-name">Shiraishi (Finance)</div>
   </div>
 
   <div class="chibi-avatar" id="emp-kazama" onclick="triggerSpeak('kazama')">
-    <div class="speech-bubble" id="bubble-kazama">note売れ筋トレンドを分析中…🔍</div>
+    <div class="speech-bubble" id="bubble-kazama">Analyzing top trending topics on note... 🔍</div>
     <div class="chibi-head" style="background:#0D9488; border-color:#5EEAD4;">🔍</div>
     <div class="chibi-body" style="background:#0D9488;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">風間 (市場調査)</div>
+    <div class="avatar-name">Kazama (Research)</div>
   </div>
 
   <div class="chibi-avatar walk-around" id="emp-yuki" onclick="triggerSpeak('yuki')">
-    <div class="speech-bubble" id="bubble-yuki">無料/有料ラインの黄金比率を設計中！</div>
+    <div class="speech-bubble" id="bubble-yuki">Designing optimal paywall conversion ratio!</div>
     <div class="chibi-head" style="background:#D97706; border-color:#FCD34D;">📑</div>
     <div class="chibi-body" style="background:#D97706;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">結城 (編集長)</div>
+    <div class="avatar-name">Yuki (Editor)</div>
   </div>
 
   <div class="chibi-avatar" id="emp-morikawa" onclick="triggerSpeak('morikawa')">
-    <div class="speech-bubble" id="bubble-morikawa">実践テンプレを超高速タイピング中…！</div>
+    <div class="speech-bubble" id="bubble-morikawa">Drafting actionable copy-and-paste templates ⚡</div>
     <div class="chibi-head" style="background:#EA580C; border-color:#FDBA74;">✍️</div>
     <div class="chibi-body" style="background:#EA580C;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">森川 (ライター)</div>
+    <div class="avatar-name">Morikawa (Writer)</div>
   </div>
 
   <div class="chibi-avatar" id="emp-kanzaki" onclick="triggerSpeak('kanzaki')">
-    <div class="speech-bubble" id="bubble-kanzaki">ファクトチェック95点！合格認定🛡️</div>
+    <div class="speech-bubble" id="bubble-kanzaki">Fact-check score: 95/100! Quality Certified 🛡️</div>
     <div class="chibi-head" style="background:#DC2626; border-color:#FCA5A5;">🛡️</div>
     <div class="chibi-body" style="background:#DC2626;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">神崎 (品質管理)</div>
+    <div class="avatar-name">Kanzaki (QA)</div>
   </div>
 
   <div class="chibi-avatar walk-around" id="emp-sasaki" onclick="triggerSpeak('sasaki')">
-    <div class="speech-bubble" id="bubble-sasaki">X・Threads・Blueskyに同時発信中📢</div>
+    <div class="speech-bubble" id="bubble-sasaki">Multi-syndicating across X, Threads & Bluesky 📢</div>
     <div class="chibi-head" style="background:#2563EB; border-color:#93C5FD;">📢</div>
     <div class="chibi-body" style="background:#2563EB;"></div>
     <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">佐々木 (広報課)</div>
+    <div class="avatar-name">Sasaki (PR)</div>
   </div>
 
 </div>
 
 <script>
   const speeches = {
-    ichijo: ["全社売上最大化に向けて指揮中！", "完全無料運用の鉄則を監督しています。", "読者満足度100%の記事だけを出します。"],
-    tachibana: ["法的調査台帳を確認、適法です！", "会社法第7条の遵守を徹底しています。", "著作権・景表法チェック完了！"],
-    ayase: ["社員の負荷スコア監視中。健全です✨", "就業規則Ver 0.9を運用中！", "ボトルネック発生時は増員提案します。"],
-    kazama: ["noteの最新売れ筋を市場調査中…🔍", "ターゲット読者の悩みを深掘り中！", "競合にない独自テーマを発掘しました。"],
-    yuki: ["無料/有料ラインの黄金比率を設計中！", "読者を惹きつける見出しを構成中。", "森川さん、この型で執筆お願いします！"],
-    morikawa: ["実践テンプレを超高速タイピング中…！", "コピペで使える雛形を執筆中⚡", "読者がすぐ行動できるステップを作成中！"],
-    kanzaki: ["記事ステータスを更新しました🛡️", "ファクトチェック95点！合格認定！", "誤字脱字なし、可読性も抜群です！"],
-    sasaki: ["X・Threads・Blueskyに同時発信中📢", "Instagramカルーセル案を作成完了！", "Mastodonに有益ノウハウを配信中✨"],
-    shiraishi: ["月間維持費0円（完全無料）確認済💰", "ワンコイン500円で売上最大化を試算！", "経理課の費用管理台帳も正常です📈"]
+    ichijo: ["Maximizing global revenue & enterprise value.", "Enforcing zero-cost operational discipline.", "Ensuring 100% subscriber satisfaction."],
+    tachibana: ["Legal inquiry ledger verified: Fully compliant.", "Ensuring strict corporate & copyright compliance.", "Platform terms & privacy check passed!"],
+    ayase: ["Monitoring workload metrics: Healthy distribution ✨", "Operating under Corporate Rulebook v0.9.", "Zero-cost staffing expansion ready if needed."],
+    kazama: ["Analyzing top trending topics on note... 🔍", "Identifying high-intent buyer personas.", "Targeting uncontested profitable niches!"],
+    yuki: ["Designing optimal paywall conversion ratio!", "Structuring high-impact compelling headlines.", "Morikawa-san, drafting with this proven framework!"],
+    morikawa: ["Drafting actionable copy-and-paste templates ⚡", "Writing high-speed practical workflows!", "Structuring clear, immediate step-by-step guides."],
+    kanzaki: ["Article status & audit trail updated 🛡️", "Fact-check score: 95/100! Quality Certified.", "Zero typos, high readability & logical flow!"],
+    sasaki: ["Multi-syndicating across X, Threads & Bluesky 📢", "Instagram carousel assets prepared!", "Broadcasting actionable insights on Mastodon ✨"],
+    shiraishi: ["Monthly fixed costs verified at ¥0 (Zero Cost) 💰", "Simulating revenue at 500 JPY unit price!", "Accounting ledger balanced and operating smoothly 📈"]
   };
 
   const employeeIds = Object.keys(speeches);
