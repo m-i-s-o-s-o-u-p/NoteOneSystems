@@ -95,6 +95,16 @@ if "prefill_topic" not in st.session_state:
 if "prefill_audience" not in st.session_state:
     st.session_state.prefill_audience = ""
 
+# Form toggle states for revision forms (auto-closes after submit)
+if "show_off_art_rev" not in st.session_state:
+    st.session_state.show_off_art_rev = False
+if "show_off_tp_rev" not in st.session_state:
+    st.session_state.show_off_tp_rev = False
+if "show_mr_tp_rev" not in st.session_state:
+    st.session_state.show_mr_tp_rev = False
+if "show_qa_art_rev" not in st.session_state:
+    st.session_state.show_qa_art_rev = False
+
 # Navigation Helper: changes page or resets scroll to top if already selected
 def navigate_to(target_id: str):
     st.session_state.active_page_id = target_id
@@ -283,64 +293,41 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# JavaScript Component to auto-scroll top on navigation click
-scroll_code = f"""
-<div id="scroll-trigger-{st.session_state.scroll_trigger}" style="display:none;"></div>
+# Top anchor element for scrolling
+st.markdown("<div id='top-of-page'></div>", unsafe_allow_html=True)
+
+# Robust auto-scroll top script running on every render/trigger
+components.html(f"""
+<div id="scroll-node-{st.session_state.scroll_trigger}"></div>
 <script>
     (function() {{
-        function doScrollTop() {{
+        function scrollMainTop() {{
             try {{
                 const pDoc = window.parent.document;
-                const appContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]');
-                const mainSection = pDoc.querySelector('section.main');
-                const mainBlock = pDoc.querySelector('[data-testid="stMainBlockContainer"]');
-                const stApp = pDoc.querySelector('.stApp');
-                
+                const topAnchor = pDoc.getElementById('top-of-page');
+                if (topAnchor) {{
+                    topAnchor.scrollIntoView({{ behavior: 'instant', block: 'start' }});
+                }}
+                const appContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]') ||
+                                     pDoc.querySelector('section.main') ||
+                                     pDoc.querySelector('.main') ||
+                                     pDoc.querySelector('.stApp');
                 if (appContainer) {{
                     appContainer.scrollTop = 0;
-                    try {{ appContainer.scrollTo({{ top: 0, behavior: 'instant' }}); }} catch(e) {{}}
-                }}
-                if (mainSection) {{
-                    mainSection.scrollTop = 0;
-                    try {{ mainSection.scrollTo({{ top: 0, behavior: 'instant' }}); }} catch(e) {{}}
-                }}
-                if (mainBlock) {{
-                    mainBlock.scrollTop = 0;
-                }}
-                if (stApp) {{
-                    stApp.scrollTop = 0;
                 }}
                 pDoc.documentElement.scrollTop = 0;
                 pDoc.body.scrollTop = 0;
                 window.parent.scrollTo(0, 0);
-            }} catch(e) {{
-                console.warn("Scroll to top:", e);
-            }}
+            }} catch(e) {{}}
         }}
 
-        // Run immediately and also on sequential ticks after DOM layout renders
-        doScrollTop();
-        setTimeout(doScrollTop, 50);
-        setTimeout(doScrollTop, 150);
-        setTimeout(doScrollTop, 300);
-
-        // Attach global click listener to all sidebar buttons so they trigger scroll top on click immediately
-        try {{
-            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-            if (sidebar && !sidebar.dataset.scrollBound) {{
-                sidebar.dataset.scrollBound = "true";
-                sidebar.addEventListener('click', function(e) {{
-                    const btn = e.target.closest('button');
-                    if (btn) {{
-                        doScrollTop();
-                    }}
-                }}, true);
-            }}
-        }} catch(e) {{}}
+        scrollMainTop();
+        setTimeout(scrollMainTop, 50);
+        setTimeout(scrollMainTop, 150);
+        setTimeout(scrollMainTop, 350);
     }})();
 </script>
-"""
-components.html(scroll_code, height=0)
+""", height=0)
 
 # ==========================================
 # Sidebar: Multilingual Navigation Menu
@@ -584,23 +571,36 @@ elif page_id == "office":
                 st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
                 st.rerun()
         with col_o_ap2:
-            with st.popover(t("qa_btn_revision", lang), use_container_width=True):
-                st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                with st.form("office_article_revision_form", clear_on_submit=True):
-                    fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
-                    submit_rev_art = st.form_submit_button("📨 送信", type="primary", use_container_width=True)
-                    if submit_rev_art:
-                        if fb_txt.strip():
-                            workflow.request_revision(art["id"], fb_txt)
-                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
-                            st.rerun()
-                        else:
-                            st.error("修正指示内容を入力してください。")
+            rev_label = "✍️ 修正指示を入力する" if not st.session_state.show_off_art_rev else "✖️ 修正指示欄を閉じる"
+            if st.button(rev_label, use_container_width=True, key="off_toggle_art_rev"):
+                st.session_state.show_off_art_rev = not st.session_state.show_off_art_rev
+                st.rerun()
         with col_o_ap3:
             if st.button(t("qa_btn_reject", lang), use_container_width=True, key="off_btn_rej_art"):
                 workflow.reject_article(art["id"])
                 st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
                 st.rerun()
+
+        # 修正指示入力フォーム（送信後に自動で閉じる）
+        if st.session_state.show_off_art_rev:
+            with st.container():
+                st.markdown(f"#### ✍️ {t('qa_btn_revision', lang)}")
+                with st.form("office_article_revision_form", clear_on_submit=True):
+                    fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
+                    col_f_sub1, col_f_sub2 = st.columns([3, 1])
+                    with col_f_sub1:
+                        submit_rev_art = st.form_submit_button("📨 修正指示を送信する", type="primary", use_container_width=True)
+                    with col_f_sub2:
+                        pass
+                    
+                    if submit_rev_art:
+                        if fb_txt.strip():
+                            workflow.request_revision(art["id"], fb_txt)
+                            st.session_state.show_off_art_rev = False  # 自動で閉じる
+                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            st.rerun()
+                        else:
+                            st.error("修正指示内容を入力してください。")
 
         # 📄 統合査読エリア（白背景・黒文字・予備情報ヘッダー付き）
         st.markdown(f"<div class='section-title'>📄 {'審査書類・原稿プレビュー' if lang=='ja' else 'Manuscript & Review Dossier'}</div>", unsafe_allow_html=True)
@@ -610,19 +610,9 @@ elif page_id == "office":
         read_time_min = max(1, round(char_count / 450))
         origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
         
-        # 100% White Background for Paywall threshold indicator badge
-        paywall_badge_html = f"""
-        <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 22px 0; color: #0369A1; font-weight: 800; text-align: center;'>
-            🔒 {t('qa_paywall_badge', lang)}
-        </div>
-        """
-        if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
-            delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
-            parts = clean_content.split(delimiter)
-            body_render = f"<div>{parts[0]}</div>{paywall_badge_html}<div>{parts[1]}</div>"
-        else:
-            body_render = f"<div>{clean_content}</div>"
-
+        delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else ("🔒 [Paywall] Premium Section Starts Here" if "🔒 [Paywall] Premium Section Starts Here" in clean_content else None)
+        
+        # 1つの白背景査読ドシエ
         st.markdown(f"""
         <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
             <!-- 1. 予備情報・審査前提ヘッダー -->
@@ -651,12 +641,38 @@ elif page_id == "office":
                 </div>
             </div>
 
-            <!-- 2. note完成原稿プレビュー（白背景） -->
+            <!-- 2. note完成原稿プレビュー見出し -->
             <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
-            <div style='font-size: 1rem; color: #0F172A; margin: 16px 0; line-height: 1.8;'>{body_render}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            <div style='height: 1px; background: #E2E8F0; margin: 26px 0;'></div>
+        # 本文の純粋なレンダリング（HTMLタグ露出を完全防止、無料・有料を同一の白背景・黒文字で統一）
+        with st.container():
+            if delimiter:
+                parts = clean_content.split(delimiter)
+                free_part = parts[0].strip()
+                paid_part = parts[1].strip() if len(parts) > 1 else ""
+                
+                # 無料部分 (白背景 #FFFFFF, 黒文字 #0F172A)
+                st.markdown(f"""
+                <div class='review-paper-white' style='margin-top: -10px;'>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{free_part}</div>
+                    <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 24px 0; color: #0369A1; font-weight: 800; text-align: center; font-size: 1rem;'>
+                        🔒 {t('qa_paywall_badge', lang)}
+                    </div>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{paid_part}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class='review-paper-white' style='margin-top: -10px;'>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{clean_content}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
+        # 3. 5大SNS告知文 ＆ 4. 法務・QA審査
+        st.markdown(f"""
+        <div class='review-paper-white' style='margin-top: 18px;'>
             <!-- 3. 5大SNS告知文（均一行間） -->
             <h3 style='color: #1D4ED8 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📢 5大SNS告知文（佐々木 翼 作成）</h3>
             <div style='background: #F8FAFC; padding: 18px; border-radius: 8px; border: 1px solid #CBD5E1; margin: 16px 0;'>
@@ -720,23 +736,31 @@ elif page_id == "office":
                 st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
                 st.rerun()
         with col_o_tp2:
-            with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
-                st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                with st.form("office_topic_revision_form", clear_on_submit=True):
-                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
-                    submit_rev_tp = st.form_submit_button("📨 送信", type="primary", use_container_width=True)
-                    if submit_rev_tp:
-                        if rev_fb.strip():
-                            market_manager.request_revision(tp["id"], rev_fb)
-                            st.warning("風間アナリストに再調査指示を伝達しました。")
-                            st.rerun()
-                        else:
-                            st.error("指示内容を入力してください。")
+            rev_tp_label = "✍️ 再調査指示を入力する" if not st.session_state.show_off_tp_rev else "✖️ 再調査指示欄を閉じる"
+            if st.button(rev_tp_label, use_container_width=True, key="off_toggle_tp_rev"):
+                st.session_state.show_off_tp_rev = not st.session_state.show_off_tp_rev
+                st.rerun()
         with col_o_tp3:
             if st.button(t("mr_btn_reject_topic", lang), use_container_width=True, key="off_btn_rej_tp"):
                 market_manager.reject_topic(tp["id"])
                 st.info("トピックを却下しました。")
                 st.rerun()
+
+        # トピック再調査指示入力フォーム（送信後に自動で閉じる）
+        if st.session_state.show_off_tp_rev:
+            with st.container():
+                st.markdown(f"#### ✍️ {t('mr_btn_revise_topic', lang)}")
+                with st.form("office_topic_revision_form", clear_on_submit=True):
+                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
+                    submit_rev_tp = st.form_submit_button("📨 再調査指示を送信する", type="primary", use_container_width=True)
+                    if submit_rev_tp:
+                        if rev_fb.strip():
+                            market_manager.request_revision(tp["id"], rev_fb)
+                            st.session_state.show_off_tp_rev = False  # 自動で閉じる
+                            st.warning("風間アナリストに再調査指示を伝達しました。")
+                            st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
 
         # 📄 統合市場調査・企画提案書（白背景・黒文字・予備情報ヘッダー付き）
         st.markdown(f"""
@@ -1076,24 +1100,32 @@ elif page_id == "market_research":
                 st.rerun()
 
         with col_tpa2:
-            with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
-                st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                with st.form("mr_page_topic_revision_form", clear_on_submit=True):
-                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="mr_rev_tp_fb")
-                    submit_mr_rev = st.form_submit_button("📨 再調査指示を送信する", type="primary", use_container_width=True)
-                    if submit_mr_rev:
-                        if rev_fb.strip():
-                            market_manager.request_revision(tp["id"], rev_fb)
-                            st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
-                            st.rerun()
-                        else:
-                            st.error("指示内容を入力してください。")
+            rev_tp_main_label = "✍️ 再調査指示を入力する" if not st.session_state.show_mr_tp_rev else "✖️ 再調査指示欄を閉じる"
+            if st.button(rev_tp_main_label, use_container_width=True, key="mr_toggle_tp_rev"):
+                st.session_state.show_mr_tp_rev = not st.session_state.show_mr_tp_rev
+                st.rerun()
 
         with col_tpa3:
             if st.button(t("mr_btn_reject_topic", lang), use_container_width=True):
                 market_manager.reject_topic(tp["id"])
                 st.info("トピックを却下しました。")
                 st.rerun()
+
+        # トピック再調査指示入力フォーム（送信後に自動で閉じる）
+        if st.session_state.show_mr_tp_rev:
+            with st.container():
+                st.markdown(f"#### ✍️ {t('mr_btn_revise_topic', lang)}")
+                with st.form("mr_page_topic_revision_form", clear_on_submit=True):
+                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="mr_rev_tp_fb")
+                    submit_mr_rev = st.form_submit_button("📨 再調査指示を送信する", type="primary", use_container_width=True)
+                    if submit_mr_rev:
+                        if rev_fb.strip():
+                            market_manager.request_revision(tp["id"], rev_fb)
+                            st.session_state.show_mr_tp_rev = False  # 自動で閉じる
+                            st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
+                            st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
 
         # 承認済みの場合の「記事制作課へ直接引き渡し」ボタン
         if not tp_locked:
@@ -1327,24 +1359,32 @@ elif page_id == "qa":
                 st.rerun()
 
         with app_col2:
-            with st.popover(t("qa_btn_revision", lang), use_container_width=True):
-                st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                with st.form("qa_page_article_revision_form", clear_on_submit=True):
-                    feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
-                    submit_qa_rev = st.form_submit_button("📨 修正指示を送信する", type="primary", use_container_width=True)
-                    if submit_qa_rev:
-                        if feedback_txt.strip():
-                            workflow.request_revision(art["id"], feedback_txt)
-                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
-                            st.rerun()
-                        else:
-                            st.error("修正指示内容を入力してください。")
+            rev_qa_label = "✍️ 修正指示を入力する" if not st.session_state.show_qa_art_rev else "✖️ 修正指示欄を閉じる"
+            if st.button(rev_qa_label, use_container_width=True, key="qa_toggle_art_rev"):
+                st.session_state.show_qa_art_rev = not st.session_state.show_qa_art_rev
+                st.rerun()
 
         with app_col3:
             if st.button(t("qa_btn_reject", lang), use_container_width=True, key="qa_btn_rej_main"):
                 workflow.reject_article(art["id"])
                 st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
                 st.rerun()
+
+        # QA修正指示入力フォーム（送信後に自動で閉じる）
+        if st.session_state.show_qa_art_rev:
+            with st.container():
+                st.markdown(f"#### ✍️ {t('qa_btn_revision', lang)}")
+                with st.form("qa_page_article_revision_form", clear_on_submit=True):
+                    feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
+                    submit_qa_rev = st.form_submit_button("📨 修正指示を送信する", type="primary", use_container_width=True)
+                    if submit_qa_rev:
+                        if feedback_txt.strip():
+                            workflow.request_revision(art["id"], feedback_txt)
+                            st.session_state.show_qa_art_rev = False  # 自動で閉じる
+                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            st.rerun()
+                        else:
+                            st.error("修正指示内容を入力してください。")
 
         # 📄 単一統合査読エリア（白背景・黒文字・予備情報ヘッダー付き）
         st.markdown(f"<div class='section-title'>📄 {'審査書類・原稿プレビュー' if lang=='ja' else 'Manuscript & Review Dossier'}</div>", unsafe_allow_html=True)
@@ -1353,19 +1393,8 @@ elif page_id == "qa":
         char_count = len(clean_content)
         read_time_min = max(1, round(char_count / 450))
         origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
-
-        # 100% White Background for Paywall threshold indicator badge
-        paywall_badge_html = f"""
-        <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 22px 0; color: #0369A1; font-weight: 800; text-align: center;'>
-            🔒 {t('qa_paywall_badge', lang)}
-        </div>
-        """
-        if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
-            delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
-            parts = clean_content.split(delimiter)
-            body_render = f"<div>{parts[0]}</div>{paywall_badge_html}<div>{parts[1]}</div>"
-        else:
-            body_render = f"<div>{clean_content}</div>"
+        
+        delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else ("🔒 [Paywall] Premium Section Starts Here" if "🔒 [Paywall] Premium Section Starts Here" in clean_content else None)
 
         st.markdown(f"""
         <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
@@ -1395,12 +1424,38 @@ elif page_id == "qa":
                 </div>
             </div>
 
-            <!-- 2. note完成原稿プレビュー（白背景） -->
+            <!-- 2. note完成原稿プレビュー見出し -->
             <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
-            <div style='font-size: 1rem; color: #0F172A; margin: 16px 0; line-height: 1.8;'>{body_render}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            <div style='height: 1px; background: #E2E8F0; margin: 26px 0;'></div>
+        # 本文の純粋なレンダリング（HTMLタグ露出を完全防止、無料・有料を同一の白背景・黒文字で統一）
+        with st.container():
+            if delimiter:
+                parts = clean_content.split(delimiter)
+                free_part = parts[0].strip()
+                paid_part = parts[1].strip() if len(parts) > 1 else ""
+                
+                # 無料部分 (白背景 #FFFFFF, 黒文字 #0F172A)
+                st.markdown(f"""
+                <div class='review-paper-white' style='margin-top: -10px;'>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{free_part}</div>
+                    <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 24px 0; color: #0369A1; font-weight: 800; text-align: center; font-size: 1rem;'>
+                        🔒 {t('qa_paywall_badge', lang)}
+                    </div>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{paid_part}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class='review-paper-white' style='margin-top: -10px;'>
+                    <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{clean_content}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
+        # 3. 5大SNS告知文 ＆ 4. 法務・QA審査
+        st.markdown(f"""
+        <div class='review-paper-white' style='margin-top: 18px;'>
             <!-- 3. 5大SNS告知文（均一行間） -->
             <h3 style='color: #1D4ED8 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📢 5大SNS告知文（佐々木 翼 作成）</h3>
             <div style='background: #F8FAFC; padding: 18px; border-radius: 8px; border: 1px solid #CBD5E1; margin: 16px 0;'>
