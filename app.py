@@ -43,11 +43,159 @@ from core.i18n import t
 def clean_txt(val: str) -> str:
     if not val or not isinstance(val, str):
         return ""
-    # Remove markdown bold asterisks
     cleaned = val.replace("**", "")
-    # Remove stray HTML div/span tags if present in plain string
     cleaned = re.sub(r'<[^>]+>', '', cleaned)
     return cleaned.strip()
+
+# Helper to build 100% Clean Article Dossier HTML rendered via st.html (Zero Markdown parser interference)
+def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
+    clean_content = clean_txt(art.get("content", ""))
+    char_count = len(clean_content)
+    read_time_min = max(1, round(char_count / 450))
+    origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
+    delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else ("🔒 [Paywall] Premium Section Starts Here" if "🔒 [Paywall] Premium Section Starts Here" in clean_content else None)
+
+    if delimiter:
+        parts = clean_content.split(delimiter)
+        free_part = parts[0].strip()
+        paid_part = parts[1].strip() if len(parts) > 1 else ""
+        body_html = f"""
+        <div style="color: #0F172A; font-size: 1rem; line-height: 1.85; white-space: pre-wrap; margin-bottom: 20px;">{free_part}</div>
+        <div style="background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 24px 0; color: #0369A1; font-weight: 800; text-align: center; font-size: 1rem;">
+            🔒 {t('qa_paywall_badge', lang)}
+        </div>
+        <div style="color: #0F172A; font-size: 1rem; line-height: 1.85; white-space: pre-wrap; margin-top: 20px;">{paid_part}</div>
+        """
+    else:
+        body_html = f"""
+        <div style="color: #0F172A; font-size: 1rem; line-height: 1.85; white-space: pre-wrap;">{clean_content}</div>
+        """
+
+    sns_raw = clean_txt(art.get("marketing", ""))
+    sns_blocks = []
+    for sec in sns_raw.split("【"):
+        if not sec.strip():
+            continue
+        sec_str = "【" + sec.strip()
+        lines = sec_str.split("\n", 1)
+        s_title = lines[0].strip()
+        s_body = lines[1].strip() if len(lines) > 1 else ""
+        sns_blocks.append(f"""
+        <div style="margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #E2E8F0;">
+            <div style="font-weight: 800; color: #1D4ED8; font-size: 0.95rem; margin-bottom: 6px;">{s_title}</div>
+            <div style="color: #1E293B; font-size: 0.92rem; line-height: 1.7; white-space: pre-wrap;">{s_body}</div>
+        </div>
+        """)
+    sns_html = "".join(sns_blocks)
+
+    legal_txt = clean_txt(art.get('legal_check', '審査中'))
+    qa_txt = clean_txt(art.get('qa_score', '採点中'))
+
+    return f"""
+    <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:26px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 22px rgba(0,0,0,0.18); margin: 18px 0;">
+        <div style="background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;">
+                <span style="font-weight: 800; font-size: 1.05rem; color: #0F172A;">📋 査読前提・品質監査情報 (Executive Review Header)</span>
+                <span style="background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">Ready for Sign-off</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;">
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #0369A1;">🏢 担当部門・課:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">編集部 記事制作課（執筆: 森川 拓真 / 編集: 結城 紬）<br>マーケティング部 広報課（佐々木 翼）</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #047857;">📝 文字数・読了目安:</strong>
+                    <div style="color: #1E293B; margin-top:2px;"><strong>{char_count:,} 文字</strong>（読了目安: 約 {read_time_min} 分 / 推奨価格: ¥{art.get('price', 500):,}）</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #D97706;">💡 発生元企画提案:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">{origin_topic_str}</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #7C3AED;">🔍 品質管理・検証ソース:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">note利用規約(2026最新版), 景品表示法(不当表示防止基準), 会社法第7条(商号), 社内QA規程Ver.2.1</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color: #0F172A; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📋 note完成原稿プレビュー</h3>
+        {body_html}
+
+        <div style="height: 1px; background: #CBD5E1; margin: 26px 0;"></div>
+
+        <h3 style="color: #1D4ED8; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📢 5大SNS告知文（佐々木 翼 作成）</h3>
+        <div style="background: #F8FAFC; padding: 18px; border-radius: 8px; border: 1px solid #CBD5E1; margin: 16px 0;">
+            {sns_html}
+        </div>
+
+        <div style="height: 1px; background: #CBD5E1; margin: 26px 0;"></div>
+
+        <h3 style="color: #0369A1; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">⚖️ 法的適合性 ＆ 🛡️ 品質管理スコア（橘 律 ＆ 神崎 玲奈）</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+            <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;">
+                <strong style="color: #0369A1; font-size: 0.95rem;">⚖️ 法務課 スクリーニング審査 (橘 律)</strong>
+                <div style="white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px; line-height: 1.65;">{legal_txt}</div>
+            </div>
+            <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;">
+                <strong style="color: #B45309; font-size: 0.95rem;">🛡️ 品質管理課 100点採点スコア (神崎 玲奈)</strong>
+                <div style="white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px; line-height: 1.65;">{qa_txt}</div>
+            </div>
+        </div>
+    </div>
+    """
+
+# Helper to build 100% Clean Topic Dossier HTML rendered via st.html
+def get_topic_dossier_html(tp: dict, lang: str = "ja") -> str:
+    category = clean_txt(tp.get('category', '実務ノウハウ'))
+    audience = clean_txt(tp.get('target_audience', ''))
+    price = tp.get('recommended_price', 500)
+    demand = clean_txt(tp.get('demand_summary', ''))
+    diff_gap = clean_txt(tp.get('competitor_gap', ''))
+    data_chars = len(demand + diff_gap)
+
+    return f"""
+    <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:26px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 22px rgba(0,0,0,0.18); margin: 18px 0;">
+        <div style="background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 22px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;">
+                <span style="font-weight: 800; font-size: 1.05rem; color: #0F172A;">📋 企画査読前提・調査情報 (Research Metadata Dossier)</span>
+                <span style="background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">Ready for Sign-off</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;">
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #0369A1;">🏢 担当部門・課:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">編集部 市場調査課（担当: 風間 涼）</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #047857;">📊 調査分析データ量:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">約 {data_chars:,} 文字（推奨価格: ¥{price:,}）</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #D97706;">🎯 調査カテゴリ / 対象:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">{category} / 想定読者: {audience}</div>
+                </div>
+                <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
+                    <strong style="color: #7C3AED;">🔍 調査・分析ソース:</strong>
+                    <div style="color: #1E293B; margin-top:2px;">note内検索トレンド, 競合売れ筋ランキング, 読者ペルソナ購買動線分析</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color: #0369A1; margin: 20px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📊 {'市場調査・企画提案書 (風間 涼 提出)' if lang=='ja' else 'Market Research Proposal (Ryo Kazama)'}</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+            <div style="background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;">
+                <strong style="color:#0369A1; font-size:0.95rem;">🎯 ターゲット読者 ＆ 価格戦略</strong>
+                <p style="margin:8px 0; color:#1E293B;"><strong>カテゴリ:</strong> {category}</p>
+                <p style="margin:8px 0; color:#1E293B;"><strong>想定読者:</strong> {audience}</p>
+                <p style="margin:8px 0; color:#1E293B;"><strong>推奨販売価格:</strong> ¥{price:,}</p>
+            </div>
+            <div style="background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;">
+                <strong style="color:#047857; font-size:0.95rem;">🔥 市場ニーズ ＆ 競合差別化</strong>
+                <p style="margin:8px 0; color:#1E293B;"><strong>市場ニーズ:</strong> {demand}</p>
+                <p style="margin:8px 0; color:#1E293B;"><strong>競合差別化:</strong> {diff_gap}</p>
+            </div>
+        </div>
+    </div>
+    """
 
 # Page Configuration
 st.set_page_config(
@@ -79,7 +227,6 @@ if "prefill_topic" not in st.session_state:
 if "prefill_audience" not in st.session_state:
     st.session_state.prefill_audience = ""
 
-# Form toggle states for revision forms (auto-closes after submit)
 if "show_univ_rev_form" not in st.session_state:
     st.session_state.show_univ_rev_form = False
 if "show_mr_tp_rev" not in st.session_state:
@@ -87,7 +234,6 @@ if "show_mr_tp_rev" not in st.session_state:
 if "show_qa_art_rev" not in st.session_state:
     st.session_state.show_qa_art_rev = False
 
-# Navigation Helper: changes page or resets scroll to top if already selected
 def navigate_to(target_id: str):
     st.session_state.active_page_id = target_id
     st.session_state.scroll_trigger += 1
@@ -99,7 +245,7 @@ workflow = NoteOneWorkflow(ai_client)
 chat_manager = OfficeChatManager(ai_client)
 market_manager = MarketResearchManager(ai_client)
 
-# High-contrast UI Styling: Dark Executive Floor & Paper-White Review Dossier
+# High-contrast UI Styling: Dark Base & Paper-White Review Dossier
 st.markdown("""
 <style>
     .main-header {
@@ -132,34 +278,6 @@ st.markdown("""
         margin-bottom: 22px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         color: #F8FAFC !important;
-    }
-    
-    /* 📄 Single Paper-White Review Dossier (100% White Background & Deep Navy/Black Text) */
-    .review-paper-white {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        border: 2px solid #CBD5E1 !important;
-        border-radius: 12px;
-        padding: 26px;
-        margin: 18px 0;
-        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
-        line-height: 1.8;
-    }
-    .review-paper-white h1, 
-    .review-paper-white h2, 
-    .review-paper-white h3, 
-    .review-paper-white h4, 
-    .review-paper-white h5, 
-    .review-paper-white h6 {
-        color: #0F172A !important;
-        font-weight: 800 !important;
-    }
-    .review-paper-white p, 
-    .review-paper-white span, 
-    .review-paper-white li, 
-    .review-paper-white label,
-    .review-paper-white div {
-        color: #1E293B !important;
     }
     
     .approval-box-locked {
@@ -233,7 +351,6 @@ st.markdown("""
         border: 1px solid #1E293B;
     }
     
-    /* Sidebar Navigation Links */
     div[data-testid="stSidebar"] button {
         text-align: left !important;
         justify-content: flex-start !important;
@@ -250,7 +367,6 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Active Sidebar Navigation Highlight */
     div[data-testid="stSidebar"] button[kind="primary"],
     div[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {
         background-color: #38BDF8 !important;
@@ -260,7 +376,6 @@ st.markdown("""
         box-shadow: 0 2px 10px rgba(56, 189, 248, 0.45) !important;
     }
     
-    /* Clean layout padding for true 0px top alignment */
     .block-container {
         padding-top: 1.2rem !important;
         padding-bottom: 3rem !important;
@@ -275,7 +390,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 100% Reliable Synchronous Direct DOM Scroll-to-Top Handler (Runs in parent document context via image onload)
+# 100% Reliable Synchronous Direct DOM Scroll-to-Top Handler
 st.markdown(f"""
 <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
      data-scroll-trigger="{st.session_state.scroll_trigger}"
@@ -502,7 +617,6 @@ elif page_id == "office":
     st.markdown(f"<div class='section-title'>👑 {'全社統合決裁センター' if lang=='ja' else 'Universal Executive Approval Center'}</div>", unsafe_allow_html=True)
     st.markdown(f"<div style='color: #94A3B8; margin-bottom: 18px;'>{'全社各部門の決裁待ち申請を一覧（レコード）として並べています。ラジオボタンで1件選択し、単一の査読エリアで審査・決裁を行ってください。' if lang=='ja' else 'All pending submissions across departments are listed below. Select one submission via radio button to inspect and sign off in the single review dossier.'}</div>", unsafe_allow_html=True)
 
-    # 全部門の未承認案件を単一リストに集約
     pending_items = []
     
     # 1. 記事制作課・広報課（記事・広告）
@@ -572,157 +686,14 @@ elif page_id == "office":
         item_raw = current_item["data"]
         cur_status = current_item["status"]
 
-        # 3. 単一の査読エリア（選択された1件のプレビューを表示）
+        # 3. 単一の査読エリア（選択された1件のプレビューを表示 - st.htmlによる完全クリーンレンダリング）
         st.markdown("---")
         st.markdown(f"<div class='section-title'>📄 {'審査書類・プレビュー（査読エリア）' if lang=='ja' else 'Review Dossier (Single Inspection Area)'}</div>", unsafe_allow_html=True)
 
         if item_type == "article":
-            art = item_raw
-            clean_content = clean_txt(art.get("content", ""))
-            char_count = len(clean_content)
-            read_time_min = max(1, round(char_count / 450))
-            origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
-            delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else ("🔒 [Paywall] Premium Section Starts Here" if "🔒 [Paywall] Premium Section Starts Here" in clean_content else None)
-
-            # 単一白背景ドシエ（ヘッダー ＋ 本文 ＋ SNS ＋ 法務QA）
-            with st.container():
-                st.markdown(f"""
-                <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-                    <!-- 1. 予備情報ヘッダー -->
-                    <div style='background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 24px;'>
-                        <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;'>
-                            <span style='font-weight: 800; font-size: 1.05rem; color: #0F172A;'>📋 査読前提・品質監査情報 (Executive Review Header)</span>
-                            <span style='background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;'>Ready for Sign-off</span>
-                        </div>
-                        <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;'>
-                            <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                                <strong style='color: #0369A1;'>🏢 担当部門・課:</strong>
-                                <div style='color: #1E293B; margin-top:2px;'>編集部 記事制作課（執筆: 森川 拓真 / 編集: 結城 紬）<br>マーケティング部 広報課（佐々木 翼）</div>
-                            </div>
-                            <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                                <strong style='color: #047857;'>📝 文字数・読了目安:</strong>
-                                <div style='color: #1E293B; margin-top:2px;'><strong>{char_count:,} 文字</strong>（読了目安: 約 {read_time_min} 分 / 推奨価格: ¥{art.get('price', 500):,}）</div>
-                            </div>
-                            <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                                <strong style='color: #D97706;'>💡 発生元企画提案:</strong>
-                                <div style='color: #1E293B; margin-top:2px;'>{origin_topic_str}</div>
-                            </div>
-                            <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                                <strong style='color: #7C3AED;'>🔍 品質管理・検証ソース:</strong>
-                                <div style='color: #1E293B; margin-top:2px;'>note利用規約(2026最新版), 景品表示法(不当表示防止基準), 会社法第7条(商号), 社内QA規程Ver.2.1</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. note完成原稿プレビュー見出し -->
-                    <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
-                </div>
-                """, unsafe_allow_html=True)
-
-                # 原稿本文
-                if delimiter:
-                    parts = clean_content.split(delimiter)
-                    free_part = parts[0].strip()
-                    paid_part = parts[1].strip() if len(parts) > 1 else ""
-                    st.markdown(f"""
-                    <div class='review-paper-white' style='margin-top: -10px;'>
-                        <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{free_part}</div>
-                        <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 24px 0; color: #0369A1; font-weight: 800; text-align: center; font-size: 1rem;'>
-                            🔒 {t('qa_paywall_badge', lang)}
-                        </div>
-                        <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{paid_part}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class='review-paper-white' style='margin-top: -10px;'>
-                        <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{clean_content}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                # 3. 5大SNS告知文（純粋なテキスト描画）
-                st.markdown("""
-                <div class='review-paper-white' style='margin-top: 18px;'>
-                    <h3 style='color: #1D4ED8 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📢 5大SNS告知文（佐々木 翼 作成）</h3>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                sns_raw = clean_txt(art.get("marketing", ""))
-                with st.expander("📢 5大SNS告知文を展開して確認する", expanded=True):
-                    for sec in sns_raw.split("【"):
-                        if not sec.strip():
-                            continue
-                        sec_str = "【" + sec.strip()
-                        lines = sec_str.split("\n", 1)
-                        st.markdown(f"##### {lines[0].strip()}")
-                        if len(lines) > 1:
-                            st.write(lines[1].strip())
-                        st.divider()
-
-                # 4. 法務・QA審査
-                st.markdown(f"""
-                <div class='review-paper-white' style='margin-top: 18px;'>
-                    <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>⚖️ 法的適合性 ＆ 🛡️ 品質管理スコア（橘 律 ＆ 神崎 玲奈）</h3>
-                    <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;'>
-                        <div style='background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;'>
-                            <strong style='color: #0369A1; font-size: 0.95rem;'>⚖️ 法務課 スクリーニング審査 (橘 律)</strong>
-                            <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px;'>{clean_txt(art.get('legal_check', '審査中'))}</div>
-                        </div>
-                        <div style='background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;'>
-                            <strong style='color: #B45309; font-size: 0.95rem;'>🛡️ 品質管理課 100点採点スコア (神崎 玲奈)</strong>
-                            <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px;'>{clean_txt(art.get('qa_score', '採点中'))}</div>
-                        </div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
+            st.html(get_article_dossier_html(item_raw, lang))
         elif item_type == "topic":
-            tp = item_raw
-            st.markdown(f"""
-            <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-                <!-- 予備情報ヘッダー -->
-                <div style='background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 22px;'>
-                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;'>
-                        <span style='font-weight: 800; font-size: 1.05rem; color: #0F172A;'>📋 企画査読前提・調査情報 (Research Metadata Dossier)</span>
-                        <span style='background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;'>Ready for Sign-off</span>
-                    </div>
-                    <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;'>
-                        <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                            <strong style='color: #0369A1;'>🏢 担当部門・課:</strong>
-                            <div style='color: #1E293B; margin-top:2px;'>編集部 市場調査課（担当: 風間 涼）</div>
-                        </div>
-                        <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                            <strong style='color: #047857;'>📊 調査分析データ量:</strong>
-                            <div style='color: #1E293B; margin-top:2px;'>約 {len(tp.get('demand_summary','')+tp.get('competitor_gap','')):,} 文字（推奨価格: ¥{tp.get('recommended_price', 500):,}）</div>
-                        </div>
-                        <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                            <strong style='color: #D97706;'>🎯 調査カテゴリ / 対象:</strong>
-                            <div style='color: #1E293B; margin-top:2px;'>{clean_txt(tp.get('category', '実務ノウハウ'))} / 想定読者: {clean_txt(tp.get('target_audience', ''))}</div>
-                        </div>
-                        <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                            <strong style='color: #7C3AED;'>🔍 調査・分析ソース:</strong>
-                            <div style='color: #1E293B; margin-top:2px;'>note内検索トレンド, 競合売れ筋ランキング, 読者ペルソナ購買動線分析</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 企画詳細 -->
-                <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画提案書 (風間 涼 提出)' if lang=='ja' else 'Market Research Proposal (Ryo Kazama)'}</h3>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;'>
-                    <div style='background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;'>
-                        <strong style='color:#0369A1; font-size:0.95rem;'>🎯 ターゲット読者 ＆ 価格戦略</strong>
-                        <p style='margin:8px 0; color:#1E293B;'><strong>カテゴリ:</strong> {clean_txt(tp.get('category', '実務ノウハウ'))}</p>
-                        <p style='margin:8px 0; color:#1E293B;'><strong>想定読者:</strong> {clean_txt(tp.get('target_audience', ''))}</p>
-                        <p style='margin:8px 0; color:#1E293B;'><strong>推奨販売価格:</strong> ¥{tp.get('recommended_price', 500):,}</p>
-                    </div>
-                    <div style='background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;'>
-                        <strong style='color:#047857; font-size:0.95rem;'>🔥 市場ニーズ ＆ 競合差別化</strong>
-                        <p style='margin:8px 0; color:#1E293B;'><strong>市場ニーズ:</strong> {clean_txt(tp.get('demand_summary', ''))}</p>
-                        <p style='margin:8px 0; color:#1E293B;'><strong>競合差別化:</strong> {clean_txt(tp.get('competitor_gap', ''))}</p>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.html(get_topic_dossier_html(item_raw, lang))
 
         # 4. 査読エリアの直下に「承認」「✍️ 否認」「拒否」ボタンを表示
         st.markdown("---")
@@ -769,7 +740,7 @@ elif page_id == "office":
                 st.session_state.show_univ_rev_form = False
                 st.rerun()
 
-        # 否認時の指示入力フォーム（送信後に自動で閉じる）
+        # 否認時の指示入力フォーム
         if st.session_state.show_univ_rev_form:
             with st.container():
                 st.markdown(f"#### ✍️ {'否認・修正指示の入力' if lang=='ja' else 'Denial & Revision Directives'}")
@@ -788,7 +759,7 @@ elif page_id == "office":
                             else:
                                 market_manager.request_revision(current_item["id"], fb_text)
                                 st.warning("市場調査課に再調査指示を伝達しました。")
-                            st.session_state.show_univ_rev_form = False  # 自動で閉じる
+                            st.session_state.show_univ_rev_form = False
                             st.rerun()
                         else:
                             st.error("指示内容を入力してください。")
@@ -800,7 +771,6 @@ elif page_id == "office":
     st.markdown(f"<div class='section-title'>{t('consult_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
 
-    # ユーザーからの自由入力フォーム
     with st.form("office_consultation_form", clear_on_submit=True):
         c_in_q1, c_in_q2 = st.columns([4, 1])
         with c_in_q1:
@@ -848,7 +818,6 @@ elif page_id == "office":
             })
             st.rerun()
 
-    # 会話履歴の表示
     if st.session_state.office_chat_history:
         st.markdown(f"#### {t('consult_log_title', lang)}")
         for item in reversed(st.session_state.office_chat_history):
@@ -1014,7 +983,6 @@ elif page_id == "market_research":
     
     st.info(t("mr_mission", lang))
     
-    # 1. 🔍 新規トピック市場調査の指示フォーム
     with st.expander(f"➕ {t('mr_new_research_header', lang)}", expanded=False):
         c_rs1, c_rs2 = st.columns([3, 2])
         with c_rs1:
@@ -1033,7 +1001,6 @@ elif page_id == "market_research":
 
     st.markdown("---")
 
-    # 2. 📋 調査トピック管理台帳 ＆ 企画決裁プレビュー
     st.markdown(f"<div class='section-title'>{t('mr_topic_list_header', lang)}</div>", unsafe_allow_html=True)
     topics = market_manager.list_topics()
     
@@ -1046,52 +1013,8 @@ elif page_id == "market_research":
         tp_status = tp.get("status", "Pending Owner Approval")
         tp_locked = tp_status in ["Pending Owner Approval", "Revision Requested"]
 
-        # 📄 査読エリア（プレビューを先に表示）
-        st.markdown(f"""
-        <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-            <!-- 予備情報ヘッダー -->
-            <div style='background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 22px;'>
-                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;'>
-                    <span style='font-weight: 800; font-size: 1.05rem; color: #0F172A;'>📋 企画査読前提・調査情報 (Research Metadata Dossier)</span>
-                    <span style='background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;'>Ready for Sign-off</span>
-                </div>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;'>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #0369A1;'>🏢 担当部門・課:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>編集部 市場調査課（担当: 風間 涼）</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #047857;'>📊 調査分析データ量:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>約 {len(tp.get('demand_summary','')+tp.get('competitor_gap','')):,} 文字（推奨価格: ¥{tp.get('recommended_price', 500):,}）</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #D97706;'>🎯 調査カテゴリ / 対象:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>{clean_txt(tp.get('category', '実務ノウハウ'))} / 想定読者: {clean_txt(tp.get('target_audience', ''))}</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #7C3AED;'>🔍 調査・分析ソース:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>note内検索トレンド, 競合売れ筋ランキング, 読者ペルソナ購買動線分析</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 企画詳細 -->
-            <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📊 {'市場調査・企画提案書 (風間 涼 提出)' if lang=='ja' else 'Market Research Proposal (Ryo Kazama)'}</h3>
-            <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;'>
-                <div style='background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;'>
-                    <strong style='color:#0369A1; font-size:0.95rem;'>🎯 ターゲット読者 ＆ 価格戦略</strong>
-                    <p style='margin:8px 0; color:#1E293B;'><strong>カテゴリ:</strong> {clean_txt(tp.get('category', '実務ノウハウ'))}</p>
-                    <p style='margin:8px 0; color:#1E293B;'><strong>想定読者:</strong> {clean_txt(tp.get('target_audience', ''))}</p>
-                    <p style='margin:8px 0; color:#1E293B;'><strong>推奨販売価格:</strong> ¥{tp.get('recommended_price', 500):,}</p>
-                </div>
-                <div style='background:#F8FAFC; padding:16px; border-radius:8px; border:1px solid #CBD5E1;'>
-                    <strong style='color:#047857; font-size:0.95rem;'>🔥 市場ニーズ ＆ 競合差別化</strong>
-                    <p style='margin:8px 0; color:#1E293B;'><strong>市場ニーズ:</strong> {clean_txt(tp.get('demand_summary', ''))}</p>
-                    <p style='margin:8px 0; color:#1E293B;'><strong>競合差別化:</strong> {clean_txt(tp.get('competitor_gap', ''))}</p>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # 📄 査読エリア（st.htmlによる完全クリーンレンダリング）
+        st.html(get_topic_dossier_html(tp, lang))
 
         # 👑 企画決裁欄（プレビューのあとに配置）
         st.markdown("---")
@@ -1141,7 +1064,6 @@ elif page_id == "market_research":
                 st.info("トピックを拒否（却下）しました。")
                 st.rerun()
 
-        # トピック再調査指示入力フォーム
         if st.session_state.show_mr_tp_rev:
             with st.container():
                 st.markdown(f"#### ✍️ {'否認・再調査指示の入力' if lang=='ja' else 'Topic Revision Directives'}")
@@ -1151,13 +1073,12 @@ elif page_id == "market_research":
                     if submit_mr_rev:
                         if rev_fb.strip():
                             market_manager.request_revision(tp["id"], rev_fb)
-                            st.session_state.show_mr_tp_rev = False  # 自動で閉じる
+                            st.session_state.show_mr_tp_rev = False
                             st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
                             st.rerun()
                         else:
                             st.error("指示内容を入力してください。")
 
-        # 承認済みの場合の「記事制作課へ直接引き渡し」ボタン
         if not tp_locked:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True):
@@ -1166,7 +1087,6 @@ elif page_id == "market_research":
                 st.session_state.active_page_id = "content_creation"
                 st.rerun()
 
-        # タイムスタンプ履歴
         st.markdown("##### ⏱️ 企画ステータス遷移タイムスタンプ履歴")
         history = tp.get("status_history", [])
         for h in reversed(history):
@@ -1298,104 +1218,8 @@ elif page_id == "qa":
         cur_status = art.get("status", "Pending Owner Approval")
         is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
 
-        clean_content = clean_txt(art.get("content", ""))
-        char_count = len(clean_content)
-        read_time_min = max(1, round(char_count / 450))
-        origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
-        delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else ("🔒 [Paywall] Premium Section Starts Here" if "🔒 [Paywall] Premium Section Starts Here" in clean_content else None)
-
-        # 📄 査読エリア（プレビューを先に表示）
-        st.markdown(f"<div class='section-title'>📄 {'審査書類・原稿プレビュー' if lang=='ja' else 'Manuscript & Review Dossier'}</div>", unsafe_allow_html=True)
-
-        st.markdown(f"""
-        <div class='review-paper-white' style='border-left: 6px solid #0284C7 !important;'>
-            <!-- 1. 予備情報ヘッダー -->
-            <div style='background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 24px;'>
-                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;'>
-                    <span style='font-weight: 800; font-size: 1.05rem; color: #0F172A;'>📋 査読前提・品質監査情報 (Executive Review Header)</span>
-                    <span style='background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;'>Ready for Sign-off</span>
-                </div>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;'>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #0369A1;'>🏢 担当部門・課:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>編集部 記事制作課（執筆: 森川 拓真 / 編集: 結城 紬）<br>マーケティング部 広報課（佐々木 翼）</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #047857;'>📝 文字数・読了目安:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'><strong>{char_count:,} 文字</strong>（読了目安: 約 {read_time_min} 分 / 推奨価格: ¥{art.get('price', 500):,}）</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #D97706;'>💡 発生元企画提案:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>{origin_topic_str}</div>
-                    </div>
-                    <div style='background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #E2E8F0;'>
-                        <strong style='color: #7C3AED;'>🔍 品質管理・検証ソース:</strong>
-                        <div style='color: #1E293B; margin-top:2px;'>note利用規約(2026最新版), 景品表示法(不当表示防止基準), 会社法第7条(商号), 社内QA規程Ver.2.1</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. note完成原稿プレビュー見出し -->
-            <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 原稿本文
-        if delimiter:
-            parts = clean_content.split(delimiter)
-            free_part = parts[0].strip()
-            paid_part = parts[1].strip() if len(parts) > 1 else ""
-            st.markdown(f"""
-            <div class='review-paper-white' style='margin-top: -10px;'>
-                <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{free_part}</div>
-                <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 24px 0; color: #0369A1; font-weight: 800; text-align: center; font-size: 1rem;'>
-                    🔒 {t('qa_paywall_badge', lang)}
-                </div>
-                <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{paid_part}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class='review-paper-white' style='margin-top: -10px;'>
-                <div style='color: #0F172A; font-size: 1rem; line-height: 1.8; white-space: pre-wrap;'>{clean_content}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # 3. 5大SNS告知文
-        st.markdown("""
-        <div class='review-paper-white' style='margin-top: 18px;'>
-            <h3 style='color: #1D4ED8 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📢 5大SNS告知文（佐々木 翼 作成）</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        sns_raw = clean_txt(art.get("marketing", ""))
-        with st.expander("📢 5大SNS告知文を展開して確認する", expanded=True):
-            for sec in sns_raw.split("【"):
-                if not sec.strip():
-                    continue
-                sec_str = "【" + sec.strip()
-                lines = sec_str.split("\n", 1)
-                st.markdown(f"##### {lines[0].strip()}")
-                if len(lines) > 1:
-                    st.write(lines[1].strip())
-                st.divider()
-
-        # 4. 法務・QA審査
-        st.markdown(f"""
-        <div class='review-paper-white' style='margin-top: 18px;'>
-            <h3 style='color: #0369A1 !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>⚖️ 法的適合性 ＆ 🛡️ 品質管理スコア（橘 律 ＆ 神崎 玲奈）</h3>
-            <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;'>
-                <div style='background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;'>
-                    <strong style='color: #0369A1; font-size: 0.95rem;'>⚖️ 法務課 スクリーニング審査 (橘 律)</strong>
-                    <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px;'>{clean_txt(art.get('legal_check', '審査中'))}</div>
-                </div>
-                <div style='background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #CBD5E1;'>
-                    <strong style='color: #B45309; font-size: 0.95rem;'>🛡️ 品質管理課 100点採点スコア (神崎 玲奈)</strong>
-                    <div style='white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px;'>{clean_txt(art.get('qa_score', '採点中'))}</div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # 📄 査読エリア（st.htmlによる完全クリーンレンダリング）
+        st.html(get_article_dossier_html(art, lang))
 
         # 👑 オーナー決裁欄（プレビューの直後に配置）
         st.markdown("---")
@@ -1426,7 +1250,6 @@ elif page_id == "qa":
             </div>
             """, unsafe_allow_html=True)
 
-        # 👑 オーナー決裁アクションパネル
         app_col1, app_col2, app_col3 = st.columns([2, 2, 1])
         with app_col1:
             if st.button("承認", type="primary", use_container_width=True, key="qa_btn_app_main"):
@@ -1445,7 +1268,6 @@ elif page_id == "qa":
                 st.info("記事を拒否（却下・アーカイブ）しました。" if lang == "ja" else "Article rejected and archived.")
                 st.rerun()
 
-        # QA修正指示入力フォーム
         if st.session_state.show_qa_art_rev:
             with st.container():
                 st.markdown(f"#### ✍️ {'否認・修正指示の入力' if lang=='ja' else 'Article Revision Directives'}")
@@ -1455,7 +1277,7 @@ elif page_id == "qa":
                     if submit_qa_rev:
                         if feedback_txt.strip():
                             workflow.request_revision(art["id"], feedback_txt)
-                            st.session_state.show_qa_art_rev = False  # 自動で閉じる
+                            st.session_state.show_qa_art_rev = False
                             st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
                             st.rerun()
                         else:
@@ -1463,7 +1285,6 @@ elif page_id == "qa":
 
         st.markdown("---")
 
-        # タイムスタンプ履歴
         st.markdown(f"##### {t('qa_history_title', lang)}")
         history = art.get("status_history", [])
         for h in reversed(history):
@@ -1472,7 +1293,6 @@ elif page_id == "qa":
         
         st.divider()
 
-        # マークダウン全文
         st.markdown(f"#### {t('qa_markdown_title', lang)}")
         if is_locked:
             st.warning("🔒 【ロック中】オーナー承認が出るまでnoteへの貼り付けコードは保護されています。")
