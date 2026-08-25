@@ -107,5 +107,20 @@
       "message": "Mastodon用ハッシュタグ付きトピック投稿を配信しました。",
       "cost": "0円 (Open API)"
     }
-  }
+  },
+  "status": "Pre-Publication",
+  "status_history": [
+    {
+      "status": "Pre-Publication",
+      "timestamp": "2026-08-25 15:51:26",
+      "actor": "代表者（オーナー）",
+      "note": "ステータスを「Pre-Publication」に変更"
+    },
+    {
+      "status": "Pre-Publication",
+      "timestamp": "2026-08-25 15:51:35",
+      "actor": "代表者（オーナー）",
+      "note": "ステータスを「Pre-Publication」に変更"
+    }
+  ]
 }

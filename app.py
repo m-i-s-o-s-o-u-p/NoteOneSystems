@@ -9,6 +9,7 @@ from core.holdings_manager import HoldingsManager
 from core.ringi_manager import RingiManager
 from core.hr_manager import HRManager
 from companies.note_one_systems.workflow import NoteOneWorkflow
+from companies.note_one_systems.office_chat_manager import OfficeChatManager
 
 # Page Configuration
 st.set_page_config(
@@ -95,6 +96,15 @@ st.markdown("""
         color: #F8FAFC !important;
         border: 1px solid #334155;
     }
+    .user-query-card {
+        background-color: #0F172A !important;
+        border-left: 5px solid #38BDF8;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        color: #E2E8F0 !important;
+        border: 1px solid #1E293B;
+    }
     
     /* Sidebar Navigation Links */
     div[data-testid="stSidebar"] button {
@@ -143,9 +153,12 @@ if "api_key" not in st.session_state:
     st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
 if "nav_page" not in st.session_state:
     st.session_state.nav_page = "🏢 Company Dashboard"
+if "office_chat_history" not in st.session_state:
+    st.session_state.office_chat_history = []
 
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
+chat_manager = OfficeChatManager(ai_client)
 
 # ==========================================
 # Sidebar: English Navigation Menu
@@ -312,7 +325,7 @@ if page == "🏢 Company Dashboard":
                 st.warning("Please enter a valid company name.")
 
 # ==========================================
-# 2. 🏢 Headquarter Office Room
+# 2. 🏢 Headquarter Office Room (社員対話デスク統合)
 # ==========================================
 elif page == "🏢 Headquarter Office Room":
     st.markdown("<div class='main-header'>Headquarter</div>", unsafe_allow_html=True)
@@ -326,6 +339,121 @@ elif page == "🏢 Headquarter Office Room":
             game_html = f.read()
         components.html(game_html, height=530)
 
+    # -------------------------------------------------------------
+    # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
+    # -------------------------------------------------------------
+    st.markdown("---")
+    st.markdown("<div class='section-title'>💬 Direct Inquiries & Employee Consultation Desk</div>", unsafe_allow_html=True)
+    st.markdown("<div style='color: #94A3B8; margin-bottom: 12px;'>質問や指示を入力すると、最適な担当部署の専門AI社員が自律的に判定・回答します。</div>", unsafe_allow_html=True)
+
+    # クイック質問サンプル（ワンクリックで質問可能）
+    st.markdown("##### 💡 Quick Inquiries (クリックして質問を入力):")
+    sample_col1, sample_col2 = st.columns(2)
+    with sample_col1:
+        if st.button("📌 Noteのサービスは日本人向けサービスですか？", use_container_width=True):
+            resp = chat_manager.generate_response("Noteのサービスは日本人向けサービスですか？")
+            st.session_state.office_chat_history.append({
+                "user": "Noteのサービスは日本人向けサービスですか？",
+                "response": resp,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+        if st.button("📌 今週のnote売れ筋トレンドと高成約テーマは？", use_container_width=True):
+            resp = chat_manager.generate_response("今週のnote売れ筋トレンドと高成約テーマは？")
+            st.session_state.office_chat_history.append({
+                "user": "今週のnote売れ筋トレンドと高成約テーマは？",
+                "response": resp,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+    with sample_col2:
+        if st.button("📌 Noteの英語圏ユーザと日本語圏ユーザの比率は？", use_container_width=True):
+            resp = chat_manager.generate_response("Noteの英語圏ユーザと日本語圏ユーザの比率は？")
+            st.session_state.office_chat_history.append({
+                "user": "Noteの英語圏ユーザと日本語圏ユーザの比率は？",
+                "response": resp,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+        if st.button("📌 システムの運用費用（固定費）は本当に0円ですか？", use_container_width=True):
+            resp = chat_manager.generate_response("システムの運用費用（固定費）は本当に0円ですか？")
+            st.session_state.office_chat_history.append({
+                "user": "システムの運用費用（固定費）は本当に0円ですか？",
+                "response": resp,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+    # ユーザーからの自由入力フォーム
+    with st.form("office_consultation_form", clear_on_submit=True):
+        c_in_q1, c_in_q2 = st.columns([4, 1])
+        with c_in_q1:
+            user_inquiry = st.text_input(
+                "質問・指示を入力してください (Ask a question or issue a directive to the team)",
+                placeholder="例: 「Noteの英語圏ユーザと日本語圏ユーザの比率は？」「note記事販売の法的な注意点は？」「売上を伸ばすための価格戦略は？」"
+            )
+        with c_in_q2:
+            target_assignee = st.selectbox(
+                "担当者指定",
+                ["Auto-Routing (自動判別)", "一条 蓮 (CEO)", "風間 涼 (市場調査)", "結城 紬 (編集長)", "森川 拓真 (ライター)", "佐々木 翼 (広報)", "神崎 玲奈 (QA)", "綾瀬 七海 (人事)", "橘 律 (法務)", "白石 葵 (財務・経理)"]
+            )
+        submit_inquiry = st.form_submit_button("📨 送信して回答を得る (Send Inquiry)", type="primary", use_container_width=True)
+
+    if submit_inquiry and user_inquiry.strip():
+        # Map selected employee
+        assignee_map = {
+            "Auto-Routing (自動判別)": "auto",
+            "一条 蓮 (CEO)": "ichijo",
+            "風間 涼 (市場調査)": "kazama",
+            "結城 紬 (編集長)": "yuki",
+            "森川 拓真 (ライター)": "morikawa",
+            "佐々木 翼 (広報)": "sasaki",
+            "神崎 玲奈 (QA)": "kanzaki",
+            "綾瀬 七海 (人事)": "ayase",
+            "橘 律 (法務)": "tachibana",
+            "白石 葵 (財務・経理)": "shiraishi"
+        }
+        chosen_emp = assignee_map.get(target_assignee, "auto")
+        
+        with st.spinner("担当者がデスクで回答を作成中..."):
+            response_data = chat_manager.generate_response(user_inquiry, chosen_emp)
+            st.session_state.office_chat_history.append({
+                "user": user_inquiry,
+                "response": response_data,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+
+    # 会話履歴の表示
+    if st.session_state.office_chat_history:
+        st.markdown("#### 📜 Consultation & Directives Log")
+        for item in reversed(st.session_state.office_chat_history):
+            resp = item["response"]
+            st.markdown(f"""
+            <div class='user-query-card'>
+                <div style='font-size: 0.8rem; color: #94A3B8;'>🕒 {item.get('timestamp', '')} | 👤 <strong>あなたからの質問・指示:</strong></div>
+                <div style='font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-top: 4px;'>{item['user']}</div>
+            </div>
+            <div class='chat-bubble'>
+                <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
+                    <div style='font-weight: 800; color: #FFFFFF; font-size: 1.1rem;'>
+                        {resp.get('icon', '🧑‍💼')} {resp.get('name', '担当社員')} <span style='font-size: 0.85rem; color: #93C5FD; font-weight: 600;'>（{resp.get('role', '')} / {resp.get('department', '')}）</span>
+                    </div>
+                    <span class='status-live'><span class='pulse-dot'></span>回答完了</span>
+                </div>
+                <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{resp.get('content', '')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        if st.button("🗑️ 対話ログをクリア (Clear Consultation Log)"):
+            st.session_state.office_chat_history = []
+            st.rerun()
+
+    # -------------------------------------------------------------
+    # リアルタイム社員デスク一覧
+    # -------------------------------------------------------------
     st.markdown("---")
     st.markdown("<div class='section-title'>🖥️ Workspace Desks & Live Employee Activity</div>", unsafe_allow_html=True)
     
