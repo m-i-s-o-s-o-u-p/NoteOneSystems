@@ -173,9 +173,9 @@ with st.sidebar:
         st.session_state.nav_page = "🏢 Company Dashboard"
         st.rerun()
 
-    # 2. 🏢 Headquarter Office Room
-    if st.button("🏢 Headquarter Office Room", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Headquarter Office Room" else "secondary"):
-        st.session_state.nav_page = "🏢 Headquarter Office Room"
+    # 2. 🏢 Office Room (Updated name)
+    if st.button("🏢 Office Room", use_container_width=True, type="primary" if st.session_state.nav_page == "🏢 Office Room" else "secondary"):
+        st.session_state.nav_page = "🏢 Office Room"
         st.rerun()
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
@@ -325,19 +325,19 @@ if page == "🏢 Company Dashboard":
                 st.warning("Please enter a valid company name.")
 
 # ==========================================
-# 2. 🏢 Headquarter Office Room (社員対話デスク統合)
+# 2. 🏢 Office Room (メイン見出し: 🏢 Office Room / セクション: Headquarter)
 # ==========================================
-elif page == "🏢 Headquarter Office Room":
-    st.markdown("<div class='main-header'>Headquarter</div>", unsafe_allow_html=True)
+elif page == "🏢 Office Room":
+    st.markdown("<div class='main-header'>🏢 Office Room</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>9 specialized autonomous AI employees working in their designated virtual workspaces</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>Office Room</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Headquarter</div>", unsafe_allow_html=True)
     
     html_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/assets/game_office.html")
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             game_html = f.read()
-        components.html(game_html, height=530)
+        components.html(game_html, height=545)
 
     # -------------------------------------------------------------
     # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
@@ -402,7 +402,6 @@ elif page == "🏢 Headquarter Office Room":
         submit_inquiry = st.form_submit_button("📨 送信して回答を得る (Send Inquiry)", type="primary", use_container_width=True)
 
     if submit_inquiry and user_inquiry.strip():
-        # Map selected employee
         assignee_map = {
             "Auto-Routing (自動判別)": "auto",
             "一条 蓮 (CEO)": "ichijo",

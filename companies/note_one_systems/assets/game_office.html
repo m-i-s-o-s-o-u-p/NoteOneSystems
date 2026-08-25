@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0B132B; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 520px; }
+  body { background: #0B132B; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 540px; }
   
   .office-game-container {
     width: 100%;
     max-width: 920px;
-    height: 510px;
+    height: 530px;
     background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
     border: 2px solid #38BDF8;
     border-radius: 16px;
@@ -17,10 +17,60 @@
     box-shadow: 0 12px 36px rgba(0,0,0,0.6), inset 0 0 25px rgba(56, 189, 248, 0.15);
   }
 
+  /* 上部ヘッダーバー（Live in Office専用領域・オフィス要素との完全重なり防止） */
+  .top-hud-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 42px;
+    background: rgba(15, 23, 42, 0.85);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 18px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .hud-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #38BDF8;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .office-hud {
+    background: rgba(6, 78, 59, 0.85);
+    border: 1px solid #22C55E;
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #4ADE80;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+  }
+  .hud-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #22C55E;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22C55E;
+  }
+
   .floor-grid {
     position: absolute;
+    top: 42px;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 42px);
     background-image: 
       linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
@@ -45,12 +95,12 @@
     letter-spacing: 0.5px;
   }
 
-  /* Zone Layout */
-  .zone-ceo       { top: 20px; left: 20px; width: 220px; height: 180px; border-color: rgba(234, 179, 8, 0.4); }
-  .zone-admin     { top: 220px; left: 20px; width: 260px; height: 270px; border-color: rgba(99, 102, 241, 0.4); }
-  .zone-center    { top: 20px; left: 260px; width: 340px; height: 180px; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.03); }
-  .zone-editorial { top: 220px; left: 300px; width: 600px; height: 270px; border-color: rgba(249, 115, 22, 0.4); }
-  .zone-pr-mkt    { top: 20px; right: 20px; width: 260px; height: 180px; border-color: rgba(34, 197, 94, 0.4); }
+  /* ゾーンレイアウト（上部ヘッダー分下へオフセット） */
+  .zone-ceo       { top: 54px; left: 20px; width: 220px; height: 175px; border-color: rgba(234, 179, 8, 0.4); }
+  .zone-admin     { top: 245px; left: 20px; width: 260px; height: 265px; border-color: rgba(99, 102, 241, 0.4); }
+  .zone-center    { top: 54px; left: 260px; width: 340px; height: 175px; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.03); }
+  .zone-editorial { top: 245px; left: 300px; width: 600px; height: 265px; border-color: rgba(249, 115, 22, 0.4); }
+  .zone-pr-mkt    { top: 54px; right: 20px; width: 260px; height: 175px; border-color: rgba(34, 197, 94, 0.4); }
 
   .desk {
     position: absolute;
@@ -74,13 +124,13 @@
 
   .meeting-table {
     position: absolute;
-    top: 45px;
+    top: 42px;
     left: 35px;
     width: 270px;
-    height: 90px;
+    height: 88px;
     background: #0F172A;
     border: 3px solid #38BDF8;
-    border-radius: 45px;
+    border-radius: 44px;
     box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     display: flex;
     flex-direction: column;
@@ -91,7 +141,7 @@
     font-weight: 700;
   }
 
-  /* Chibi Avatars */
+  /* 二等身キャラクター */
   .chibi-avatar {
     position: absolute;
     width: 54px;
@@ -167,7 +217,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
 
-  /* Highest Z-Index Speech Bubble */
+  /* 最前面表示・見切れ防止の吹き出し (Z-Index 9999) */
   .speech-bubble {
     position: absolute;
     bottom: 78px;
@@ -203,18 +253,18 @@
     transform: translateY(0) scale(1);
   }
 
-  /* Employee Coordinates */
-  #emp-ichijo   { top: 75px; left: 100px; }
-  #emp-tachibana{ top: 270px; left: 50px; }
-  #emp-ayase    { top: 385px; left: 50px; }
-  #emp-shiraishi{ top: 330px; left: 180px; }
+  /* キャラクター位置（上部ヘッダー分調整） */
+  #emp-ichijo   { top: 100px; left: 100px; }
+  #emp-tachibana{ top: 290px; left: 50px; }
+  #emp-ayase    { top: 405px; left: 50px; }
+  #emp-shiraishi{ top: 350px; left: 180px; }
 
-  #emp-kazama   { top: 270px; left: 340px; }
-  #emp-yuki     { top: 270px; left: 470px; }
-  #emp-morikawa { top: 270px; left: 600px; }
-  #emp-kanzaki  { top: 385px; left: 470px; }
+  #emp-kazama   { top: 290px; left: 340px; }
+  #emp-yuki     { top: 290px; left: 470px; }
+  #emp-morikawa { top: 290px; left: 600px; }
+  #emp-kanzaki  { top: 405px; left: 470px; }
 
-  #emp-sasaki   { top: 75px; right: 110px; }
+  #emp-sasaki   { top: 100px; right: 110px; }
 
   .walk-around {
     animation: gentleWander 14s infinite alternate ease-in-out;
@@ -226,44 +276,21 @@
     75% { transform: translate(6px, 6px); }
     100% { transform: translate(0, 0); }
   }
-
-  /* HUD */
-  .office-hud {
-    position: absolute;
-    top: 12px;
-    right: 18px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid #22C55E;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 11px;
-    color: #4ADE80;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 50;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  }
-  .hud-live-dot {
-    width: 8px;
-    height: 8px;
-    background: #22C55E;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #22C55E;
-  }
 </style>
 </head>
 <body>
 
 <div class="office-game-container">
-  <div class="floor-grid"></div>
-
-  <!-- HUD: Live in Office: 9/9 -->
-  <div class="office-hud">
-    <div class="hud-live-dot"></div>
-    <span>Live in Office: 9/9</span>
+  <!-- 上部専用ヘッダーバー: Live in Office がオフィスゾーンと重ならない独立領域 -->
+  <div class="top-hud-bar">
+    <div class="hud-title">🏢 Note One Systems Virtual Office Floor</div>
+    <div class="office-hud">
+      <div class="hud-live-dot"></div>
+      <span>Live in Office: 9/9</span>
+    </div>
   </div>
+
+  <div class="floor-grid"></div>
 
   <!-- 1. CEO Zone -->
   <div class="room-zone zone-ceo">
