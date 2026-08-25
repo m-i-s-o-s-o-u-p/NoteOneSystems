@@ -99,11 +99,11 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
                 break
 
         sns_blocks.append(f"""
-        <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-            <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
-                <span style="background: {bg_col}; color: {txt_col}; font-weight: 800; font-size: 0.8rem; padding: 3px 10px; border-radius: 4px; margin-right: 8px;">{icon} {s_title}</span>
+        <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                <span class="sns-platform-badge" style="background: {bg_col}; color: #FFFFFF !important; font-weight: 800; font-size: 0.85rem; padding: 4px 12px; border-radius: 6px; letter-spacing: 0.2px;">{icon} {s_title}</span>
             </div>
-            <div style="color: #1E293B; font-size: 0.92rem; line-height: 1.75; white-space: pre-wrap;">{s_body}</div>
+            <div style="color: #0F172A !important; font-size: 0.96rem; line-height: 1.8; white-space: pre-wrap; font-weight: 500;">{s_body}</div>
         </div>
         """)
     sns_html = "".join(sns_blocks)
@@ -112,39 +112,39 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
     qa_txt = clean_txt(art.get('qa_score', '採点中'))
 
     return f"""
-    <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:26px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 22px rgba(0,0,0,0.18); margin: 18px 0;">
+    <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:28px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 24px rgba(0,0,0,0.15); margin: 18px 0;">
         <div style="background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 24px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;">
-                <span style="font-weight: 800; font-size: 1.05rem; color: #0F172A;">📋 査読前提・品質監査情報 (Executive Review Header)</span>
-                <span style="background: #0284C7; color: #FFFFFF; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">Ready for Sign-off</span>
+                <span style="font-weight: 800; font-size: 1.05rem; color: #0F172A !important;">📋 査読前提・品質監査情報 (Executive Review Header)</span>
+                <span style="background: #0284C7; color: #FFFFFF !important; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">Ready for Sign-off</span>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.92rem;">
                 <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
-                    <strong style="color: #0369A1;">🏢 担当部門・課:</strong>
-                    <div style="color: #1E293B; margin-top:2px;">編集部 記事制作課（執筆: 森川 拓真 / 編集: 結城 紬）<br>マーケティング部 広報課（佐々木 翼）</div>
+                    <strong style="color: #0369A1 !important;">🏢 担当部門・課:</strong>
+                    <div style="color: #1E293B !important; margin-top:2px;">編集部 記事制作課（執筆: 森川 拓真 / 編集: 結城 紬）<br>マーケティング部 広報課（佐々木 翼）</div>
                 </div>
                 <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
-                    <strong style="color: #047857;">📝 文字数・読了目安:</strong>
-                    <div style="color: #1E293B; margin-top:2px;"><strong>{char_count:,} 文字</strong>（読了目安: 約 {read_time_min} 分 / 推奨価格: ¥{art.get('price', 500):,}）</div>
+                    <strong style="color: #047857 !important;">📝 文字数・読了目安:</strong>
+                    <div style="color: #1E293B !important; margin-top:2px;"><strong style="color:#0F172A !important;">{char_count:,} 文字</strong>（読了目安: 約 {read_time_min} 分 / 推奨価格: ¥{art.get('price', 500):,}）</div>
                 </div>
                 <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
-                    <strong style="color: #D97706;">💡 発生元企画提案:</strong>
-                    <div style="color: #1E293B; margin-top:2px;">{origin_topic_str}</div>
+                    <strong style="color: #D97706 !important;">💡 発生元企画提案:</strong>
+                    <div style="color: #1E293B !important; margin-top:2px;">{origin_topic_str}</div>
                 </div>
                 <div style="background:#FFFFFF; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1;">
-                    <strong style="color: #7C3AED;">🔍 品質管理・検証ソース:</strong>
-                    <div style="color: #1E293B; margin-top:2px;">note利用規約(2026最新版), 景品表示法(不当表示防止基準), 会社法第7条(商号), 社内QA規程Ver.2.1</div>
+                    <strong style="color: #7C3AED !important;">🔍 品質管理・検証ソース:</strong>
+                    <div style="color: #1E293B !important; margin-top:2px;">note利用規約(2026最新版), 景品表示法(不当表示防止基準), 会社法第7条(商号), 社内QA規程Ver.2.1</div>
                 </div>
             </div>
         </div>
 
-        <h3 style="color: #0F172A; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📋 note完成原稿プレビュー</h3>
+        <h3 style="color: #0F172A !important; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📋 note完成原稿プレビュー</h3>
         {body_html}
 
-        <div style="height: 1px; background: #CBD5E1; margin: 26px 0;"></div>
+        <div style="height: 1px; background: #CBD5E1; margin: 28px 0;"></div>
 
-        <h3 style="color: #1D4ED8; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📢 5大SNS告知文（佐々木 翼 作成）</h3>
-        <div style="background: #F8FAFC; padding: 18px; border-radius: 8px; border: 1px solid #CBD5E1; margin: 16px 0;">
+        <h3 style="color: #0F172A !important; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📢 5大SNS告知文（佐々木 翼 作成）</h3>
+        <div style="background: #F8FAFC; padding: 20px; border-radius: 10px; border: 1px solid #CBD5E1; margin: 16px 0;">
             {sns_html}
         </div>
 
@@ -342,6 +342,13 @@ st.markdown("""
     }
     .review-paper-white strong {
         color: #0F172A !important;
+        font-weight: 800 !important;
+    }
+    
+    /* Dedicated override for branded SNS badges to keep white text */
+    .sns-platform-badge,
+    .review-paper-white .sns-platform-badge {
+        color: #FFFFFF !important;
         font-weight: 800 !important;
     }
 
