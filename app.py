@@ -274,6 +274,12 @@ st.markdown("""
         box-shadow: 0 2px 10px rgba(56, 189, 248, 0.45) !important;
     }
     
+    /* Optimize main content top padding so headers appear cleanly at top */
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
     h1, h2, h3, h4, h5, h6 {
         color: #FFFFFF !important;
     }
@@ -283,10 +289,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Top anchor element for scrolling
-st.markdown("<div id='top-of-page'></div>", unsafe_allow_html=True)
-
-# Robust auto-scroll top script running on every render/trigger
+# Robust auto-scroll top script running on every render/trigger (Exact 0px absolute top)
 components.html(f"""
 <div id="scroll-node-{st.session_state.scroll_trigger}"></div>
 <script>
@@ -294,16 +297,22 @@ components.html(f"""
         function scrollMainTop() {{
             try {{
                 const pDoc = window.parent.document;
-                const topAnchor = pDoc.getElementById('top-of-page');
-                if (topAnchor) {{
-                    topAnchor.scrollIntoView({{ behavior: 'instant', block: 'start' }});
-                }}
-                const appContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]') ||
-                                     pDoc.querySelector('section.main') ||
-                                     pDoc.querySelector('.main') ||
-                                     pDoc.querySelector('.stApp');
+                const appContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]');
+                const mainSection = pDoc.querySelector('section.main');
+                const mainBlock = pDoc.querySelector('[data-testid="stMainBlockContainer"]');
+                const stApp = pDoc.querySelector('.stApp');
+                
                 if (appContainer) {{
                     appContainer.scrollTop = 0;
+                }}
+                if (mainSection) {{
+                    mainSection.scrollTop = 0;
+                }}
+                if (mainBlock) {{
+                    mainBlock.scrollTop = 0;
+                }}
+                if (stApp) {{
+                    stApp.scrollTop = 0;
                 }}
                 pDoc.documentElement.scrollTop = 0;
                 pDoc.body.scrollTop = 0;
@@ -311,10 +320,12 @@ components.html(f"""
             }} catch(e) {{}}
         }}
 
+        // Trigger immediately and at sequential layout completion ticks
         scrollMainTop();
-        setTimeout(scrollMainTop, 50);
-        setTimeout(scrollMainTop, 150);
-        setTimeout(scrollMainTop, 350);
+        setTimeout(scrollMainTop, 30);
+        setTimeout(scrollMainTop, 100);
+        setTimeout(scrollMainTop, 250);
+        setTimeout(scrollMainTop, 500);
     }})();
 </script>
 """, height=0)
@@ -748,8 +759,7 @@ elif page_id == "office":
                 st.rerun()
 
         with col_dec2:
-            rev_btn_label = "✍️ 否認（修正指示を入力）" if not st.session_state.show_univ_rev_form else "✖️ 否認欄を閉じる"
-            if st.button(rev_btn_label, use_container_width=True, key="univ_btn_toggle_revision"):
+            if st.button("✍️ 否認", use_container_width=True, key="univ_btn_toggle_revision"):
                 st.session_state.show_univ_rev_form = not st.session_state.show_univ_rev_form
                 st.rerun()
 
@@ -1130,8 +1140,7 @@ elif page_id == "market_research":
                 st.rerun()
 
         with col_tpa2:
-            rev_tp_main_label = "✍️ 否認（再調査指示を入力）" if not st.session_state.show_mr_tp_rev else "✖️ 否認欄を閉じる"
-            if st.button(rev_tp_main_label, use_container_width=True, key="mr_toggle_tp_rev"):
+            if st.button("✍️ 否認", use_container_width=True, key="mr_toggle_tp_rev"):
                 st.session_state.show_mr_tp_rev = not st.session_state.show_mr_tp_rev
                 st.rerun()
 
@@ -1430,8 +1439,7 @@ elif page_id == "qa":
                 st.rerun()
 
         with app_col2:
-            rev_qa_label = "✍️ 否認（修正指示を入力）" if not st.session_state.show_qa_art_rev else "✖️ 否認欄を閉じる"
-            if st.button(rev_qa_label, use_container_width=True, key="qa_toggle_art_rev"):
+            if st.button("✍️ 否認", use_container_width=True, key="qa_toggle_art_rev"):
                 st.session_state.show_qa_art_rev = not st.session_state.show_qa_art_rev
                 st.rerun()
 
