@@ -86,12 +86,20 @@ if "api_key" not in st.session_state:
     st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
 if "active_page_id" not in st.session_state:
     st.session_state.active_page_id = "dashboard"
+if "scroll_trigger" not in st.session_state:
+    st.session_state.scroll_trigger = 0
 if "office_chat_history" not in st.session_state:
     st.session_state.office_chat_history = []
 if "prefill_topic" not in st.session_state:
     st.session_state.prefill_topic = ""
 if "prefill_audience" not in st.session_state:
     st.session_state.prefill_audience = ""
+
+# Navigation Helper: changes page or resets scroll to top if already selected
+def navigate_to(target_id: str):
+    st.session_state.active_page_id = target_id
+    st.session_state.scroll_trigger += 1
+    st.rerun()
 
 lang = st.session_state.language
 ai_client = AIClient(api_key=st.session_state.api_key)
@@ -134,7 +142,7 @@ st.markdown("""
         color: #F8FAFC !important;
     }
     
-    /* 📄 Single Integrated Paper-White Review Dossier */
+    /* 📄 Single Integrated Paper-White Review Dossier (100% White Background) */
     .review-paper-white {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
@@ -275,6 +283,29 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# JavaScript Component to auto-scroll top on navigation click
+components.html("""
+<script>
+    // Jump to top of main window and Streamlit container
+    function scrollToTop() {
+        try {
+            const mainContainer = window.parent.document.querySelector('.main') || 
+                                  window.parent.document.querySelector('section.main') || 
+                                  window.parent.document.querySelector('[data-testid="stMainBlockContainer"]') ||
+                                  window.parent.document.querySelector('.stApp');
+            if (mainContainer) {
+                mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.parent.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch(e) {
+            window.scrollTo(0, 0);
+        }
+    }
+    scrollToTop();
+</script>
+""", height=0)
+
 # ==========================================
 # Sidebar: Multilingual Navigation Menu
 # ==========================================
@@ -285,60 +316,47 @@ with st.sidebar:
 
     # 1. 🏢 Company Dashboard (Top Level)
     if st.button(t("nav_dashboard", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "dashboard" else "secondary"):
-        st.session_state.active_page_id = "dashboard"
-        st.rerun()
+        navigate_to("dashboard")
 
     # 2. 🏢 Office Room
     if st.button(t("nav_office", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "office" else "secondary"):
-        st.session_state.active_page_id = "office"
-        st.rerun()
+        navigate_to("office")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 3. 📝 Editorial Department
     st.markdown(f"<div style='font-size:0.95rem; font-weight:800; color:#38BDF8; padding: 4px 6px;'>{t('dept_editorial', lang)}</div>", unsafe_allow_html=True)
     if st.button(f"　 {t('nav_market_research', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "market_research" else "secondary"):
-        st.session_state.active_page_id = "market_research"
-        st.rerun()
+        navigate_to("market_research")
     if st.button(f"　 {t('nav_content_creation', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "content_creation" else "secondary"):
-        st.session_state.active_page_id = "content_creation"
-        st.rerun()
+        navigate_to("content_creation")
     if st.button(f"　 {t('nav_pr', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "pr" else "secondary"):
-        st.session_state.active_page_id = "pr"
-        st.rerun()
+        navigate_to("pr")
     if st.button(f"　 {t('nav_qa', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "qa" else "secondary"):
-        st.session_state.active_page_id = "qa"
-        st.rerun()
+        navigate_to("qa")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 4. 🏛️ Administration Department
     st.markdown(f"<div style='font-size:0.95rem; font-weight:800; color:#A78BFA; padding: 4px 6px;'>{t('dept_admin', lang)}</div>", unsafe_allow_html=True)
     if st.button(f"　 {t('nav_hr', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "hr" else "secondary"):
-        st.session_state.active_page_id = "hr"
-        st.rerun()
+        navigate_to("hr")
     if st.button(f"　 {t('nav_legal', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "legal" else "secondary"):
-        st.session_state.active_page_id = "legal"
-        st.rerun()
+        navigate_to("legal")
     if st.button(f"　 {t('nav_finance', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "finance" else "secondary"):
-        st.session_state.active_page_id = "finance"
-        st.rerun()
+        navigate_to("finance")
     if st.button(f"　 {t('nav_accounting', lang)}", use_container_width=True, type="primary" if st.session_state.active_page_id == "accounting" else "secondary"):
-        st.session_state.active_page_id = "accounting"
-        st.rerun()
+        navigate_to("accounting")
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 5. Independent Utilities
     if st.button(t("nav_helpdesk", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "helpdesk" else "secondary"):
-        st.session_state.active_page_id = "helpdesk"
-        st.rerun()
+        navigate_to("helpdesk")
     if st.button(t("nav_profiles", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "profiles" else "secondary"):
-        st.session_state.active_page_id = "profiles"
-        st.rerun()
+        navigate_to("profiles")
     if st.button(t("nav_cloud_guide", lang), use_container_width=True, type="primary" if st.session_state.active_page_id == "cloud_guide" else "secondary"):
-        st.session_state.active_page_id = "cloud_guide"
-        st.rerun()
+        navigate_to("cloud_guide")
 
     # ==========================================
     # 🌐 言語切り替えリンクセクション（English左 / 日本語右）
@@ -349,10 +367,12 @@ with st.sidebar:
     with col_lang1:
         if st.button("🇺🇸 English", use_container_width=True, type="primary" if lang == "en" else "secondary"):
             st.session_state.language = "en"
+            st.session_state.scroll_trigger += 1
             st.rerun()
     with col_lang2:
         if st.button("🇯🇵 日本語", use_container_width=True, type="primary" if lang == "ja" else "secondary"):
             st.session_state.language = "ja"
+            st.session_state.scroll_trigger += 1
             st.rerun()
 
     # ==========================================
@@ -534,6 +554,8 @@ elif page_id == "office":
                 if st.button("📨 送信", type="primary", key="off_submit_rev_art"):
                     if fb_txt.strip():
                         workflow.request_revision(art["id"], fb_txt)
+                        # Clear text area state so input box resets to empty
+                        st.session_state.off_rev_art_fb = ""
                         st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
                         st.rerun()
                     else:
@@ -552,7 +574,12 @@ elif page_id == "office":
         read_time_min = max(1, round(char_count / 450))
         origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
         
-        paywall_badge_html = f"<div style='background-color: #FEF3C7; border: 2px dashed #F59E0B; border-radius: 8px; padding: 12px; margin: 16px 0; color: #92400E; font-weight: 800; text-align: center;'>{t('qa_paywall_badge', lang)}</div>"
+        # 100% White Background for Paywall threshold indicator badge
+        paywall_badge_html = f"""
+        <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 22px 0; color: #0369A1; font-weight: 800; text-align: center;'>
+            🔒 {t('qa_paywall_badge', lang)}
+        </div>
+        """
         if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
             delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
             parts = clean_content.split(delimiter)
@@ -588,7 +615,7 @@ elif page_id == "office":
                 </div>
             </div>
 
-            <!-- 2. note完成原稿プレビュー -->
+            <!-- 2. note完成原稿プレビュー（白背景） -->
             <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
             <div style='font-size: 1rem; color: #0F172A; margin: 16px 0; line-height: 1.8;'>{body_render}</div>
 
@@ -663,6 +690,8 @@ elif page_id == "office":
                 if st.button("📨 送信", type="primary", key="off_submit_rev_tp"):
                     if rev_fb.strip():
                         market_manager.request_revision(tp["id"], rev_fb)
+                        # Clear text area state so input box resets to empty
+                        st.session_state.off_rev_tp_fb = ""
                         st.warning("風間アナリストに再調査指示を伝達しました。")
                         st.rerun()
                     else:
@@ -1013,10 +1042,11 @@ elif page_id == "market_research":
         with col_tpa2:
             with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
                 st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang))
-                if st.button("📨 再調査指示を送信する", type="primary"):
+                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="mr_rev_tp_fb")
+                if st.button("📨 再調査指示を送信する", type="primary", key="mr_submit_rev_tp"):
                     if rev_fb.strip():
                         market_manager.request_revision(tp["id"], rev_fb)
+                        st.session_state.mr_rev_tp_fb = ""
                         st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
                         st.rerun()
                     else:
@@ -1266,6 +1296,7 @@ elif page_id == "qa":
                 if st.button("📨 修正指示を送信する", type="primary", key="qa_submit_rev_main"):
                     if feedback_txt.strip():
                         workflow.request_revision(art["id"], feedback_txt)
+                        st.session_state.qa_rev_main_fb = ""
                         st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
                         st.rerun()
                     else:
@@ -1285,7 +1316,12 @@ elif page_id == "qa":
         read_time_min = max(1, round(char_count / 450))
         origin_topic_str = f"企画テーマ: 『{clean_txt(art.get('topic', ''))}』 (市場調査課 風間 涼 分析・承認済)" if art.get('topic') else "実務効率化・Notionテンプレート実践"
 
-        paywall_badge_html = f"<div style='background-color: #FEF3C7; border: 2px dashed #F59E0B; border-radius: 8px; padding: 12px; margin: 16px 0; color: #92400E; font-weight: 800; text-align: center;'>{t('qa_paywall_badge', lang)}</div>"
+        # 100% White Background for Paywall threshold indicator badge
+        paywall_badge_html = f"""
+        <div style='background-color: #FFFFFF; border: 2px dashed #0284C7; border-radius: 8px; padding: 14px; margin: 22px 0; color: #0369A1; font-weight: 800; text-align: center;'>
+            🔒 {t('qa_paywall_badge', lang)}
+        </div>
+        """
         if "🔒 ここから先は有料エリアです" in clean_content or "🔒 [Paywall] Premium Section Starts Here" in clean_content:
             delimiter = "🔒 ここから先は有料エリアです" if "🔒 ここから先は有料エリアです" in clean_content else "🔒 [Paywall] Premium Section Starts Here"
             parts = clean_content.split(delimiter)
@@ -1321,7 +1357,7 @@ elif page_id == "qa":
                 </div>
             </div>
 
-            <!-- 2. note完成原稿プレビュー -->
+            <!-- 2. note完成原稿プレビュー（白背景） -->
             <h3 style='color: #0F172A !important; margin-top:0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px;'>📋 note完成原稿プレビュー</h3>
             <div style='font-size: 1rem; color: #0F172A; margin: 16px 0; line-height: 1.8;'>{body_render}</div>
 
