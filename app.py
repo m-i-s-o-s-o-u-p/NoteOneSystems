@@ -265,9 +265,17 @@ workflow = NoteOneWorkflow(ai_client)
 chat_manager = OfficeChatManager(ai_client)
 market_manager = MarketResearchManager(ai_client)
 
-# High-contrast UI Styling: Dark Base & Paper-White Review Dossier
+# High-contrast UI Styling: Scoped Dark Theme & Pure White Review Dossier
 st.markdown("""
 <style>
+    /* ============================================================== */
+    /* 🏢 1. GLOBAL BASE STYLES & TYPOGRAPHY                         */
+    /* ============================================================== */
+    .stApp {
+        background-color: #0B132B !important;
+        color: #F8FAFC !important;
+    }
+    
     .main-header {
         font-size: 2.2rem;
         font-weight: 800;
@@ -300,6 +308,46 @@ st.markdown("""
         color: #F8FAFC !important;
     }
     
+    /* ============================================================== */
+    /* 📄 2. PAPER-WHITE REVIEW DOSSIER (100% High-Contrast Black)   */
+    /* ============================================================== */
+    .review-paper-white,
+    .review-paper-white * {
+        color: #0F172A !important;
+    }
+    .review-paper-white {
+        background-color: #FFFFFF !important;
+        border: 2px solid #CBD5E1 !important;
+        border-left: 6px solid #0284C7 !important;
+        border-radius: 12px;
+        padding: 28px;
+        margin: 18px 0;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+        line-height: 1.85;
+    }
+    .review-paper-white h1, 
+    .review-paper-white h2, 
+    .review-paper-white h3, 
+    .review-paper-white h4, 
+    .review-paper-white h5, 
+    .review-paper-white h6 {
+        color: #0F172A !important;
+        font-weight: 800 !important;
+    }
+    .review-paper-white p, 
+    .review-paper-white li, 
+    .review-paper-white label,
+    .review-paper-white div {
+        color: #1E293B !important;
+    }
+    .review-paper-white strong {
+        color: #0F172A !important;
+        font-weight: 800 !important;
+    }
+
+    /* ============================================================== */
+    /* 👑 3. APPROVAL BOXES & STATUS CARDS                           */
+    /* ============================================================== */
     .approval-box-locked {
         background: linear-gradient(135deg, #2A1711 0%, #1E1B4B 100%) !important;
         border: 2px solid #F59E0B !important;
@@ -307,8 +355,14 @@ st.markdown("""
         padding: 22px;
         margin: 20px 0;
         box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
+    }
+    .approval-box-locked h3 {
+        color: #FCD34D !important;
+    }
+    .approval-box-locked div {
         color: #FFFFFF !important;
     }
+    
     .approval-box-approved {
         background: linear-gradient(135deg, #064E3B 0%, #0F172A 100%) !important;
         border: 2px solid #10B981 !important;
@@ -316,8 +370,14 @@ st.markdown("""
         padding: 22px;
         margin: 20px 0;
         box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+    }
+    .approval-box-approved h3 {
+        color: #6EE7B7 !important;
+    }
+    .approval-box-approved div {
         color: #FFFFFF !important;
     }
+    
     .desk-card {
         background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
         border-radius: 12px;
@@ -325,13 +385,16 @@ st.markdown("""
         border: 1px solid #38BDF8 !important;
         margin-bottom: 16px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .desk-card div, .desk-card span {
         color: #F8FAFC !important;
     }
+    
     .status-live {
         display: inline-flex;
         align-items: center;
         background-color: #064E3B;
-        color: #4ADE80;
+        color: #4ADE80 !important;
         font-size: 0.8rem;
         font-weight: 700;
         padding: 4px 10px;
@@ -371,6 +434,9 @@ st.markdown("""
         border: 1px solid #1E293B;
     }
     
+    /* ============================================================== */
+    /* 🧭 4. SIDEBAR NAVIGATION LINKS                                 */
+    /* ============================================================== */
     div[data-testid="stSidebar"] button {
         text-align: left !important;
         justify-content: flex-start !important;
@@ -380,7 +446,7 @@ st.markdown("""
         margin-bottom: 3px !important;
         border: 1px solid transparent !important;
         background-color: transparent !important;
-        color: #CBD5E1 !important;
+        color: #E2E8F0 !important;
     }
     div[data-testid="stSidebar"] button:hover {
         background-color: #1E293B !important;
@@ -399,13 +465,6 @@ st.markdown("""
     .block-container {
         padding-top: 1.2rem !important;
         padding-bottom: 3rem !important;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-        color: #FFFFFF !important;
-    }
-    p, span, label {
-        color: #E2E8F0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
