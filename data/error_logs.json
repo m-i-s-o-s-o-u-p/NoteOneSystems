@@ -1,10 +1,19 @@
 {
   "title": "NoteOneSystems 株式会社 社内ヘルプデスク：全エラー管理台帳",
   "updated_at": "2026-08-25",
-  "total_errors": 4,
-  "resolved_errors": 4,
+  "total_errors": 5,
+  "resolved_errors": 5,
   "pending_errors": 0,
   "errors": [
+    {
+      "id": "ERR_20260825_002",
+      "occurred_at": "2026-08-25 19:40:35",
+      "module": "オーナー決裁センター (Executive Revision Popover Form)",
+      "error_message": "StreamlitAPIException: st.session_state.off_rev_art_fb cannot be modified after the widget with key off_rev_art_fb is instantiated.",
+      "root_cause": "Streamlitのウィジェット仕様上、すでに画面上に宣言・インスタンス化されたウィジェットのkeyを持つsession_stateを同一実行パス上で直接空文字に代入・上書きしようとしたため。",
+      "solution": "st.form(..., clear_on_submit=True)コンポーネントでポップオーバー内のテキスト入力フォームを包括し、手動のsession_state代入に頼らずStreamlit標準機能による送信後自動クリア機構へリファクタリングして完全解消。",
+      "status": "🟢 解決済み"
+    },
     {
       "id": "ERR_20260825_001",
       "occurred_at": "2026-08-25 18:18:04",

@@ -550,16 +550,16 @@ elif page_id == "office":
         with col_o_ap2:
             with st.popover(t("qa_btn_revision", lang), use_container_width=True):
                 st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
-                if st.button("📨 送信", type="primary", key="off_submit_rev_art"):
-                    if fb_txt.strip():
-                        workflow.request_revision(art["id"], fb_txt)
-                        # Clear text area state so input box resets to empty
-                        st.session_state.off_rev_art_fb = ""
-                        st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
-                        st.rerun()
-                    else:
-                        st.error("修正指示内容を入力してください。")
+                with st.form("office_article_revision_form", clear_on_submit=True):
+                    fb_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="off_rev_art_fb")
+                    submit_rev_art = st.form_submit_button("📨 送信", type="primary", use_container_width=True)
+                    if submit_rev_art:
+                        if fb_txt.strip():
+                            workflow.request_revision(art["id"], fb_txt)
+                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            st.rerun()
+                        else:
+                            st.error("修正指示内容を入力してください。")
         with col_o_ap3:
             if st.button(t("qa_btn_reject", lang), use_container_width=True, key="off_btn_rej_art"):
                 workflow.reject_article(art["id"])
@@ -686,16 +686,16 @@ elif page_id == "office":
         with col_o_tp2:
             with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
                 st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
-                if st.button("📨 送信", type="primary", key="off_submit_rev_tp"):
-                    if rev_fb.strip():
-                        market_manager.request_revision(tp["id"], rev_fb)
-                        # Clear text area state so input box resets to empty
-                        st.session_state.off_rev_tp_fb = ""
-                        st.warning("風間アナリストに再調査指示を伝達しました。")
-                        st.rerun()
-                    else:
-                        st.error("指示内容を入力してください。")
+                with st.form("office_topic_revision_form", clear_on_submit=True):
+                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="off_rev_tp_fb")
+                    submit_rev_tp = st.form_submit_button("📨 送信", type="primary", use_container_width=True)
+                    if submit_rev_tp:
+                        if rev_fb.strip():
+                            market_manager.request_revision(tp["id"], rev_fb)
+                            st.warning("風間アナリストに再調査指示を伝達しました。")
+                            st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
         with col_o_tp3:
             if st.button(t("mr_btn_reject_topic", lang), use_container_width=True, key="off_btn_rej_tp"):
                 market_manager.reject_topic(tp["id"])
@@ -1042,15 +1042,16 @@ elif page_id == "market_research":
         with col_tpa2:
             with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
                 st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
-                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="mr_rev_tp_fb")
-                if st.button("📨 再調査指示を送信する", type="primary", key="mr_submit_rev_tp"):
-                    if rev_fb.strip():
-                        market_manager.request_revision(tp["id"], rev_fb)
-                        st.session_state.mr_rev_tp_fb = ""
-                        st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
-                        st.rerun()
-                    else:
-                        st.error("指示内容を入力してください。")
+                with st.form("mr_page_topic_revision_form", clear_on_submit=True):
+                    rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang), key="mr_rev_tp_fb")
+                    submit_mr_rev = st.form_submit_button("📨 再調査指示を送信する", type="primary", use_container_width=True)
+                    if submit_mr_rev:
+                        if rev_fb.strip():
+                            market_manager.request_revision(tp["id"], rev_fb)
+                            st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
+                            st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
 
         with col_tpa3:
             if st.button(t("mr_btn_reject_topic", lang), use_container_width=True):
@@ -1292,15 +1293,16 @@ elif page_id == "qa":
         with app_col2:
             with st.popover(t("qa_btn_revision", lang), use_container_width=True):
                 st.markdown(f"#### {t('qa_btn_revision', lang)}")
-                feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
-                if st.button("📨 修正指示を送信する", type="primary", key="qa_submit_rev_main"):
-                    if feedback_txt.strip():
-                        workflow.request_revision(art["id"], feedback_txt)
-                        st.session_state.qa_rev_main_fb = ""
-                        st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
-                        st.rerun()
-                    else:
-                        st.error("修正指示内容を入力してください。")
+                with st.form("qa_page_article_revision_form", clear_on_submit=True):
+                    feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
+                    submit_qa_rev = st.form_submit_button("📨 修正指示を送信する", type="primary", use_container_width=True)
+                    if submit_qa_rev:
+                        if feedback_txt.strip():
+                            workflow.request_revision(art["id"], feedback_txt)
+                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            st.rerun()
+                        else:
+                            st.error("修正指示内容を入力してください。")
 
         with app_col3:
             if st.button(t("qa_btn_reject", lang), use_container_width=True, key="qa_btn_rej_main"):
