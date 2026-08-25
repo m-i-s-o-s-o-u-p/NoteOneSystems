@@ -10,19 +10,20 @@ from core.ringi_manager import RingiManager
 from core.hr_manager import HRManager
 from companies.note_one_systems.workflow import NoteOneWorkflow
 from companies.note_one_systems.office_chat_manager import OfficeChatManager
+from companies.note_one_systems.market_research_manager import MarketResearchManager
 from core.i18n import t
 
 # Page Configuration
 st.set_page_config(
-    page_title="Note One Systems ,Inc | AI Enterprise Platform",
+    page_title="Note One Systems, Inc. | AI Enterprise Platform",
     page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Session State Initialization
+# Session State Initialization (English as default base language)
 if "language" not in st.session_state:
-    st.session_state.language = "ja"  # Default to Japanese as requested
+    st.session_state.language = "en"
 if "holdings_manager" not in st.session_state:
     st.session_state.holdings_manager = HoldingsManager()
 if "ringi_manager" not in st.session_state:
@@ -35,13 +36,18 @@ if "active_page_id" not in st.session_state:
     st.session_state.active_page_id = "dashboard"
 if "office_chat_history" not in st.session_state:
     st.session_state.office_chat_history = []
+if "prefill_topic" not in st.session_state:
+    st.session_state.prefill_topic = ""
+if "prefill_audience" not in st.session_state:
+    st.session_state.prefill_audience = ""
 
 lang = st.session_state.language
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
 chat_manager = OfficeChatManager(ai_client)
+market_manager = MarketResearchManager(ai_client)
 
-# High-contrast White Text & Cerulean Blue Active State Styles
+# High-contrast White Text & Sky Blue Active State Styles
 st.markdown("""
 <style>
     .main-header {
@@ -61,7 +67,7 @@ st.markdown("""
         font-size: 1.35rem;
         font-weight: 700;
         color: #FFFFFF !important;
-        border-left: 5px solid #007BA7;
+        border-left: 5px solid #38BDF8;
         padding-left: 12px;
         margin: 24px 0 16px 0;
         letter-spacing: -0.3px;
@@ -75,11 +81,29 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         color: #F8FAFC !important;
     }
+    .approval-box-locked {
+        background: linear-gradient(135deg, #2A1711 0%, #1E1B4B 100%) !important;
+        border: 2px solid #F59E0B !important;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 22px;
+        box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
+        color: #FFFFFF !important;
+    }
+    .approval-box-approved {
+        background: linear-gradient(135deg, #064E3B 0%, #0F172A 100%) !important;
+        border: 2px solid #10B981 !important;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 22px;
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+        color: #FFFFFF !important;
+    }
     .desk-card {
         background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
         border-radius: 12px;
         padding: 18px;
-        border: 1px solid #007BA7 !important;
+        border: 1px solid #38BDF8 !important;
         margin-bottom: 16px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         color: #F8FAFC !important;
@@ -110,7 +134,7 @@ st.markdown("""
     }
     .chat-bubble {
         background-color: #1E293B !important;
-        border-left: 5px solid #007BA7;
+        border-left: 5px solid #38BDF8;
         padding: 16px 20px;
         border-radius: 8px;
         margin-bottom: 14px;
@@ -145,14 +169,14 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Active Sidebar Navigation: Cerulean Blue (#007BA7) */
+    /* Active Sidebar Navigation: Bright Sky Blue (#38BDF8) Highlight */
     div[data-testid="stSidebar"] button[kind="primary"],
     div[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {
-        background-color: #007BA7 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #38BDF8 !important;
+        background-color: #38BDF8 !important;
+        color: #0B132B !important;
+        border: 1px solid #7DD3FC !important;
         font-weight: 800 !important;
-        box-shadow: 0 2px 10px rgba(0, 123, 167, 0.5) !important;
+        box-shadow: 0 2px 10px rgba(56, 189, 248, 0.45) !important;
     }
     
     h1, h2, h3, h4, h5, h6 {
@@ -165,10 +189,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# Sidebar: Dynamic Multilingual Navigation Menu
+# Sidebar: Multilingual Navigation Menu
 # ==========================================
 with st.sidebar:
-    st.markdown(f"<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems ,Inc</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#FFFFFF !important;'>🏢 Note One Systems, Inc.</h2>", unsafe_allow_html=True)
     st.caption(t("sidebar_subtitle", lang))
     st.markdown("---")
 
@@ -229,6 +253,24 @@ with st.sidebar:
         st.session_state.active_page_id = "cloud_guide"
         st.rerun()
 
+    # ==========================================
+    # 🌐 言語切り替えリンクセクション（English左 / 日本語右）
+    # ==========================================
+    st.markdown("---")
+    st.markdown(f"<div style='font-size:0.85rem; font-weight:800; color:#38BDF8; margin-bottom:6px;'>{t('lang_section_title', lang)}</div>", unsafe_allow_html=True)
+    col_lang1, col_lang2 = st.columns(2)
+    with col_lang1:
+        if st.button("🇺🇸 English", use_container_width=True, type="primary" if lang == "en" else "secondary"):
+            st.session_state.language = "en"
+            st.rerun()
+    with col_lang2:
+        if st.button("🇯🇵 日本語", use_container_width=True, type="primary" if lang == "ja" else "secondary"):
+            st.session_state.language = "ja"
+            st.rerun()
+
+    # ==========================================
+    # ⚙️ AI Intelligence Engine (Gemini) - 言語設定の下に配置
+    # ==========================================
     st.markdown("---")
     st.markdown(f"<h4 style='color:#FFFFFF !important;'>{t('ai_engine_title', lang)}</h4>", unsafe_allow_html=True)
     api_key_input = st.text_input(
@@ -246,25 +288,6 @@ with st.sidebar:
     else:
         st.info(t("ai_demo", lang))
 
-    st.markdown("---")
-    st.caption(t("cost_free_caption", lang))
-    st.caption(t("active_specialists_caption", lang))
-
-    # ==========================================
-    # 一番下の言語切り替えリンクセクション (Language Switcher Link Section)
-    # ==========================================
-    st.markdown("---")
-    st.markdown(f"<div style='font-size:0.85rem; font-weight:800; color:#38BDF8; margin-bottom:6px;'>{t('lang_section_title', lang)}</div>", unsafe_allow_html=True)
-    col_lang1, col_lang2 = st.columns(2)
-    with col_lang1:
-        if st.button("🇯🇵 日本語", use_container_width=True, type="primary" if lang == "ja" else "secondary"):
-            st.session_state.language = "ja"
-            st.rerun()
-    with col_lang2:
-        if st.button("🇺🇸 English", use_container_width=True, type="primary" if lang == "en" else "secondary"):
-            st.session_state.language = "en"
-            st.rerun()
-
 # Active Page ID
 page_id = st.session_state.active_page_id
 
@@ -278,7 +301,20 @@ if page_id == "dashboard":
     holdings_info = st.session_state.holdings_manager.get_holdings_info()
     companies = holdings_info.get("companies", [])
     articles = workflow.list_articles()
+    topics = market_manager.list_topics()
     
+    # 承認待ち記事＆トピックの検出
+    pending_articles = [a for a in articles if a.get("status") in ["Pending Owner Approval", "Revision Requested"]]
+    pending_topics = [tp for tp in topics if tp.get("status") in ["Pending Owner Approval", "Revision Requested"]]
+
+    if pending_topics or pending_articles:
+        warn_msg = []
+        if pending_topics:
+            warn_msg.append(f"🔍 調査トピック承認待ち: {len(pending_topics)} 件")
+        if pending_articles:
+            warn_msg.append(f"📄 記事・広告承認待ち: {len(pending_articles)} 件")
+        st.warning(f"🔔 **【オーナー決裁アラート】{' / '.join(warn_msg)}** ➔ 各部門で最終承認を行ってください。")
+
     target_file = os.path.join(os.path.dirname(__file__), "data/sales_targets.json")
     if os.path.exists(target_file):
         with open(target_file, "r", encoding="utf-8") as f:
@@ -287,7 +323,7 @@ if page_id == "dashboard":
         target_data = {"monthly_target_yen": 100000, "target_articles_monthly": 15}
     
     target_sales = target_data.get("monthly_target_yen", 100000)
-    total_sales = sum([art.get("price", 500) * 10 for art in articles])
+    total_sales = sum([art.get("price", 500) * 10 for art in articles if art.get("status") in ["Approved", "Published"]])
     progress_ratio = min(1.0, total_sales / target_sales) if target_sales > 0 else 0.0
 
     col1, col2, col3, col4 = st.columns(4)
@@ -313,8 +349,8 @@ if page_id == "dashboard":
             with c_col2:
                 st.markdown(f"**{comp['name']}**")
                 st.write(comp.get('description', ''))
-                if "trade_name_note" in comp:
-                    st.caption(f"🛡️ {comp['trade_name_note']}")
+                trade_brand = comp.get('trade_name_note', '対外的な販売者名・ブランド名: noteone')
+                st.caption(f"🛡️ {trade_brand}")
             with c_col3:
                 status_text = "稼働中" if lang == "ja" else "Active"
                 st.markdown(f"{'ステータス' if lang=='ja' else 'Status'}: :green[{comp.get('status', status_text)}]")
@@ -347,7 +383,7 @@ if page_id == "dashboard":
                 st.warning("会社名を入力してください。" if lang == "ja" else "Please enter a valid company name.")
 
 # ==========================================
-# 2. 🏢 Office Room (メイン見出し: 🏢 Office Room / セクション: Headquarter)
+# 2. 🏢 Office Room
 # ==========================================
 elif page_id == "office":
     st.markdown(f"<div class='main-header'>{t('office_main_header', lang)}</div>", unsafe_allow_html=True)
@@ -366,51 +402,7 @@ elif page_id == "office":
     # -------------------------------------------------------------
     st.markdown("---")
     st.markdown(f"<div class='section-title'>{t('consult_title', lang)}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 12px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
-
-    # クイック質問サンプル（ワンクリックで質問可能）
-    st.markdown(f"##### {t('quick_inquiries_title', lang)}")
-    sample_col1, sample_col2 = st.columns(2)
-    with sample_col1:
-        q1_txt = "Noteのサービスは日本人向けサービスですか？" if lang == "ja" else "Is the note platform primarily designed for Japanese users?"
-        if st.button(f"📌 {q1_txt}", use_container_width=True):
-            resp = chat_manager.generate_response(q1_txt)
-            st.session_state.office_chat_history.append({
-                "user": q1_txt,
-                "response": resp,
-                "timestamp": datetime.now().strftime("%H:%M:%S")
-            })
-            st.rerun()
-        q2_txt = "今週のnote売れ筋トレンドと高成約テーマは？" if lang == "ja" else "What are this week's top converting trend topics on note?"
-        if st.button(f"📌 {q2_txt}", use_container_width=True):
-            resp = chat_manager.generate_response(q2_txt)
-            st.session_state.office_chat_history.append({
-                "user": q2_txt,
-                "response": resp,
-                "timestamp": datetime.now().strftime("%H:%M:%S")
-            })
-            st.rerun()
-    with sample_col2:
-        q3_txt = "Noteの英語圏ユーザと日本語圏ユーザの比率は？" if lang == "ja" else "What is the ratio of English vs Japanese users on note?"
-        if st.button(f"📌 {q3_txt}", use_container_width=True):
-            resp = chat_manager.generate_response(q3_txt)
-            st.session_state.office_chat_history.append({
-                "user": q3_txt,
-                "response": resp,
-                "timestamp": datetime.now().strftime("%H:%M:%S")
-            })
-            st.rerun()
-        q4_txt = "システムの運用費用（固定費）は本当に0円ですか？" if lang == "ja" else "Are the system operating fixed costs really 0 JPY?"
-        if st.button(f"📌 {q4_txt}", use_container_width=True):
-            resp = chat_manager.generate_response(q4_txt)
-            st.session_state.office_chat_history.append({
-                "user": q4_txt,
-                "response": resp,
-                "timestamp": datetime.now().strftime("%H:%M:%S")
-            })
-            st.rerun()
-
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
 
     # ユーザーからの自由入力フォーム
     with st.form("office_consultation_form", clear_on_submit=True):
@@ -618,7 +610,7 @@ elif page_id == "office":
         """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 🔍 Market Research Division
+# 3. 🔍 Market Research Division & 👑 Topic Approval Center
 # ==========================================
 elif page_id == "market_research":
     st.markdown(f"<div class='main-header'>{t('mr_title', lang)}</div>", unsafe_allow_html=True)
@@ -626,29 +618,131 @@ elif page_id == "market_research":
     
     st.info(t("mr_mission", lang))
     
-    st.markdown(f"<div class='section-title'>{t('mr_report_title', lang)}</div>", unsafe_allow_html=True)
-    if lang == "ja":
-        st.markdown("""
-        <div class='content-box'>
-            <h4 style='color:#38BDF8;'>🔥 今週のnote高成約キーワード</h4>
-            <ul>
-                <li><strong>AI×実務効率化:</strong> 「ChatGPTで残業をゼロにする実践プロンプト集」「Notion×AI 自動化テンプレート」</li>
-                <li><strong>初心者向け副業マップ:</strong> 「知識ゼロからのnote有料記事販売ロードマップ」</li>
-                <li><strong>即戦力テンプレ:</strong> 「コピペで使える企画書・業務マニュアルの型」</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+    # -------------------------------------------------------------
+    # 1. 🔍 新規トピック市場調査の指示フォーム
+    # -------------------------------------------------------------
+    with st.expander(f"➕ {t('mr_new_research_header', lang)}", expanded=False):
+        c_rs1, c_rs2 = st.columns([3, 2])
+        with c_rs1:
+            rs_kw = st.text_input(t("mr_keyword_label", lang), placeholder=t("mr_keyword_ph", lang))
+        with c_rs2:
+            rs_aud = st.text_input(t("mr_audience_label", lang), placeholder=t("mr_audience_ph", lang))
+        
+        if st.button(t("mr_btn_research", lang), type="primary", use_container_width=True):
+            if rs_kw.strip():
+                with st.spinner("風間アナリストがnote市場・競合ギャップを調査中..."):
+                    new_tp = market_manager.conduct_research(rs_kw, rs_aud)
+                    st.success(f"🎉 新規トピック『{new_tp['title']}』の市場調査が完了し、承認待ちとして登録されました！")
+                    st.rerun()
+            else:
+                st.warning("調査キーワードを入力してください。")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 2. 📋 調査トピック管理台帳 ＆ 👑 企画決裁ゲートウェイ
+    # -------------------------------------------------------------
+    st.markdown(f"<div class='section-title'>{t('mr_topic_list_header', lang)}</div>", unsafe_allow_html=True)
+    topics = market_manager.list_topics()
+    
+    if not topics:
+        st.info("調査トピックがありません。上記フォームから新規調査を指示してください。")
     else:
-        st.markdown("""
-        <div class='content-box'>
-            <h4 style='color:#38BDF8;'>🔥 High-Yield note Keywords of the Week</h4>
-            <ul>
-                <li><strong>AI & Workflow Automation:</strong> "Practical ChatGPT Prompts to Eliminate Overtime Work", "Notion & AI Automated Operations Template"</li>
-                <li><strong>Beginner Monetization Blueprints:</strong> "Zero-Knowledge Roadmap to Selling Paid note Articles"</li>
-                <li><strong>Actionable Templates:</strong> "Plug-and-Play Frameworks for Proposals & Standard Operating Procedures"</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        topic_titles = [f"[{tp.get('status', 'Pending Owner Approval')}] {tp.get('category', '')} | {tp.get('title', '')}" for tp in topics]
+        sel_tp_idx = st.selectbox(t("mr_select_topic_label", lang), range(len(topics)), format_func=lambda x: topic_titles[x])
+        tp = topics[sel_tp_idx]
+        tp_status = tp.get("status", "Pending Owner Approval")
+        tp_locked = tp_status in ["Pending Owner Approval", "Revision Requested"]
+
+        if tp_locked:
+            st.markdown(f"""
+            <div class='approval-box-locked'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {tp_status}</h3>
+                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>企画承認待ち</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('mr_topic_locked_warning', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class='approval-box-approved'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {tp_status}</h3>
+                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>企画承認済み</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('mr_topic_unlocked_success', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 👑 トピック決裁アクションボタン
+        col_tpa1, col_tpa2, col_tpa3 = st.columns([2, 2, 1])
+        with col_tpa1:
+            if st.button(t("mr_btn_approve_topic", lang), type="primary", use_container_width=True):
+                market_manager.approve_topic(tp["id"])
+                st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
+                st.rerun()
+
+        with col_tpa2:
+            with st.popover(t("mr_btn_revise_topic", lang), use_container_width=True):
+                st.markdown(f"#### {t('mr_btn_revise_topic', lang)}")
+                rev_fb = st.text_area(t("mr_topic_feedback_label", lang), placeholder=t("mr_topic_feedback_ph", lang))
+                if st.button("📨 再調査指示を送信する", type="primary"):
+                    if rev_fb.strip():
+                        market_manager.request_revision(tp["id"], rev_fb)
+                        st.warning("風間アナリストに再調査・切り口変更指示を伝達しました。")
+                        st.rerun()
+                    else:
+                        st.error("指示内容を入力してください。")
+
+        with col_tpa3:
+            if st.button(t("mr_btn_reject_topic", lang), use_container_width=True):
+                market_manager.reject_topic(tp["id"])
+                st.info("トピックを却下しました。")
+                st.rerun()
+
+        # 承認済みの場合の「記事制作課へ直接引き渡し」ボタン
+        if not tp_locked:
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True):
+                st.session_state.prefill_topic = tp.get("title", "")
+                st.session_state.prefill_audience = tp.get("target_audience", "")
+                st.session_state.active_page_id = "content_creation"
+                st.rerun()
+
+        st.markdown("---")
+
+        # トピック調査レポート詳細カード
+        st.markdown("#### 📊 市場調査詳細レポート (風間 涼 提出)")
+        c_rep1, c_rep2 = st.columns(2)
+        with c_rep1:
+            st.markdown(f"""
+            <div class='content-box'>
+                <h4 style='color:#38BDF8; margin-top:0;'>🎯 ターゲット読者 ＆ カテゴリ</h4>
+                <p><strong>カテゴリ:</strong> {tp.get('category', '実務ノウハウ')}</p>
+                <p><strong>想定読者ペルソナ:</strong> {tp.get('target_audience', '')}</p>
+                <p><strong>推奨販売価格:</strong> ¥{tp.get('recommended_price', 500):,} (ROI最適化)</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with c_rep2:
+            st.markdown(f"""
+            <div class='content-box'>
+                <h4 style='color:#4ADE80; margin-top:0;'>🔥 市場ニーズ ＆ 競合差別化ギャップ</h4>
+                <p><strong>市場ニーズ:</strong> {tp.get('demand_summary', '')}</p>
+                <p><strong>競合差別化の武器:</strong> {tp.get('competitor_gap', '')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # タイムスタンプ履歴
+        st.markdown("##### ⏱️ 企画ステータス遷移タイムスタンプ履歴")
+        history = tp.get("status_history", [])
+        for h in reversed(history):
+            note_str = f" - <em>{h.get('note')}</em>" if h.get('note') else ""
+            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({h.get('actor', '')}){note_str}", unsafe_allow_html=True)
 
 # ==========================================
 # 4. ✍️ Content Creation Division
@@ -657,15 +751,23 @@ elif page_id == "content_creation":
     st.markdown(f"<div class='main-header'>{t('cc_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('cc_sub', lang)}</div>", unsafe_allow_html=True)
 
+    if st.session_state.prefill_topic:
+        st.success(f"📥 **市場調査課から承認済みトピックを引き継ぎました:** 『{st.session_state.prefill_topic}』")
+
     st.markdown(f"#### {t('cc_form_title', lang)}")
     c_in1, c_in2 = st.columns([3, 1])
     with c_in1:
+        init_topic = st.session_state.prefill_topic if st.session_state.prefill_topic else ""
+        init_audience = st.session_state.prefill_audience if st.session_state.prefill_audience else ""
+        
         topic_input = st.text_input(
             t("cc_topic_label", lang),
+            value=init_topic,
             placeholder=t("cc_topic_ph", lang)
         )
         audience_input = st.text_input(
             t("cc_target_label", lang),
+            value=init_audience,
             placeholder=t("cc_target_ph", lang)
         )
     with c_in2:
@@ -708,10 +810,13 @@ elif page_id == "content_creation":
                 elif event.get("status") == "completed":
                     completed_article = event.get("article")
                     progress_bar.progress(1.0)
-                    status_text.markdown("✅ **全工程（執筆・法務・QA・5大SNSプロモーション）が完了しました！**" if lang == "ja" else "✅ **Full pipeline (Writing, Legal Review, QA Audit, 5-SNS Syndication) completed successfully!**")
+                    status_text.markdown("🔒 **全工程完了！記事はオーナー最終承認待ちとして安全にロックされました。**" if lang == "ja" else "🔒 **Full pipeline completed! Article is securely locked awaiting owner final approval.**")
             
             if completed_article:
-                st.success(f"🎉 記事『{completed_article['title']}』が完成し、品質管理課の台帳に「掲載前」として登録されました！" if lang == "ja" else f"🎉 Article '{completed_article['title']}' created and logged into Quality Assurance registry as 'Pre-Publication'!")
+                # Clear prefill
+                st.session_state.prefill_topic = ""
+                st.session_state.prefill_audience = ""
+                st.success(f"🎉 記事『{completed_article['title']}』が作成されました！「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{completed_article['title']}' created! Please review and approve in '✨ {t('nav_qa', lang)}'.")
 
 # ==========================================
 # 5. 📢 Public Relations Division
@@ -748,44 +853,112 @@ elif page_id == "pr":
         st.success("広報課のSNS設定を保存しました。" if lang == "ja" else "Social media configuration saved successfully.")
 
 # ==========================================
-# 6. ✨ Quality Assurance Division
+# 6. ✨ Quality Assurance Division & 👑 Executive Approval Center
 # ==========================================
 elif page_id == "qa":
     st.markdown(f"<div class='main-header'>{t('qa_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('qa_sub', lang)}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"#### {t('qa_registry_title', lang)}")
     articles = workflow.list_articles()
     
     if not articles:
         st.info(t("qa_no_articles", lang))
     else:
-        article_titles = [f"[{art.get('status', '掲載前')}] {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
+        article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {art.get('title', '')}" for art in articles]
         selected_idx = st.selectbox(t("qa_select_label", lang), range(len(articles)), format_func=lambda x: article_titles[x])
         art = articles[selected_idx]
+        cur_status = art.get("status", "Pending Owner Approval")
         
-        col_stat1, col_stat2 = st.columns([2, 3])
-        with col_stat1:
-            cur_status = art.get("status", "掲載前" if lang == "ja" else "Pre-Publication")
-            status_options = ["考案中", "執筆中", "査読中", "掲載前", "掲載済み"] if lang == "ja" else ["Idea Formulation", "In Writing", "Under Peer Review", "Pre-Publication", "Published"]
-            st.markdown(f"**{t('qa_cur_status', lang)}** :green[**{cur_status}**]")
-            new_stat = st.selectbox(
-                t("qa_change_label", lang),
-                status_options,
-                index=status_options.index(cur_status) if cur_status in status_options else 3
-            )
-            if st.button(t("qa_update_btn", lang), type="primary"):
-                workflow.update_article_status(art["id"], new_stat)
-                st.success(f"ステータスを「{new_stat}」に更新し、タイムスタンプを記録しました！" if lang == "ja" else f"Status updated to '{new_stat}' with immutable timestamp logged!")
+        # ==============================================================
+        # 👑 オーナー最終承認ゲートウェイ (Executive Approval Gateway)
+        # ==============================================================
+        st.markdown(f"<div class='section-title'>{t('qa_approval_header', lang)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color:#94A3B8; margin-bottom:12px;'>{t('qa_approval_sub', lang)}</div>", unsafe_allow_html=True)
+
+        is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
+        
+        if is_locked:
+            st.markdown(f"""
+            <div class='approval-box-locked'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
+                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>決裁待ち</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('qa_locked_warning', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class='approval-box-approved'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <h3 style='color: #6EE7B7 !important; margin:0;'>✅ Status: {cur_status}</h3>
+                    <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>承認済み</span>
+                </div>
+                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                    {t('qa_unlocked_success', lang)}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 👑 オーナー決裁アクションパネル
+        app_col1, app_col2, app_col3 = st.columns([2, 2, 1])
+        with app_col1:
+            if st.button(t("qa_btn_approve", lang), type="primary", use_container_width=True):
+                workflow.approve_article(art["id"])
+                st.success("🎉 オーナー最終承認が完了し、投稿ロックを解除しました！" if lang == "ja" else "🎉 Approved by owner! Publishing lock has been released.")
                 st.rerun()
-        
-        with col_stat2:
-            st.markdown(f"##### {t('qa_history_title', lang)}")
-            history = art.get("status_history", [])
-            for h in reversed(history):
-                st.write(f"- **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({h.get('actor', '')})")
+
+        with app_col2:
+            with st.popover(t("qa_btn_revision", lang), use_container_width=True):
+                st.markdown(f"#### {t('qa_btn_revision', lang)}")
+                feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang))
+                if st.button("📨 修正指示を送信する", type="primary"):
+                    if feedback_txt.strip():
+                        workflow.request_revision(art["id"], feedback_txt)
+                        st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                        st.rerun()
+                    else:
+                        st.error("修正指示内容を入力してください。")
+
+        with app_col3:
+            if st.button(t("qa_btn_reject", lang), use_container_width=True):
+                workflow.reject_article(art["id"])
+                st.info("記事を却下・アーカイブしました。" if lang == "ja" else "Article rejected and archived.")
+                st.rerun()
+
+        st.markdown("---")
+
+        # 審査データ（法務チェック & QAスコア）
+        col_chk1, col_chk2 = st.columns(2)
+        with col_chk1:
+            st.markdown("#### ⚖️ 法務課 スクリーニング審査 (橘 律)")
+            st.markdown(f"""
+            <div style='background-color:#0F172A; border:1px solid #334155; border-left:4px solid #38BDF8; border-radius:8px; padding:14px; color:#F8FAFC;'>
+                {art.get('legal_check', '審査中')}
+            </div>
+            """, unsafe_allow_html=True)
+        with col_chk2:
+            st.markdown("#### 🛡️ 品質管理課 100点採点スコア (神崎 玲奈)")
+            st.markdown(f"""
+            <div style='background-color:#0F172A; border:1px solid #334155; border-left:4px solid #F59E0B; border-radius:8px; padding:14px; color:#F8FAFC;'>
+                {art.get('qa_score', '採点中')}
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # タイムスタンプ履歴
+        st.markdown(f"##### {t('qa_history_title', lang)}")
+        history = art.get("status_history", [])
+        for h in reversed(history):
+            note_str = f" - <em>{h.get('note')}</em>" if h.get('note') else ""
+            st.markdown(f"- 🕒 **{h.get('timestamp')}** ➔ `[{h.get('status')}]` ({h.get('actor', '')}){note_str}", unsafe_allow_html=True)
         
         st.divider()
+
+        # 記事プレビュー
         st.markdown(f"#### {t('qa_preview_title', lang)}")
         content = art.get("content", "")
         if "🔒 ここから先は有料エリアです" in content or "🔒 [Paywall] Premium Section Starts Here" in content:
@@ -801,11 +974,22 @@ elif page_id == "qa":
         else:
             st.markdown(content)
         
+        st.divider()
+
+        # 5大SNS広告文
         st.markdown(f"#### {t('qa_sns_copy_title', lang)}")
-        st.text_area("Social Promotion Copy", value=art.get("marketing", ""), height=250)
+        if is_locked:
+            st.info("🔒 【保護中】オーナー最終承認が完了すると、ここからSNSへの直接投稿が可能になります。")
+        st.text_area("Social Promotion Copy", value=art.get("marketing", ""), height=200, disabled=is_locked)
         
+        # マークダウン全文
         st.markdown(f"#### {t('qa_markdown_title', lang)}")
-        st.text_area("Markdown Source", value=art.get("content", ""), height=300)
+        if is_locked:
+            st.warning("🔒 【ロック中】オーナー承認が出るまでnoteへの貼り付けコードは保護されています。")
+            st.code("🔒 LOCKED: Awaiting Owner Final Approval (承認ボタンを押すとロックが解除されます)", language="text")
+        else:
+            st.success("✅ 【ロック解除済】以下のマークダウンをnoteの記事エディタにそのまま貼り付けて公開できます！")
+            st.text_area("Markdown Source (note editor ready)", value=art.get("content", ""), height=300)
 
 # ==========================================
 # 7. 🤝 Human Resources Division
@@ -861,7 +1045,7 @@ elif page_id == "legal":
     
     for inv in legal_inv["investigations"]:
         st.markdown(f"""
-        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #007BA7; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
+        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
             <div style='display: flex; justify-content: space-between;'>
                 <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {inv['category']} (ID: {inv['id']})</strong>
                 <span>{inv['status']}</span>
@@ -979,7 +1163,7 @@ elif page_id == "helpdesk":
     for err in err_data.get("errors", []):
         with st.container():
             st.markdown(f"""
-            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #007BA7; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
                 <div style='display: flex; justify-content: space-between;'>
                     <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {err['module']} (ID: {err['id']})</strong>
                     <span>{err['status']}</span>
@@ -1045,7 +1229,7 @@ elif page_id == "cloud_guide":
         ### 🎯 3 Steps to Deploy 100% Free on Cloud
         
         #### 1️⃣ Step 1: Push Code to GitHub (Free)
-        1. Visit [GitHub](https://github.com/) and create a new repository (Private or Public).
+        1. Visit [GitHub](https://github.com/)指示
         2. Upload the files in this workspace (`ai_holdings_platform`).
 
         #### 2️⃣ Step 2: Connect to Streamlit Community Cloud (Free)

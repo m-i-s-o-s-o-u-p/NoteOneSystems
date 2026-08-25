@@ -1,0 +1,68 @@
+[
+  {
+    "id": "topic_20260825_001",
+    "title": "ChatGPTで残業をゼロにする実務プロンプト50選＆自動化テンプレ",
+    "target_audience": "残業を削減したいデスクワーカー・ビジネスパーソン",
+    "category": "AI×実務効率化",
+    "demand_summary": "note内で『残業削減』『ChatGPT実務』の検索ボリュームが急増中。コピペで動くプロンプトの需要が極めて高い。",
+    "competitor_gap": "一般的なプロンプト集は抽象的。当社は『メール返信』『議事録要約』『Excel関数生成』の即戦力3分野に特化して差別化。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-08-25 10:00:00",
+    "analyst": "風間 涼 (Ryo Kazama)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-08-25 10:00:00",
+        "actor": "風間 涼 (市場調査課)",
+        "note": "note市場トレンド分析完了。オーナーのトピック承認待ち（ロック中）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260825_002",
+    "title": "知識ゼロからのnote有料記事販売ロードマップ【初月5万円達成モデル】",
+    "target_audience": "副業でnote記事販売を始めたい初心者・クリエイター",
+    "category": "副業・マネタイズ",
+    "demand_summary": "『note副業』『有料記事の書き方』の購買意欲が常に上位。特にワンコイン（500円）での入門記事が最もCVRが高い。",
+    "competitor_gap": "精神論ではなく、売れるテーマの選定方法、有料ラインの引き方、5大SNS告知の具体手順を網羅。",
+    "recommended_price": 500,
+    "status": "Approved",
+    "created_at": "2026-08-25 09:30:00",
+    "analyst": "風間 涼 (Ryo Kazama)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-08-25 09:30:00",
+        "actor": "風間 涼 (市場調査課)",
+        "note": "市場調査完了。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-08-25 11:15:00",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での執筆を許可。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260825_003",
+    "title": "Notion×AI 自動化オペレーション構築ガイド【チーム標準化テンプレ付】",
+    "target_audience": "Notionを業務で活用したいチームリーダー・フリーランス",
+    "category": "業務自動化ツール",
+    "demand_summary": "NotionデータベースとAI連携によるタスク自動管理のニーズが国内企業で拡大中。",
+    "competitor_gap": "設定手順のスクリーンショット図解と、ワンクリック複製可能な公開Notionテンプレートを同梱して高付加価値化。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-08-25 11:00:00",
+    "analyst": "風間 涼 (Ryo Kazama)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-08-25 11:00:00",
+        "actor": "風間 涼 (市場調査課)",
+        "note": "市場調査完了。オーナー承認待ち。"
+      }
+    ]
+  }
+]
