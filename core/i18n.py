@@ -365,6 +365,23 @@ MESSAGES = {
 }
 
 def t(key: str, lang: str = "ja") -> str:
-    """Helper to get translated string safely."""
-    lang_dict = MESSAGES.get(lang, MESSAGES["ja"])
-    return lang_dict.get(key, MESSAGES["ja"].get(key, key))
+    """
+    Helper to get translated string safely with multi-layer fallback.
+    Guarantees human-readable text even if cache mismatch occurs.
+    """
+    lang_dict = MESSAGES.get(lang, MESSAGES.get("ja", {}))
+    if key in lang_dict:
+        return lang_dict[key]
+    
+    # Fallback to ja if en key missing
+    if "ja" in MESSAGES and key in MESSAGES["ja"]:
+        return MESSAGES["ja"][key]
+        
+    # Fallback to en if ja key missing
+    if "en" in MESSAGES and key in MESSAGES["en"]:
+        return MESSAGES["en"][key]
+        
+    # Human-readable fallback formatting instead of raw key
+    cleaned = key.replace("_", " ").title()
+    return cleaned
+

@@ -1,9 +1,31 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import os
+import sys
+import importlib
 import json
 import pandas as pd
 from datetime import datetime
+
+# Import and auto-reload core submodules to prevent stale cache in Streamlit runtime
+import core.ai_client
+import core.holdings_manager
+import core.ringi_manager
+import core.hr_manager
+import core.i18n
+import companies.note_one_systems.workflow
+import companies.note_one_systems.office_chat_manager
+import companies.note_one_systems.market_research_manager
+
+importlib.reload(core.ai_client)
+importlib.reload(core.holdings_manager)
+importlib.reload(core.ringi_manager)
+importlib.reload(core.hr_manager)
+importlib.reload(core.i18n)
+importlib.reload(companies.note_one_systems.workflow)
+importlib.reload(companies.note_one_systems.office_chat_manager)
+importlib.reload(companies.note_one_systems.market_research_manager)
+
 from core.ai_client import AIClient
 from core.holdings_manager import HoldingsManager
 from core.ringi_manager import RingiManager

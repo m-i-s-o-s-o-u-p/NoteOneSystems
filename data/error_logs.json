@@ -1,10 +1,19 @@
 {
   "title": "NoteOneSystems 株式会社 社内ヘルプデスク：全エラー管理台帳",
-  "updated_at": "2026-08-24",
-  "total_errors": 3,
-  "resolved_errors": 3,
+  "updated_at": "2026-08-25",
+  "total_errors": 4,
+  "resolved_errors": 4,
   "pending_errors": 0,
   "errors": [
+    {
+      "id": "ERR_20260825_001",
+      "occurred_at": "2026-08-25 18:18:04",
+      "module": "品質管理課 ＆ オーナー最終承認センター (Executive Approval Gateway)",
+      "error_message": "AttributeError: 'NoteOneWorkflow' object has no attribute 'request_revision' & i18n Translation Key Cache Lag",
+      "root_cause": "StreamlitのPythonモジュールキャッシュにより、hot-reload時に更新されたworkflow.pyおよびi18n.pyの最新クラス・辞書がメモリ上に再読み込みされていなかったため。",
+      "solution": "importlib.reload()によるサブモジュール強制ホットリロード機構の実装、多層フォールバック機構を備えた堅牢なt()翻訳関数への強化、および全メソッドの再同期により完全解消。",
+      "status": "🟢 解決済み"
+    },
     {
       "id": "ERR_20260824_001",
       "occurred_at": "2026-08-24 15:51:13",
