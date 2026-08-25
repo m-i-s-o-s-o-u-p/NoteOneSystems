@@ -284,27 +284,63 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # JavaScript Component to auto-scroll top on navigation click
-components.html("""
+scroll_code = f"""
+<div id="scroll-trigger-{st.session_state.scroll_trigger}" style="display:none;"></div>
 <script>
-    // Jump to top of main window and Streamlit container
-    function scrollToTop() {
-        try {
-            const mainContainer = window.parent.document.querySelector('.main') || 
-                                  window.parent.document.querySelector('section.main') || 
-                                  window.parent.document.querySelector('[data-testid="stMainBlockContainer"]') ||
-                                  window.parent.document.querySelector('.stApp');
-            if (mainContainer) {
-                mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            window.parent.scrollTo({ top: 0, behavior: 'smooth' });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } catch(e) {
-            window.scrollTo(0, 0);
-        }
-    }
-    scrollToTop();
+    (function() {{
+        function doScrollTop() {{
+            try {{
+                const pDoc = window.parent.document;
+                const appContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]');
+                const mainSection = pDoc.querySelector('section.main');
+                const mainBlock = pDoc.querySelector('[data-testid="stMainBlockContainer"]');
+                const stApp = pDoc.querySelector('.stApp');
+                
+                if (appContainer) {{
+                    appContainer.scrollTop = 0;
+                    try {{ appContainer.scrollTo({{ top: 0, behavior: 'instant' }}); }} catch(e) {{}}
+                }}
+                if (mainSection) {{
+                    mainSection.scrollTop = 0;
+                    try {{ mainSection.scrollTo({{ top: 0, behavior: 'instant' }}); }} catch(e) {{}}
+                }}
+                if (mainBlock) {{
+                    mainBlock.scrollTop = 0;
+                }}
+                if (stApp) {{
+                    stApp.scrollTop = 0;
+                }}
+                pDoc.documentElement.scrollTop = 0;
+                pDoc.body.scrollTop = 0;
+                window.parent.scrollTo(0, 0);
+            }} catch(e) {{
+                console.warn("Scroll to top:", e);
+            }}
+        }}
+
+        // Run immediately and also on sequential ticks after DOM layout renders
+        doScrollTop();
+        setTimeout(doScrollTop, 50);
+        setTimeout(doScrollTop, 150);
+        setTimeout(doScrollTop, 300);
+
+        // Attach global click listener to all sidebar buttons so they trigger scroll top on click immediately
+        try {{
+            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar && !sidebar.dataset.scrollBound) {{
+                sidebar.dataset.scrollBound = "true";
+                sidebar.addEventListener('click', function(e) {{
+                    const btn = e.target.closest('button');
+                    if (btn) {{
+                        doScrollTop();
+                    }}
+                }}, true);
+            }}
+        }} catch(e) {{}}
+    }})();
 </script>
-""", height=0)
+"""
+components.html(scroll_code, height=0)
 
 # ==========================================
 # Sidebar: Multilingual Navigation Menu
