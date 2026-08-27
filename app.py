@@ -1420,18 +1420,22 @@ elif page_id == "hr":
     st.markdown(f"<div class='main-header'>{t('hr_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('hr_sub', lang)}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"#### {t('hr_org_title', lang)}")
-    with open(os.path.join(os.path.dirname(__file__), "companies/note_one_systems/org_chart_and_job_descriptions.json"), "r", encoding="utf-8") as f:
-        org_data = json.load(f)
-    
-    st.write(f"**{'制定者:' if lang=='ja' else 'Authorized by:'}** {org_data.get('author')} | **{'バージョン:' if lang=='ja' else 'Version:'}** {org_data.get('version')}")
-    
-    with st.expander(t("hr_view_ledger", lang)):
-        for dept in org_data["departments"]:
+    # 📄 Departmental Document Link
+    org_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/org_chart_and_job_descriptions.json")
+    if os.path.exists(org_file):
+        with open(org_file, "r", encoding="utf-8") as f:
+            org_data = json.load(f)
+    else:
+        org_data = {"departments": []}
+
+    with st.expander(f"📄 {'社内文書: 組織図 ＆ 職務記述書 (Ver 2.1)' if lang=='ja' else 'Internal Document: Org Chart & Job Descriptions (Ver 2.1)'}", expanded=False):
+        st.write(f"**{'制定者:' if lang=='ja' else 'Authorized by:'}** {org_data.get('author')} | **{'バージョン:' if lang=='ja' else 'Version:'}** {org_data.get('version')}")
+        for dept in org_data.get("departments", []):
             st.markdown(f"**{dept['icon']} {dept['name']}** ({'統括:' if lang=='ja' else 'Lead:'} {dept['head']})")
-            for role in dept["roles"]:
+            for role in dept.get("roles", []):
                 st.write(f"- **{role['role_name']} ({role['member']})**: {', '.join(role['responsibilities'][:2])}")
-    
+
+    st.markdown("---")
     st.markdown(f"#### {t('hr_workload_title', lang)}")
     stats = st.session_state.hr_manager.get_workload_stats()
     df_data = []
@@ -1457,31 +1461,32 @@ elif page_id == "legal":
     st.markdown(f"<div class='main-header'>{t('legal_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('legal_sub', lang)}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"#### {t('legal_ledger_title', lang)}")
+    # 📄 Departmental Document Link
     legal_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/legal_investigations.json")
     if os.path.exists(legal_file):
         with open(legal_file, "r", encoding="utf-8") as f:
             legal_inv = json.load(f)
     else:
         legal_inv = {"investigations": []}
-    
-    for inv in legal_inv["investigations"]:
-        st.markdown(f"""
-        <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
-            <div style='display: flex; justify-content: space-between;'>
-                <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {clean_txt(inv['category'])} (ID: {inv['id']})</strong>
-                <span>{inv['status']}</span>
+
+    with st.expander(f"📄 {'社内文書: 法務コンプライアンス調査台帳 ＆ 審査規程' if lang=='ja' else 'Internal Document: Legal Investigations & Compliance Ledger'}", expanded=False):
+        for inv in legal_inv.get("investigations", []):
+            st.markdown(f"""
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 16px; margin-bottom: 14px; color: #F8FAFC;'>
+                <div style='display: flex; justify-content: space-between;'>
+                    <strong style='font-size: 1.1rem; color: #FFFFFF;'>📋 {clean_txt(inv['category'])} (ID: {inv['id']})</strong>
+                    <span>{inv['status']}</span>
+                </div>
+                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
+                    🕒 {'受付' if lang=='ja' else 'Received'}: {inv['received_at']} | {'調査開始' if lang=='ja' else 'Review Started'}: {inv['started_at']} | {'完了' if lang=='ja' else 'Completed'}: {inv['completed_at']}
+                </div>
+                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>{'相談元:' if lang=='ja' else 'Originating Unit:'}</strong> {clean_txt(inv['requester_dept'])}</div>
+                <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>{'受付内容:' if lang=='ja' else 'Inquiry Summary:'}</strong> {clean_txt(inv['inquiry_content'])}</div>
+                <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
+                    <strong style='color: #38BDF8;'>⚖️ {'橘 律 法的な見解:' if lang=='ja' else 'Formal Legal Opinion:'}</strong> {clean_txt(inv['legal_opinion'])}
+                </div>
             </div>
-            <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>
-                🕒 {'受付' if lang=='ja' else 'Received'}: {inv['received_at']} | {'調査開始' if lang=='ja' else 'Review Started'}: {inv['started_at']} | {'完了' if lang=='ja' else 'Completed'}: {inv['completed_at']}
-            </div>
-            <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>{'相談元:' if lang=='ja' else 'Originating Unit:'}</strong> {clean_txt(inv['requester_dept'])}</div>
-            <div style='font-size: 0.9rem; color: #E2E8F0; margin-top: 4px;'><strong>{'受付内容:' if lang=='ja' else 'Inquiry Summary:'}</strong> {clean_txt(inv['inquiry_content'])}</div>
-            <div style='background-color: #0F172A; border: 1px solid #334155; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #F8FAFC;'>
-                <strong style='color: #38BDF8;'>⚖️ {'橘 律 法的な見解:' if lang=='ja' else 'Formal Legal Opinion:'}</strong> {clean_txt(inv['legal_opinion'])}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 # ==========================================
 # 9. 📊 Financial Strategy Division
@@ -1534,7 +1539,6 @@ elif page_id == "accounting":
     st.markdown(f"<div class='main-header'>{t('acc_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('acc_sub', lang)}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"#### {t('acc_ledger_title', lang)}")
     acc_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/accounting_data.json")
     if os.path.exists(acc_file):
         with open(acc_file, "r", encoding="utf-8") as f:
@@ -1544,39 +1548,37 @@ elif page_id == "accounting":
     
     st.success(f"**{t('acc_total_cost_prefix', lang)}** :green[**{t('acc_total_cost_val', lang)}**]")
     
-    cost_df = []
-    for item in acc_data.get("cost_items", []):
-        cost_df.append({
-            "カテゴリ" if lang=="ja" else "Category": item["category"],
-            "サービス名" if lang=="ja" else "Service Provider": item["service_name"],
-            "利用プラン" if lang=="ja" else "Tier / Plan": item["plan"],
-            "月額費用" if lang=="ja" else "Monthly Cost": f"¥{item['monthly_cost_yen']:,}",
-            "稼働状態" if lang=="ja" else "Operating Status": item["status"],
-            "備考" if lang=="ja" else "Audit Notes": item["notes"]
-        })
-    st.dataframe(pd.DataFrame(cost_df), use_container_width=True)
-    st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。" if lang == "ja" else "🛡️ **Strict Policy Enforcement**: Pursuant to Corporate Rule Art. 4, zero financial liabilities or cloud expenses are incurred without prior executive ringi approval.")
+    # 📄 Departmental Document Link
+    with st.expander(f"📄 {'社内文書: 月次経理・コスト監査台帳 ＆ ゼロコスト管理規程' if lang=='ja' else 'Internal Document: Monthly Cost Audit Ledger'}", expanded=False):
+        cost_df = []
+        for item in acc_data.get("cost_items", []):
+            cost_df.append({
+                "カテゴリ" if lang=="ja" else "Category": item["category"],
+                "サービス名" if lang=="ja" else "Service Provider": item["service_name"],
+                "利用プラン" if lang=="ja" else "Tier / Plan": item["plan"],
+                "月額費用" if lang=="ja" else "Monthly Cost": f"¥{item['monthly_cost_yen']:,}",
+                "稼働状態" if lang=="ja" else "Operating Status": item["status"],
+                "備考" if lang=="ja" else "Audit Notes": item["notes"]
+            })
+        st.dataframe(pd.DataFrame(cost_df), use_container_width=True)
+        st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。" if lang == "ja" else "🛡️ **Strict Policy Enforcement**: Pursuant to Corporate Rule Art. 4, zero financial liabilities or cloud expenses are incurred without prior executive ringi approval.")
 
 # ==========================================
-# 11. 💻 IT Helpdesk & System Specifications
+# 11. 💻 IT Helpdesk & Error Logs
 # ==========================================
 elif page_id == "helpdesk":
-    st.markdown(f"<div class='main-header'>{'💻 社内ヘルプデスク ＆ システム仕様書' if lang=='ja' else '💻 IT Helpdesk & System Architecture'}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='sub-header'>{'システムの動作構造、AIエージェント連携仕様、完全無料0円運用の仕組み、および障害対応ログを管理・閲覧できます。' if lang=='ja' else 'Central repository for system architecture, AI agent orchestration specs, zero-cost infrastructure, and error response logs.'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='main-header'>{t('it_title', lang)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='sub-header'>{t('it_sub', lang)}</div>", unsafe_allow_html=True)
 
-    tab_spec, tab_errors = st.tabs([
-        "📋 会社システム仕様書 (System Blueprint)" if lang=="ja" else "📋 System Blueprint",
-        "⚠️ 障害・エラー台帳 (Error Logs)" if lang=="ja" else "⚠️ Error & Incident Logs"
-    ])
+    # 📄 Departmental Document Link (Clean Inline Link)
+    spec_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/system_specifications.json")
+    if os.path.exists(spec_file):
+        with open(spec_file, "r", encoding="utf-8") as f:
+            spec_data = json.load(f)
+    else:
+        spec_data = {}
 
-    with tab_spec:
-        spec_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/system_specifications.json")
-        if os.path.exists(spec_file):
-            with open(spec_file, "r", encoding="utf-8") as f:
-                spec_data = json.load(f)
-        else:
-            spec_data = {}
-
+    with st.expander(f"📄 {'社内文書: Note One Systems 会社システム仕様書 (Ver 2.4.0)' if lang=='ja' else 'Internal Document: System Architecture Specifications (Ver 2.4.0)'}", expanded=False):
         st.markdown(f"### 🏢 {spec_data.get('system_name', 'Note One Systems Platform')}")
         st.caption(f"**Version**: {spec_data.get('version', '2.4.0')} | **Last Updated**: {spec_data.get('last_updated', '2026-08-28')} | **Managed By**: {spec_data.get('author', 'IT Helpdesk')}")
 
@@ -1647,41 +1649,42 @@ elif page_id == "helpdesk":
         </div>
         """, unsafe_allow_html=True)
 
-    with tab_errors:
-        err_file = os.path.join(os.path.dirname(__file__), "data/error_logs.json")
-        if os.path.exists(err_file):
-            with open(err_file, "r", encoding="utf-8") as f:
-                err_data = json.load(f)
-        else:
-            err_data = {"errors": []}
+    st.markdown("---")
 
-        col_e1, col_e2, col_e3 = st.columns(3)
-        with col_e1:
-            st.metric(label=t("it_total_label", lang), value=f"{len(err_data.get('errors', []))} {'件' if lang=='ja' else 'Cases'}")
-        with col_e2:
-            st.metric(label=t("it_resolved_label", lang), value=f"{len([e for e in err_data.get('errors', []) if '解決' in e.get('status', '') or 'Resolved' in e.get('status', '')])} {'件' if lang=='ja' else 'Cases'}")
-        with col_e3:
-            st.metric(label=t("it_health_label", lang), value="100% (正常稼働)" if lang == "ja" else "100% Operational")
+    # Metrics
+    err_file = os.path.join(os.path.dirname(__file__), "data/error_logs.json")
+    if os.path.exists(err_file):
+        with open(err_file, "r", encoding="utf-8") as f:
+            err_data = json.load(f)
+    else:
+        err_data = {"errors": []}
 
-        st.markdown("---")
-        st.markdown(f"<div class='section-title'>{t('it_ledger_title', lang)}</div>", unsafe_allow_html=True)
-        
-        for err in err_data.get("errors", []):
-            with st.container():
-                st.markdown(f"""
-                <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
-                    <div style='display: flex; justify-content: space-between;'>
-                        <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {clean_txt(err['module'])} (ID: {err['id']})</strong>
-                        <span style='color: #4ADE80; font-weight: 700;'>{err['status']}</span>
-                    </div>
-                    <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 {'発生日時' if lang=='ja' else 'Occurred'}: {err['occurred_at']}</div>
-                    <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
-                        {clean_txt(err['error_message'])}
-                    </div>
-                    <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {clean_txt(err['root_cause'])}</div>
-                    <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {clean_txt(err['solution'])}</div>
+    col_e1, col_e2, col_e3 = st.columns(3)
+    with col_e1:
+        st.metric(label=t("it_total_label", lang), value=f"{len(err_data.get('errors', []))} {'件' if lang=='ja' else 'Cases'}")
+    with col_e2:
+        st.metric(label=t("it_resolved_label", lang), value=f"{len([e for e in err_data.get('errors', []) if '解決' in e.get('status', '') or 'Resolved' in e.get('status', '')])} {'件' if lang=='ja' else 'Cases'}")
+    with col_e3:
+        st.metric(label=t("it_health_label", lang), value="100% (正常稼働)" if lang == "ja" else "100% Operational")
+
+    st.markdown(f"<div class='section-title'>{t('it_ledger_title', lang)}</div>", unsafe_allow_html=True)
+    
+    for err in err_data.get("errors", []):
+        with st.container():
+            st.markdown(f"""
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
+                <div style='display: flex; justify-content: space-between;'>
+                    <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {clean_txt(err['module'])} (ID: {err['id']})</strong>
+                    <span style='color: #4ADE80; font-weight: 700;'>{err['status']}</span>
                 </div>
-                """, unsafe_allow_html=True)
+                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 {'発生日時' if lang=='ja' else 'Occurred'}: {err['occurred_at']}</div>
+                <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
+                    {clean_txt(err['error_message'])}
+                </div>
+                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {clean_txt(err['root_cause'])}</div>
+                <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {clean_txt(err['solution'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # ==========================================
 # 12. 👥 Employee Profiles
