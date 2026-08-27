@@ -1,0 +1,147 @@
+{
+  "system_name": "Note One Systems Platform (AI Enterprise OS)",
+  "version": "2.4.0-Production",
+  "last_updated": "2026-08-28",
+  "author": "IT Helpdesk & System Engineering Unit (noteone)",
+  "executive_summary": {
+    "purpose": "完全無料（固定費0円）でnote有料記事・マガジンを自律制作・品質監査・5大SNSプロモーションし、売上を最大化する自律型AI企業プラットフォーム。",
+    "brand_name": "noteone",
+    "zero_cost_principle": "Gemini API無料枠、Streamlit Cloud無料ホスティング、GitHub無料永続化ストレージのみで構成され、月額固定費0円を完全厳守。"
+  },
+  "architecture_layers": [
+    {
+      "layer": "1. ユーザーインターフェース層 (UI/UX Layer)",
+      "tech_stack": "Streamlit (Python), HTML5/CSS3 (High Contrast Theme), HTML5 Canvas 2D Game Engine, DOM Event Delegation",
+      "description": "統括ダッシュボード、2Dバーチャルオフィス、全社統合決裁センター（Universal Approval Center）、各課ワークスペース、社員相談チャットを単一SPA（Single Page Application）で提供。"
+    },
+    {
+      "layer": "2. AIエンジン・プロンプト連携層 (Intelligence Layer)",
+      "tech_stack": "Google Gemini API (Free Tier), Dynamic Role-Playing Prompt Chains, JSON Structured Output",
+      "description": "市場調査、執筆、校正、広報告知、法務スクリーニング、品質採点、人事分析、財務予測の9つの専門AIエージェントを統括オーケストレーション。"
+    },
+    {
+      "layer": "3. 業務ガバナンス・決裁層 (Governance & Workflow Layer)",
+      "tech_stack": "Universal Decision Gateway (Approval / Denial / Rejection), Ringi Ledger Engine",
+      "description": "未承認記事・企画の外部公開・自動進行を物理的にロック。オーナーの1クリック決裁（承認・✍️ 否認・拒否）でのみステータスが遷移。"
+    },
+    {
+      "layer": "4. データストア・永続化層 (Storage & Persistence Layer)",
+      "tech_stack": "Local Structured JSON Files, GitHub Version Control (Git)",
+      "description": "RDBMS等の有償DBを使わず、高速かつ軽量なJSON台帳（articles.json, market_topics.json, legal_investigations.json, accounting_data.json, error_logs.json）で全データを永続化。"
+    }
+  ],
+  "agent_matrix": [
+    {
+      "id": "ceo",
+      "name": "AI Executive Lead (CEO)",
+      "dept": "経営企画室",
+      "role": "最高経営責任者",
+      "prompt_feature": "全社統括、事業戦略立案、各部門のKPI進捗モニタリング、オーナー報告。"
+    },
+    {
+      "id": "ryo",
+      "name": "風間 涼 (Ryo Kazama)",
+      "dept": "市場調査課",
+      "role": "シニアリサーチャー",
+      "prompt_feature": "note市場トレンド分析、競合note売れ筋調査、読者ペルソナ分析、販売価格戦略策定。"
+    },
+    {
+      "id": "takuma",
+      "name": "森川 拓真 (Takuma Morikawa)",
+      "dept": "記事制作課",
+      "role": "リードライター",
+      "prompt_feature": "実践的ノウハウ記事執筆、無料/有料境界線の最適配置（心理的購入トリガー設計）。"
+    },
+    {
+      "id": "tsumugi",
+      "name": "結城 紬 (Tsumugi Yuki)",
+      "dept": "記事制作課",
+      "role": "シニアエディター",
+      "prompt_feature": "推敲、可読性向上、読了時間算出、誤字脱字・専門用語の平易化。"
+    },
+    {
+      "id": "tsubasa",
+      "name": "佐々木 翼 (Tsubasa Sasaki)",
+      "dept": "広報課",
+      "role": "SNSマーケター",
+      "prompt_feature": "5大SNS（X, Instagram, Threads, Bluesky, Mastodon）向け最適化プロモーション文作成。"
+    },
+    {
+      "id": "reina",
+      "name": "神崎 玲奈 (Reina Kanzaki)",
+      "dept": "品質管理課",
+      "role": "QAスペシャリスト",
+      "prompt_feature": "社内QA規程Ver.2.1に基づく100点満点採点、読者満足度・実践価値の監査。"
+    },
+    {
+      "id": "ritsu",
+      "name": "橘 律 (Ritsu Tachibana)",
+      "dept": "法務コンプライアンス課",
+      "role": "法務スペシャリスト",
+      "prompt_feature": "note利用規約、景品表示法、著作権法、会社法第7条（商号規制）の法的スクリーニング。"
+    },
+    {
+      "id": "sakura",
+      "name": "一ノ瀬 さくら (Sakura Ichinose)",
+      "dept": "人事課",
+      "role": "HRマネージャー",
+      "prompt_feature": "社員稼働負荷スコア算出、業務量モニタリング、増員・リソース配分提案。"
+    },
+    {
+      "id": "haruto",
+      "name": "一条 晴斗 (Haruto Ichijo)",
+      "dept": "財務戦略課",
+      "role": "CFO / 財務アナリスト",
+      "prompt_feature": "売上シミュレーション、売上目標達成率モニタリング、収益最大化アドバイス。"
+    }
+  ],
+  "workflow_steps": [
+    {
+      "step": 1,
+      "title": "市場調査 & 企画立案",
+      "owner": "市場調査課 (風間 涼)",
+      "output": "企画提案書 (market_topics.json)",
+      "gate": "オーナー企画決裁（承認・✍️ 否認・拒否）"
+    },
+    {
+      "step": 2,
+      "title": "記事執筆 & 無料/有料境界線設計",
+      "owner": "記事制作課 (森川 拓真 & 結城 紬)",
+      "output": "完成原稿 (articles.json)",
+      "gate": "社内推敲・構成チェック"
+    },
+    {
+      "step": 3,
+      "title": "5大SNSマルチプロモーション作成",
+      "owner": "広報課 (佐々木 翼)",
+      "output": "X, Instagram, Threads, Bluesky, Mastodon 告知文",
+      "gate": "SNS最適化チェック"
+    },
+    {
+      "step": 4,
+      "title": "法務スクリーニング & 100点品質採点",
+      "owner": "法務課 (橘 律) & 品質管理課 (神崎 玲奈)",
+      "output": "法的適合性レポート & QA監査スコア",
+      "gate": "コンプライアンス基準クリア"
+    },
+    {
+      "step": 5,
+      "title": "全社統合決裁 (Universal Approval Gateway)",
+      "owner": "代表者・オーナー",
+      "output": "承認フラグ / 否認指示 / 拒否",
+      "gate": "オーナーの承認により投稿ロック解除"
+    },
+    {
+      "step": 6,
+      "title": "note公開 & SNSプロモーション配信",
+      "owner": "全社連携 (noteone)",
+      "output": "note記事販売開始 & 売上計上 (accounting_data.json)",
+      "gate": "売上目標達成モニタリング"
+    }
+  ],
+  "security_and_compliance": {
+    "api_key_protection": "Gemini APIキーは環境変数・ローカルセッションのみで管理し、外部送信や公開リポジトリへの漏洩を防止。",
+    "commercial_compliance": "note利用規約および景品表示法に準拠。誇大広告・虚偽表記・著作権侵害の事前自動排除。",
+    "data_ownership": "すべての作成記事、プロンプト、売上台帳は完全にお客様（オーナー）に帰属。"
+  }
+}

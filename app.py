@@ -1558,46 +1558,130 @@ elif page_id == "accounting":
     st.caption("🛡️ **経理課ポリシー**: 就業規則第4条に基づき、代表者の稟議承認がない限り、1円たりとも課金は発生しません。" if lang == "ja" else "🛡️ **Strict Policy Enforcement**: Pursuant to Corporate Rule Art. 4, zero financial liabilities or cloud expenses are incurred without prior executive ringi approval.")
 
 # ==========================================
-# 11. 💻 IT Helpdesk & Error Logs
+# 11. 💻 IT Helpdesk & System Specifications
 # ==========================================
 elif page_id == "helpdesk":
-    st.markdown(f"<div class='main-header'>{t('it_title', lang)}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='sub-header'>{t('it_sub', lang)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='main-header'>{'💻 社内ヘルプデスク ＆ システム仕様書' if lang=='ja' else '💻 IT Helpdesk & System Architecture'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='sub-header'>{'システムの動作構造、AIエージェント連携仕様、完全無料0円運用の仕組み、および障害対応ログを管理・閲覧できます。' if lang=='ja' else 'Central repository for system architecture, AI agent orchestration specs, zero-cost infrastructure, and error response logs.'}</div>", unsafe_allow_html=True)
 
-    err_file = os.path.join(os.path.dirname(__file__), "data/error_logs.json")
-    if os.path.exists(err_file):
-        with open(err_file, "r", encoding="utf-8") as f:
-            err_data = json.load(f)
-    else:
-        err_data = {"errors": []}
+    tab_spec, tab_errors = st.tabs([
+        "📋 会社システム仕様書 (System Blueprint)" if lang=="ja" else "📋 System Blueprint",
+        "⚠️ 障害・エラー台帳 (Error Logs)" if lang=="ja" else "⚠️ Error & Incident Logs"
+    ])
 
-    col_e1, col_e2, col_e3 = st.columns(3)
-    with col_e1:
-        st.metric(label=t("it_total_label", lang), value=f"{len(err_data.get('errors', []))} {'件' if lang=='ja' else 'Cases'}")
-    with col_e2:
-        st.metric(label=t("it_resolved_label", lang), value=f"{len([e for e in err_data.get('errors', []) if '解決' in e.get('status', '') or 'Resolved' in e.get('status', '')])} {'件' if lang=='ja' else 'Cases'}")
-    with col_e3:
-        st.metric(label=t("it_health_label", lang), value="100% (正常稼働)" if lang == "ja" else "100% Operational")
+    with tab_spec:
+        spec_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/system_specifications.json")
+        if os.path.exists(spec_file):
+            with open(spec_file, "r", encoding="utf-8") as f:
+                spec_data = json.load(f)
+        else:
+            spec_data = {}
 
-    st.markdown("---")
-    st.markdown(f"<div class='section-title'>{t('it_ledger_title', lang)}</div>", unsafe_allow_html=True)
-    
-    for err in err_data.get("errors", []):
-        with st.container():
+        st.markdown(f"### 🏢 {spec_data.get('system_name', 'Note One Systems Platform')}")
+        st.caption(f"**Version**: {spec_data.get('version', '2.4.0')} | **Last Updated**: {spec_data.get('last_updated', '2026-08-28')} | **Managed By**: {spec_data.get('author', 'IT Helpdesk')}")
+
+        # 1. Executive Summary & 0-Cost Stack
+        exec_sum = spec_data.get("executive_summary", {})
+        st.markdown(f"""
+        <div class='content-box' style='border-left: 5px solid #38BDF8;'>
+            <h4 style='color: #38BDF8; margin-top:0;'>💡 システム基本理念 ＆ 固定費0円事業モデル</h4>
+            <p style='color: #F8FAFC; margin-bottom: 8px;'><strong>事業目的:</strong> {exec_sum.get('purpose', '')}</p>
+            <p style='color: #F8FAFC; margin-bottom: 8px;'><strong>対外ブランド / 屋号:</strong> <span style='background: #0284C7; color: #FFF; padding: 2px 8px; border-radius: 4px;'>{exec_sum.get('brand_name', 'noteone')}</span></p>
+            <div style='background: #064E3B; border: 1px solid #10B981; border-radius: 6px; padding: 12px; margin-top: 10px;'>
+                <strong style='color: #4ADE80;'>🛡️ 完全無料（固定費0円）運用の仕組み:</strong>
+                <div style='color: #E2E8F0; font-size: 0.92rem; margin-top: 4px;'>{exec_sum.get('zero_cost_principle', '')}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # 2. Architecture Layers
+        st.markdown(f"#### 🏗️ {'システムアーキテクチャ4層構造' if lang=='ja' else 'System Architecture Layers'}")
+        for layer in spec_data.get("architecture_layers", []):
             st.markdown(f"""
-            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {clean_txt(err['module'])} (ID: {err['id']})</strong>
-                    <span>{err['status']}</span>
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <strong style='color: #38BDF8; font-size: 1.05rem;'>{layer.get('layer')}</strong>
+                    <span style='background: #0F172A; color: #94A3B8; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155;'>Tech: {layer.get('tech_stack')}</span>
                 </div>
-                <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 {'発生日時' if lang=='ja' else 'Occurred'}: {err['occurred_at']}</div>
-                <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
-                    {clean_txt(err['error_message'])}
-                </div>
-                <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {clean_txt(err['root_cause'])}</div>
-                <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {clean_txt(err['solution'])}</div>
+                <div style='color: #E2E8F0; font-size: 0.92rem; margin-top: 8px; line-height: 1.6;'>{layer.get('description')}</div>
             </div>
             """, unsafe_allow_html=True)
+
+        # 3. AI Agent Matrix
+        st.markdown(f"#### 👥 {'9名の自律型AI社員とプロンプト連携マトリクス' if lang=='ja' else 'AI Agent & Prompt Engineering Matrix'}")
+        agent_df = []
+        for ag in spec_data.get("agent_matrix", []):
+            agent_df.append({
+                "社員名 / 役職": f"{ag['name']} ({ag['role']})",
+                "担当部署": ag["dept"],
+                "プロンプト設計 & 主要責務": ag["prompt_feature"]
+            })
+        st.dataframe(pd.DataFrame(agent_df), use_container_width=True)
+
+        # 4. End-to-End Workflow & Governance Gateways
+        st.markdown(f"#### 🔄 {'全社業務ワークフロー ＆ 決裁ゲートウェイ' if lang=='ja' else 'Workflow & Approval Gateways'}")
+        for wf in spec_data.get("workflow_steps", []):
+            st.markdown(f"""
+            <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #F59E0B; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px;'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <strong style='color: #FFFFFF; font-size: 1rem;'>Step {wf.get('step')}: {wf.get('title')}</strong>
+                    <span style='background: #2A1711; color: #FCD34D; font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid #F59E0B;'>Gate: {wf.get('gate')}</span>
+                </div>
+                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; font-size: 0.88rem;'>
+                    <div style='color: #94A3B8;'><strong>担当:</strong> <span style='color: #E2E8F0;'>{wf.get('owner')}</span></div>
+                    <div style='color: #94A3B8;'><strong>成果物:</strong> <span style='color: #38BDF8;'>{wf.get('output')}</span></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 5. Security & Compliance
+        sec = spec_data.get("security_and_compliance", {})
+        st.markdown(f"""
+        <div style='background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-top: 18px;'>
+            <strong style='color: #10B981; font-size: 1rem;'>🔒 セキュリティ ＆ コンプライアンス規程</strong>
+            <ul style='color: #E2E8F0; font-size: 0.9rem; margin-top: 8px; line-height: 1.7;'>
+                <li><strong>APIキー保護:</strong> {sec.get('api_key_protection', '')}</li>
+                <li><strong>商用コンプライアンス:</strong> {sec.get('commercial_compliance', '')}</li>
+                <li><strong>データ所有権:</strong> {sec.get('data_ownership', '')}</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with tab_errors:
+        err_file = os.path.join(os.path.dirname(__file__), "data/error_logs.json")
+        if os.path.exists(err_file):
+            with open(err_file, "r", encoding="utf-8") as f:
+                err_data = json.load(f)
+        else:
+            err_data = {"errors": []}
+
+        col_e1, col_e2, col_e3 = st.columns(3)
+        with col_e1:
+            st.metric(label=t("it_total_label", lang), value=f"{len(err_data.get('errors', []))} {'件' if lang=='ja' else 'Cases'}")
+        with col_e2:
+            st.metric(label=t("it_resolved_label", lang), value=f"{len([e for e in err_data.get('errors', []) if '解決' in e.get('status', '') or 'Resolved' in e.get('status', '')])} {'件' if lang=='ja' else 'Cases'}")
+        with col_e3:
+            st.metric(label=t("it_health_label", lang), value="100% (正常稼働)" if lang == "ja" else "100% Operational")
+
+        st.markdown("---")
+        st.markdown(f"<div class='section-title'>{t('it_ledger_title', lang)}</div>", unsafe_allow_html=True)
+        
+        for err in err_data.get("errors", []):
+            with st.container():
+                st.markdown(f"""
+                <div style='background-color: #1E293B; border: 1px solid #334155; border-left: 5px solid #38BDF8; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); color: #F8FAFC;'>
+                    <div style='display: flex; justify-content: space-between;'>
+                        <strong style='font-size: 1.15rem; color: #FFFFFF;'>⚠️ {clean_txt(err['module'])} (ID: {err['id']})</strong>
+                        <span style='color: #4ADE80; font-weight: 700;'>{err['status']}</span>
+                    </div>
+                    <div style='font-size: 0.8rem; color: #94A3B8; margin: 4px 0;'>🕒 {'発生日時' if lang=='ja' else 'Occurred'}: {err['occurred_at']}</div>
+                    <div style='background-color: #450A0A; border: 1px solid #991B1B; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #FCA5A5; margin: 8px 0;'>
+                        {clean_txt(err['error_message'])}
+                    </div>
+                    <div style='font-size: 0.9rem; color: #E2E8F0;'><strong>🔍 {'原因分析:' if lang=='ja' else 'Root Cause Analysis:'}</strong> {clean_txt(err['root_cause'])}</div>
+                    <div style='font-size: 0.9rem; color: #4ADE80; margin-top: 4px;'><strong>🛠️ {'対処手順・解決法:' if lang=='ja' else 'Resolution Procedure:'}</strong> {clean_txt(err['solution'])}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # 12. 👥 Employee Profiles
