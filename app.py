@@ -667,6 +667,143 @@ if page_id == "dashboard":
     
     st.progress(progress_ratio, text=f"{t('dash_progress_text', lang)}: {int(progress_ratio*100)}% (¥{total_sales:,} / ¥{target_sales:,})")
 
+    # =============================================================
+    # 🚀 全社タスク進行パイプライン（フェーズ可視化ボード）
+    # =============================================================
+    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown(f"### 🚀 {'全社タスク進行パイプライン（フェーズ可視化ボード）' if lang=='ja' else 'Enterprise Task Progress Pipeline'}")
+    st.markdown(f"<div style='color: #94A3B8; font-size: 0.9rem; margin-bottom: 14px;'>{'9名のAI社員による制作バトンリレーの進捗状況です。案件が左から右へ流れて売上化されます。' if lang=='ja' else 'Visual kanban pipeline showing progression across 9 AI specialists.'}</div>", unsafe_allow_html=True)
+
+    # 5つのフェーズバケツを分類
+    p1_items = [] # 1. 企画・市場調査 (15%)
+    p2_items = [] # 2. 構成・執筆中 (50%)
+    p3_items = [] # 3. 法務・QA検査 (80%)
+    p4_items = [] # 4. オーナー決裁待ち (95%)
+    p5_items = [] # 5. 公開・販売中 (100%)
+
+    # トピックの分類
+    for tp in topics:
+        st_val = tp.get("status", "Pending Owner Approval")
+        if st_val == "Pending Owner Approval":
+            p4_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "市場調査課", "progress": 95, "icon": "🔍"})
+        elif st_val == "Revision Requested":
+            p1_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "市場調査課", "progress": 20, "icon": "🔍", "note": "再調査中"})
+        elif st_val == "Approved":
+            p2_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "記事制作課引継待機", "progress": 40, "icon": "📑", "note": "執筆スタンバイ"})
+
+    # 記事の分類
+    for art in articles:
+        st_val = art.get("status", "Pending Owner Approval")
+        if st_val == "Pending Owner Approval":
+            p4_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "記事制作・広報課", "progress": 95, "icon": "📄", "words": len(art.get("content", "")), "price": art.get("price", 500)})
+        elif st_val == "Revision Requested":
+            p2_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "記事制作課", "progress": 55, "icon": "✍️", "words": len(art.get("content", "")), "note": "指示反映・加筆中"})
+        elif st_val in ["Approved", "Published", "Pre-Publication"]:
+            p5_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "note販売チャンネル", "progress": 100, "icon": "🎉", "words": len(art.get("content", "")), "price": art.get("price", 500)})
+
+    lane_c1, lane_c2, lane_c3, lane_c4, lane_c5 = st.columns(5)
+
+    with lane_c1:
+        st.markdown(f"""
+        <div style='background: #0F172A; border-top: 4px solid #38BDF8; border-radius: 8px; padding: 10px; min-height: 280px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px;'>
+                <strong style='color: #38BDF8; font-size: 0.85rem;'>🔍 1. 企画・調査</strong>
+                <span style='background: #1E293B; color: #FFFFFF; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px;'>{len(p1_items)}</span>
+            </div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 4px;'>担当: 風間 涼 (15%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if not p1_items:
+            st.caption("現在進行中の案件なし")
+        for it in p1_items:
+            st.markdown(f"""
+            <div style='background: #1E293B; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-top: 8px;'>
+                <div style='font-size: 0.82rem; font-weight: 700; color: #FFFFFF;'>{it['icon']} {clean_txt(it['title'])[:28]}...</div>
+                <div style='font-size: 0.75rem; color: #F59E0B; margin-top: 4px;'>⚡ {it.get('note', '調査分析中')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with lane_c2:
+        st.markdown(f"""
+        <div style='background: #0F172A; border-top: 4px solid #F59E0B; border-radius: 8px; padding: 10px; min-height: 280px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px;'>
+                <strong style='color: #F59E0B; font-size: 0.85rem;'>✍️ 2. 構成・執筆</strong>
+                <span style='background: #1E293B; color: #FFFFFF; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px;'>{len(p2_items)}</span>
+            </div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 4px;'>担当: 結城 ＆ 森川 (50%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if not p2_items:
+            st.caption("現在進行中の案件なし")
+        for it in p2_items:
+            st.markdown(f"""
+            <div style='background: #1E293B; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-top: 8px;'>
+                <div style='font-size: 0.82rem; font-weight: 700; color: #FFFFFF;'>{it['icon']} {clean_txt(it['title'])[:28]}...</div>
+                <div style='font-size: 0.75rem; color: #FBBF24; margin-top: 4px;'>📝 {it.get('note', '4000字加筆執筆中')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with lane_c3:
+        st.markdown(f"""
+        <div style='background: #0F172A; border-top: 4px solid #A855F7; border-radius: 8px; padding: 10px; min-height: 280px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px;'>
+                <strong style='color: #A855F7; font-size: 0.85rem;'>🛡️ 3. 法務・QA</strong>
+                <span style='background: #1E293B; color: #FFFFFF; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px;'>{len(p3_items)}</span>
+            </div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 4px;'>担当: 橘 ＆ 神崎 (80%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if not p3_items:
+            st.caption("全件スクリーニング済")
+
+    with lane_c4:
+        st.markdown(f"""
+        <div style='background: #1E1B4B; border-top: 4px solid #EF4444; border-radius: 8px; padding: 10px; min-height: 280px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #6366F1; padding-bottom: 6px;'>
+                <strong style='color: #F87171; font-size: 0.85rem;'>👑 4. 決裁待ち</strong>
+                <span style='background: #EF4444; color: #FFFFFF; font-weight: 800; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;'>{len(p4_items)} 件</span>
+            </div>
+            <div style='font-size: 0.75rem; color: #CBD5E1; margin-top: 4px;'>担当: <strong>オーナー (95%)</strong></div>
+        </div>
+        """, unsafe_allow_html=True)
+        if not p4_items:
+            st.success("決裁待ちなし (全件完了)")
+        for it in p4_items:
+            words_info = f" ({it['words']:,}字)" if "words" in it else ""
+            st.markdown(f"""
+            <div style='background: #2E1065; border: 1px solid #A855F7; border-radius: 6px; padding: 10px; margin-top: 8px;'>
+                <div style='font-size: 0.82rem; font-weight: 800; color: #FFFFFF;'>{it['icon']} {clean_txt(it['title'])[:26]}...{words_info}</div>
+                <div style='display: flex; justify-content: space-between; align-items: center; margin-top: 6px;'>
+                    <span style='background: #F59E0B; color: #000; font-weight: 800; font-size: 0.7rem; padding: 1px 6px; border-radius: 4px;'>¥{it.get('price', 500)}</span>
+                    <span style='color: #F43F5E; font-weight: 800; font-size: 0.75rem;'>🔒 承認待ち</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("👉 決裁する", key=f"pipe_btn_app_{it['type']}_{it['data']['id']}", use_container_width=True):
+                st.session_state.active_page_id = "office"
+                st.session_state.scroll_trigger += 1
+                st.rerun()
+
+    with lane_c5:
+        st.markdown(f"""
+        <div style='background: #0F172A; border-top: 4px solid #10B981; border-radius: 8px; padding: 10px; min-height: 280px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px;'>
+                <strong style='color: #10B981; font-size: 0.85rem;'>🎉 5. 公開・販売</strong>
+                <span style='background: #065F46; color: #FFFFFF; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px;'>{len(p5_items)}</span>
+            </div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 4px;'>担当: 佐々木 ＆ 白石 (100%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if not p5_items:
+            st.caption("公開準備中")
+        for it in p5_items:
+            st.markdown(f"""
+            <div style='background: #064E3B; border: 1px solid #10B981; border-radius: 6px; padding: 10px; margin-top: 8px;'>
+                <div style='font-size: 0.82rem; font-weight: 700; color: #FFFFFF;'>{it['icon']} {clean_txt(it['title'])[:26]}...</div>
+                <div style='font-size: 0.75rem; color: #6EE7B7; margin-top: 4px;'>✅ note販売準備完了 (¥{it.get('price', 500)})</div>
+            </div>
+            """, unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown(f"<div class='section-title'>{t('dash_group_list', lang)}</div>", unsafe_allow_html=True)
     for comp in companies:
