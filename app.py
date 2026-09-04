@@ -519,6 +519,45 @@ st.markdown("""
     }
     
     /* ============================================================== */
+    /* 📋 3.5. INTEGRATED RADIO RECORD TABLE                          */
+    /* ============================================================== */
+    div.st-key-univ_record_radio_table div[role="radiogroup"] {
+        gap: 6px !important;
+    }
+    div.st-key-univ_record_radio_table div[role="radiogroup"] > label {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+        padding: 9px 14px !important;
+        margin-bottom: 2px !important;
+        transition: all 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    div.st-key-univ_record_radio_table div[role="radiogroup"] > label:hover {
+        background: rgba(30, 41, 59, 0.95) !important;
+        border-color: #38BDF8 !important;
+        cursor: pointer !important;
+    }
+    div.st-key-univ_record_radio_table div[role="radiogroup"] > label:has(input:checked) {
+        background: rgba(14, 165, 233, 0.12) !important;
+        border: 1.5px solid #38BDF8 !important;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
+    }
+    div.st-key-univ_record_radio_table div[role="radiogroup"] > label p {
+        font-size: 0.92rem !important;
+        color: #F8FAFC !important;
+        font-weight: 600 !important;
+        margin-bottom: 0 !important;
+    }
+    div.st-key-univ_record_radio_table div[role="radiogroup"] > label div[data-testid="stCaptionContainer"] p {
+        font-size: 0.8rem !important;
+        color: #94A3B8 !important;
+        margin-top: 2px !important;
+    }
+    
+    /* ============================================================== */
     /* 🧭 4. SIDEBAR NAVIGATION LINKS                                 */
     /* ============================================================== */
     div[data-testid="stSidebar"] button {
@@ -1013,38 +1052,43 @@ elif page_id == "office":
         if not filtered_items:
             filtered_items = pending_items
 
-        # 1. 承認が必要な申請のレコード一覧（テーブル表示）
-        st.markdown(f"#### 📋 {'決裁待ち申請レコード一覧' if lang=='ja' else 'Pending Submissions Queue'}")
-        
-        record_df = []
-        for idx, it in enumerate(filtered_items, 1):
-            record_df.append({
-                "No.": idx,
-                "種別 / 所属": f"{it['icon']} {it['dept']}",
-                "申請件名 / タイトル": it["title"],
-                "ステータス": it["status"],
-                "申請日時": it["date"]
-            })
-        st.dataframe(pd.DataFrame(record_df), use_container_width=True)
+        # レコード一覧（ラジオボタン直接組み込み型テーブル）
+        st.markdown(f"#### 📋 {'決裁待ち申請レコード一覧（行のラジオボタンで直接選択）' if lang=='ja' else 'Pending Submissions Queue (Direct Radio Selection)'}")
 
-        # 2. セレクトボックスによるスマートな1件選択（縦長圧迫を解消）
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         pending_key_map = {it["unique_key"]: it for it in pending_items}
-        
-        def format_radio_label(key):
-            it = pending_key_map[key]
-            date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
-            return f"{it['icon']} [{it['dept']}]{date_str} {it['title']}"
-
         valid_options = [it["unique_key"] for it in filtered_items]
-        if "univ_pending_selector" in st.session_state and st.session_state.univ_pending_selector not in valid_options:
-            del st.session_state["univ_pending_selector"]
 
-        selected_key = st.selectbox(
-            "👇 査読・決裁を行う申請を1件選択してください:",
+        if "univ_record_radio_table" in st.session_state and st.session_state.univ_record_radio_table not in valid_options:
+            del st.session_state["univ_record_radio_table"]
+
+        # テーブルヘッダー表示
+        st.html("""
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #334155; border-radius: 8px 8px 0 0; padding: 10px 16px; display: flex; align-items: center; font-size: 0.82rem; font-weight: 800; color: #94A3B8; border-bottom: 2px solid #1E293B; letter-spacing: 0.02em;">
+            <span style="width: 100px; display: inline-flex; align-items: center; gap: 4px;">🔘 選択 / No.</span>
+            <span style="width: 180px;">種別 / 所属</span>
+            <span style="flex: 1;">申請件名 / タイトル</span>
+            <span style="width: 120px; text-align: right;">申請日時</span>
+        </div>
+        """)
+
+        def format_table_radio_row(key):
+            it = pending_key_map[key]
+            idx = valid_options.index(key) + 1
+            date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
+            return f"**No.{idx:02d}**　{it['icon']} **[{it['dept']}]**　**{it['title']}**　`{date_str}`"
+
+        captions_list = [
+            f"📌 申請ステータス: {it['status']} ｜ 担当部署: {it['dept']}"
+            for it in filtered_items
+        ]
+
+        selected_key = st.radio(
+            "👇 査読・決裁を行う申請を選択してください:",
             options=valid_options,
-            format_func=format_radio_label,
-            key="univ_pending_selector"
+            format_func=format_table_radio_row,
+            captions=captions_list,
+            key="univ_record_radio_table",
+            label_visibility="collapsed"
         )
 
         current_item = pending_key_map[selected_key]
@@ -1113,8 +1157,8 @@ elif page_id == "office":
                     st.session_state.auto_start_creation = True
                     st.session_state.active_page_id = "content_creation"
                 st.session_state.show_univ_rev_form = False
-                if "univ_pending_selector" in st.session_state:
-                    del st.session_state["univ_pending_selector"]
+                if "univ_record_radio_table" in st.session_state:
+                    del st.session_state["univ_record_radio_table"]
                 st.session_state.scroll_trigger += 1
                 st.rerun()
 
@@ -1132,8 +1176,8 @@ elif page_id == "office":
                     market_manager.reject_topic(current_item["id"])
                     st.info("トピックを拒否（却下）しました。")
                 st.session_state.show_univ_rev_form = False
-                if "univ_pending_selector" in st.session_state:
-                    del st.session_state["univ_pending_selector"]
+                if "univ_record_radio_table" in st.session_state:
+                    del st.session_state["univ_record_radio_table"]
                 st.session_state.scroll_trigger += 1
                 st.rerun()
 
@@ -1171,8 +1215,8 @@ elif page_id == "office":
                                 market_manager.request_revision(current_item["id"], fb_text)
                                 st.warning("市場調査課に再調査指示を伝達しました（市場調査課にて再調査が開始されます）。")
                             st.session_state.show_univ_rev_form = False
-                            if "univ_pending_selector" in st.session_state:
-                                del st.session_state["univ_pending_selector"]
+                            if "univ_record_radio_table" in st.session_state:
+                                del st.session_state["univ_record_radio_table"]
                             st.session_state.scroll_trigger += 1
                             st.rerun()
                         else:
