@@ -161,6 +161,31 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
                 <div style="white-space: pre-wrap; font-size: 0.92rem; color: #1E293B; margin-top: 8px; line-height: 1.65;">{qa_txt}</div>
             </div>
         </div>
+
+        <div style="height: 1px; background: #CBD5E1; margin: 26px 0;"></div>
+
+        <h3 style="color: #7C3AED; margin: 24px 0 12px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; font-size:1.25rem; font-weight:800;">📊 財務・価格決定根拠 ＆ 収益性試算（財務課: 白石 葵 査定）</h3>
+        <div style="background: #FAF5FF; padding: 20px; border-radius: 10px; border: 1.5px solid #DDD6FE; margin: 16px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid #E9D5FF; padding-bottom: 10px;">
+                <span style="font-weight: 800; font-size: 1.05rem; color: #5B21B6;">💰 設定販売価格: ¥{art.get('price', 300):,}（基本インパルス・バイ価格）</span>
+                <span style="background: #7C3AED; color: #FFFFFF !important; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">財務アナリスト査定済</span>
+            </div>
+            <div style="color: #1E293B !important; font-size: 0.94rem; line-height: 1.8; white-space: pre-wrap;">{clean_txt(art.get('pricing_rationale', '【基本300円の戦略的根拠】カフェのコーヒー1杯未満の衝動買い（インパルス・バイ）ゾーンに設定することで購入時の躊躇を極小化し、成約率（CVR 3.8%〜5.2%）とSNS口コミ拡散を最大化します。'))}</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px;">
+                <div style="background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid #DDD6FE; text-align: center;">
+                    <div style="font-size: 0.8rem; color: #6D28D9; font-weight: 700;">想定成約率 (CVR)</div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #0F172A; margin-top: 4px;">3.8% 〜 5.2%</div>
+                </div>
+                <div style="background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid #DDD6FE; text-align: center;">
+                    <div style="font-size: 0.8rem; color: #6D28D9; font-weight: 700;">1部あたり手残り純益 (約85%)</div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #059669; margin-top: 4px;">¥{int(art.get('price', 300) * 0.85):,}</div>
+                </div>
+                <div style="background: #FFFFFF; padding: 12px; border-radius: 6px; border: 1px solid #DDD6FE; text-align: center;">
+                    <div style="font-size: 0.8rem; color: #6D28D9; font-weight: 700;">月商目標貢献額 (月150部)</div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #0284C7; margin-top: 4px;">¥{int(art.get('price', 300) * 0.85 * 150):,}</div>
+                </div>
+            </div>
+        </div>
     </div>
     """
 
@@ -169,7 +194,7 @@ def get_topic_dossier_html(tp: dict, lang: str = "ja") -> str:
     title = clean_txt(tp.get('title', ''))
     category = clean_txt(tp.get('category', '実務ノウハウ'))
     audience = clean_txt(tp.get('target_audience', '業務効率化を目指すビジネスパーソン'))
-    price = tp.get('recommended_price', 500)
+    price = tp.get('recommended_price', 300)
     demand = clean_txt(tp.get('demand_summary', 'note市場において当該領域の検索需要・購買ニーズが急増中。'))
     diff_gap = clean_txt(tp.get('competitor_gap', '現場ですぐ使える完成版テンプレートと具体的手順を提示して差別化。'))
 
@@ -188,8 +213,8 @@ def get_topic_dossier_html(tp: dict, lang: str = "ja") -> str:
     sample_articles = 280
     search_queries = 45000
     target_words = "4,000〜6,500 文字（実務テンプレ同梱）"
-    est_cvr = "3.2% 〜 4.8%"
-    target_sales_1st_month = f"{int(35000 / price)} 〜 {int(80000 / price)} 部（月商予測: 約 3.5万〜8.0万円）"
+    est_cvr = "3.8% 〜 5.2%（基本300円・衝動買い最適化）"
+    target_sales_1st_month = f"{int(30000 / price)} 〜 {int(90000 / price)} 部（月商予測: 約 3.0万〜9.0万円）"
 
     return f"""
     <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:26px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 22px rgba(0,0,0,0.18); margin: 18px 0;">
@@ -272,16 +297,21 @@ def get_topic_dossier_html(tp: dict, lang: str = "ja") -> str:
         </div>
 
         <!-- Section 4: Commercial Projection -->
-        <div style="background:#F0FDF4; padding:14px 18px; border-radius:8px; border:1px solid #86EFAC; margin-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-            <div>
-                <strong style="color:#166534; font-size:0.95rem;">💰 販売収益予測シミュレーション:</strong>
-                <div style="color:#15803D; font-size:0.86rem; margin-top:2px;">
-                    推奨販売価格: <strong>¥{price:,}</strong> ／ 想定成約率 (CVR): <strong>{est_cvr}</strong> ／ 初月予測販売数: <strong>{target_sales_1st_month}</strong>
+        <div style="background:#F0FDF4; padding:16px 20px; border-radius:8px; border:1px solid #86EFAC; margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+                <div>
+                    <strong style="color:#166534; font-size:0.98rem;">💰 販売収益予測シミュレーション:</strong>
+                    <div style="color:#15803D; font-size:0.88rem; margin-top:3px;">
+                        推奨基本価格: <strong>¥{price:,}</strong>（衝動買い推奨） ／ 想定成約率: <strong>{est_cvr}</strong> ／ 初月予測販売数: <strong>{target_sales_1st_month}</strong>
+                    </div>
                 </div>
+                <span style="background:#15803D; color:#FFFFFF; font-weight:800; font-size:0.82rem; padding:4px 12px; border-radius:20px;">
+                    基本300円・高成約モデル
+                </span>
             </div>
-            <span style="background:#15803D; color:#FFFFFF; font-weight:800; font-size:0.82rem; padding:4px 12px; border-radius:20px;">
-                高収益見込み案件
-            </span>
+            <div style="background:#DCFCE7; padding:8px 12px; border-radius:6px; font-size:0.84rem; color:#14532D; line-height:1.5;">
+                💡 <strong>【基本300円の価格設定根拠】</strong>: カフェのコーヒー1杯未満の「インパルス・バイ（衝動買い）価格」に設定することで購入障壁を最小化し、初期読者レビューの獲得とSNS拡散を最速で起こす戦略的価格です。
+            </div>
         </div>
     </div>
     """
@@ -1111,7 +1141,7 @@ elif page_id == "office":
         
         # 💰 価格変更ウィジェット（記事の場合）
         if item_type == "article":
-            cur_price = item_raw.get("price", 500)
+            cur_price = item_raw.get("price", 300)
             c_pr1, c_pr2 = st.columns([3, 1])
             with c_pr1:
                 new_price_val = st.number_input(
@@ -1723,7 +1753,7 @@ elif page_id == "content_creation":
             placeholder=t("cc_target_ph", lang)
         )
     with c_in2:
-        price_opts = [t("cc_price_opt_auto", lang), t("cc_price_opt_500", lang), t("cc_price_opt_300", lang), t("cc_price_opt_prem", lang)]
+        price_opts = [t("cc_price_opt_300", lang), t("cc_price_opt_500", lang), t("cc_price_opt_prem", lang), t("cc_price_opt_auto", lang)]
         price_input = st.selectbox(t("cc_price_label", lang), price_opts)
         st.write("")
         start_btn = st.button(t("cc_start_btn", lang), type="primary", use_container_width=True)
@@ -1935,7 +1965,7 @@ elif page_id == "qa":
         st.markdown(f"<div class='section-title'>{t('qa_approval_header', lang)}</div>", unsafe_allow_html=True)
 
         # 💰 価格変更ウィジェット
-        cur_qa_price = art.get("price", 500)
+        cur_qa_price = art.get("price", 300)
         c_qa_p1, c_qa_p2 = st.columns([3, 1])
         with c_qa_p1:
             qa_new_price = st.number_input(
