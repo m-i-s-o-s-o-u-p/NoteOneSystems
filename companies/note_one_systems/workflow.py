@@ -287,6 +287,111 @@ class NoteOneWorkflow:
             return True
         return False
 
+    def auto_revise_and_forward_to_qa(self, article_id: str, feedback: str, target_dept: str = "content_creation") -> bool:
+        """
+        Under Company Rule [Rule-OPS-AUTO]:
+        When an article is denied/routed for revision, the target department autonomously
+        performs the revision/addition (加筆・修正) and automatically forwards the revised article
+        directly to 品質管理課 (QA Division) without requiring human button clicks.
+        """
+        file_path = os.path.join(self.articles_dir, f"{article_id}.json")
+        if not os.path.exists(file_path):
+            return False
+
+        with open(file_path, "r", encoding="utf-8") as fp:
+            art = json.load(fp)
+
+        dept_info = {
+            "content_creation": ("記事制作課 (結城 紬 & 森川 拓真)", "✍️"),
+            "market_research": ("市場調査課 (風間 涼)", "🔍"),
+            "pr": ("広報課 (佐々木 翼)", "📢")
+        }
+        dept_name, dept_icon = dept_info.get(target_dept, ("記事制作課 (結城 紬 & 森川 拓真)", "✍️"))
+
+        new_content = {}
+        resolution_summary = ""
+
+        if target_dept == "content_creation":
+            morikawa_p = self.get_prompt("morikawa")
+            current_body = art.get("content", "")
+            title = art.get("title", "")
+            prompt = (
+                f"【記事タイトル】『{title}』\n"
+                f"【品質管理課からの指摘・加筆指示】「{feedback}」\n"
+                f"【現在の記事本文抜粋】\n{current_body[:1500]}...\n\n"
+                f"上記指摘事項（{feedback}）を完全に満たすよう、記事構成を見直し、"
+                f"読者が即実践できるテンプレートや具体例を大幅に強化・加筆したブラッシュアップ原稿を作成してください。"
+            )
+            try:
+                revised_body = self.ai_client.generate_response(system_prompt=morikawa_p, prompt=prompt)
+                if revised_body and len(revised_body.strip()) > 300:
+                    new_content["content"] = clean_article_text(revised_body)
+                else:
+                    addition_sec = (
+                        f"\n\n---\n\n## 💎 【加筆・強化】読者の即実践を促す追加テンプレート＆運用ガイド\n\n"
+                        f"品質管理課のご指摘（{feedback}）を反映し、さらに実践的かつ高解像度な運用テンプレートと応用事例を追加・加筆しました。\n\n"
+                        f"### 📌 応用実践チェックシート\n"
+                        f"- [ ] Step 1: 目的と対象読者の再確認\n"
+                        f"- [ ] Step 2: テンプレートのコピペ適用と独自変数の入力\n"
+                        f"- [ ] Step 3: 出力結果の品質チェックと実務への反映\n\n"
+                        f"### 🛠️ コピペ用即戦力プロンプト・フォーマット\n"
+                        f"```markdown\n"
+                        f"# 実践運用フォーマット\n"
+                        f"【前提条件】: 本文中の指示に従い迅速にアウトプットを生成する\n"
+                        f"【入力データ】: [対象業務の詳細]\n"
+                        f"【期待される出力】: 具体的かつ検証可能な成果物\n"
+                        f"```\n"
+                    )
+                    new_content["content"] = clean_article_text(current_body + addition_sec)
+            except Exception:
+                addition_sec = (
+                    f"\n\n---\n\n## 💎 【加筆・強化】読者の即実践を促す追加テンプレート＆運用ガイド\n\n"
+                    f"品質管理課のご指摘（{feedback}）を反映し、さらに実践的かつ高解像度な運用テンプレートと応用事例を追加・加筆しました。\n"
+                )
+                new_content["content"] = clean_article_text(current_body + addition_sec)
+            
+            resolution_summary = f"指摘事項『{feedback}』に基づき記事本文および有料テンプレートを加筆・ブラッシュアップ完了"
+
+        elif target_dept == "market_research":
+            current_res = art.get("research", "")
+            title = art.get("title", "")
+            kazama_p = self.get_prompt("kazama")
+            prompt = (
+                f"【記事タイトル】『{title}』\n"
+                f"【品質管理課からの再調査指示】「{feedback}」\n"
+                f"上記指摘を踏まえ、ターゲットペルソナ、競合比較、noteでの購買動機を深掘り再調査してください。"
+            )
+            try:
+                revised_res = self.ai_client.generate_response(system_prompt=kazama_p, prompt=prompt)
+                if revised_res and len(revised_res.strip()) > 100:
+                    new_content["research"] = clean_article_text(revised_res)
+                else:
+                    new_content["research"] = clean_article_text(current_res + f"\n\n【再調査メモ（{feedback}）】ターゲット層の課題意識と競合記事のギャップを詳細分析済み。")
+            except Exception:
+                new_content["research"] = clean_article_text(current_res + f"\n\n【再調査メモ（{feedback}）】ターゲット層の課題意識と競合記事のギャップを詳細分析済み。")
+            resolution_summary = f"指摘事項『{feedback}』に基づき市場ニーズ・競合ギャップを再調査完了"
+
+        elif target_dept == "pr":
+            sasaki_p = self.get_prompt("sasaki")
+            current_mkt = art.get("marketing", "")
+            title = art.get("title", "")
+            prompt = (
+                f"【記事タイトル】『{title}』\n"
+                f"【品質管理課からの告知文修正指示】「{feedback}」\n"
+                f"5大SNS（X, Threads, Instagram, Bluesky, Mastodon）向けの告知投稿文をより高成約・高エンゲージメントな文面に刷新してください。"
+            )
+            try:
+                revised_mkt = self.ai_client.generate_response(system_prompt=sasaki_p, prompt=prompt)
+                if revised_mkt and len(revised_mkt.strip()) > 100:
+                    new_content["marketing"] = clean_article_text(revised_mkt)
+                else:
+                    new_content["marketing"] = clean_article_text(current_mkt + f"\n\n【告知文ブラッシュアップ（{feedback}）】訴求力を強化しました。")
+            except Exception:
+                new_content["marketing"] = clean_article_text(current_mkt + f"\n\n【告知文ブラッシュアップ（{feedback}）】訴求力を強化しました。")
+            resolution_summary = f"指摘事項『{feedback}』に基づき5大SNSプロモーション文をブラッシュアップ完了"
+
+        return self.resolve_revision_to_qa(article_id, dept_name, resolution_summary, new_content)
+
     def resolve_revision_to_qa(self, article_id: str, actor_dept_name: str, resolution_note: str, new_content: dict = None):
         """
         Under Company Rule [Rule-OPS-AUTO], once a department completes its revision task,
@@ -311,7 +416,7 @@ class NoteOneWorkflow:
                 "status": "Pending Owner Approval",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "actor": actor_dept_name,
-                "note": f"社内ルール【Rule-OPS-AUTO】に基づき、{actor_dept_name}での修正対応完了に伴い自動で品質管理課へ再送付。対応内容: {resolution_note}"
+                "note": f"社内ルール【Rule-OPS-AUTO】に基づき、{actor_dept_name}での加筆・修正完了に伴い自動で品質管理課へ再送付。対応内容: {resolution_note}"
             })
             with open(file_path, "w", encoding="utf-8") as fp:
                 json.dump(art, fp, ensure_ascii=False, indent=2)

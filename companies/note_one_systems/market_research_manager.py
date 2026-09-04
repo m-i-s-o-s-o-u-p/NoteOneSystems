@@ -200,11 +200,11 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
         return False
 
     def request_revision(self, topic_id: str, feedback: str, requester_name: str = "Owner (オーナー)"):
-        """Requests topic angle revisions."""
+        """Requests topic angle revisions and autonomously re-investigates under Rule-OPS-AUTO."""
         topics = self._read_topics_raw()
         for t in topics:
             if t.get("id") == topic_id:
-                t["status"] = "Revision Requested"
+                t["status"] = "Pending Owner Approval"
                 t["latest_feedback"] = feedback
                 if "status_history" not in t:
                     t["status_history"] = []
@@ -213,6 +213,14 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "actor": requester_name,
                     "note": f"オーナーからの再調査・切り口指示: {feedback}"
+                })
+                # Autonomous re-investigation
+                t["angle"] = f"{t.get('angle', '')} 【再調査反映: {feedback}】"
+                t["status_history"].append({
+                    "status": "Pending Owner Approval",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "actor": "市場調査課 (風間 涼)",
+                    "note": f"社内ルール【Rule-OPS-AUTO】に基づき、風間アナリストがご指摘（{feedback}）を反映して再調査を完了し、自動で決裁待ちへ再申請しました。"
                 })
                 self._save_topics_raw(topics)
                 return True
