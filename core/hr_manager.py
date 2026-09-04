@@ -317,7 +317,88 @@ class HRManager:
         with open(HIRING_LEDGER_PATH, "w", encoding="utf-8") as f:
             json.dump(ledger, f, ensure_ascii=False, indent=2)
 
-        return profile_dict
+    BASE_9_IDS = {"ichijo", "tachibana", "ayase", "kazama", "yuki", "morikawa", "kanzaki", "sasaki", "shiraishi"}
+
+    def is_offboardable(self, employee_id: str) -> bool:
+        """Core 9 members are protected foundational infrastructure, additional hires can be freely offboarded."""
+        return employee_id not in self.BASE_9_IDS
+
+    def offboard_employee(self, employee_id: str, reason: str = "代表者の経営判断による人員整理") -> Dict[str, Any]:
+        """
+        Executes formal dismissal / offboarding of an AI employee:
+        1. Validates offboard eligibility (non-core 9)
+        2. Removes employee from company_info.json
+        3. Removes from workload_stats.json
+        4. Removes from org_chart_and_job_descriptions.json
+        5. Removes from system_specifications.json
+        6. Logs termination into hiring_ledger.json
+        """
+        if not self.is_offboardable(employee_id):
+            raise ValueError("基幹コア社員（創業9名）は会社の自律執筆・品質保証パイプラインの基盤プログラムに直結しているため、直接解雇はできません。")
+
+        emp_name = employee_id
+        emp_role = "AIスペシャリスト"
+        emp_dept = "事業本部"
+        emp_icon = "👤"
+
+        # 1. Update company_info.json
+        if os.path.exists(COMPANY_INFO_PATH):
+            with open(COMPANY_INFO_PATH, "r", encoding="utf-8") as f:
+                c_info = json.load(f)
+            emps = c_info.get("employees", [])
+            target = next((e for e in emps if e.get("id") == employee_id), None)
+            if target:
+                emp_name = target.get("name", employee_id)
+                emp_role = target.get("role", "")
+                emp_dept = target.get("department", "")
+                emp_icon = target.get("icon", "👤")
+                c_info["employees"] = [e for e in emps if e.get("id") != employee_id]
+                with open(COMPANY_INFO_PATH, "w", encoding="utf-8") as f:
+                    json.dump(c_info, f, ensure_ascii=False, indent=2)
+
+        # 2. Update workload_stats.json
+        stats = self.get_workload_stats()
+        if employee_id in stats:
+            del stats[employee_id]
+            with open(self.workload_file, "w", encoding="utf-8") as f:
+                json.dump(stats, f, ensure_ascii=False, indent=2)
+
+        # 3. Update org_chart_and_job_descriptions.json
+        if os.path.exists(ORG_CHART_PATH):
+            with open(ORG_CHART_PATH, "r", encoding="utf-8") as f:
+                org_info = json.load(f)
+            for d in org_info.get("departments", []):
+                d["roles"] = [r for r in d.get("roles", []) if r.get("member") != emp_name and r.get("role_name") != emp_role]
+            with open(ORG_CHART_PATH, "w", encoding="utf-8") as f:
+                json.dump(org_info, f, ensure_ascii=False, indent=2)
+
+        # 4. Update system_specifications.json
+        if os.path.exists(SYS_SPECS_PATH):
+            with open(SYS_SPECS_PATH, "r", encoding="utf-8") as f:
+                sys_info = json.load(f)
+            sys_info["agent_matrix"] = [a for a in sys_info.get("agent_matrix", []) if a.get("id") != employee_id]
+            with open(SYS_SPECS_PATH, "w", encoding="utf-8") as f:
+                json.dump(sys_info, f, ensure_ascii=False, indent=2)
+
+        # 5. Record offboarding in hiring_ledger.json
+        record = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "action": "解雇・オフボーディング",
+            "employee_id": employee_id,
+            "name": emp_name,
+            "role": emp_role,
+            "icon": emp_icon,
+            "department": emp_dept,
+            "cost": "¥0（退職金・手当 0円）",
+            "authorized_by": "代表者（オーナー決定）",
+            "impact": f"2Dオフィスから退場し、全社稼働名簿から除外完了（理由: {reason}）"
+        }
+        ledger = self.get_hiring_history()
+        ledger.append(record)
+        with open(HIRING_LEDGER_PATH, "w", encoding="utf-8") as f:
+            json.dump(ledger, f, ensure_ascii=False, indent=2)
+
+        return record
 
     def get_hiring_history(self) -> List[Dict[str, Any]]:
         """Returns the official company hiring history."""

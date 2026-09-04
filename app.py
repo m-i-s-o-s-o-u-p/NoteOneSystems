@@ -2173,6 +2173,49 @@ elif page_id == "hr":
                         except Exception as e:
                             st.error(f"雇用処理エラー: {e}")
 
+    # 🚪 AI社員 在籍管理 ＆ 解雇・オフボーディングデスク
+    st.markdown("---")
+    st.markdown(f"#### 🚪 {'AI社員 在籍管理 ＆ 解雇・オフボーディングデスク' if lang=='ja' else 'AI Employee Roster & Offboarding Desk'}")
+    st.markdown(f"<div style='color: #94A3B8; font-size: 0.88rem; margin-bottom: 14px;'>{'【就業規則 第18条】に基づき、代表者（オーナー）は増員したAI社員を即時かつ0円（退職金・手当なし）で解雇（オフボーディング）できます。解雇されたAI社員は直ちに2Dオフィス、相談デスク、社内名簿から退場します。<br>※基幹コア社員（創業9名）は会社の自律執筆・品質保証パイプラインのシステム保全のため解雇不可（保護対象）となっています。' if lang=='ja' else 'Under Article 18, the owner can offboard supplementary AI employees at 0 cost. Core 9 members are protected.'}</div>", unsafe_allow_html=True)
+
+    comp_info_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/company_info.json")
+    cur_employees = []
+    if os.path.exists(comp_info_path):
+        with open(comp_info_path, "r", encoding="utf-8") as f:
+            cur_employees = json.load(f).get("employees", [])
+
+    for emp in cur_employees:
+        e_id = emp["id"]
+        e_name = emp["name"]
+        e_role = emp.get("role", "AI社員")
+        e_icon = emp.get("icon", "👤")
+        e_dept = emp.get("department", "事業部")
+        is_core = not st.session_state.hr_manager.is_offboardable(e_id)
+
+        col_info, col_act = st.columns([4, 1.5])
+        with col_info:
+            status_badge = "<span style='background: #1E3A8A; color: #93C5FD; font-size: 0.78rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #3B82F6;'>🛡️ 基幹コア社員 (保護対象)</span>" if is_core else "<span style='background: #064E3B; color: #34D399; font-size: 0.78rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #10B981;'>🤝 増員AI社員 (解雇可能)</span>"
+            st.markdown(f"""
+            <div style='background: #0F172A; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px;'>
+                <span style='font-size: 1.1rem;'>{e_icon}</span>
+                <strong style='color: #F8FAFC; margin-left: 6px;'>{e_name}</strong>
+                <span style='color: #94A3B8; font-size: 0.85rem; margin-left: 8px;'>（{e_role} / {e_dept}）</span>
+                <span style='margin-left: 10px;'>{status_badge}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_act:
+            st.write("")
+            if is_core:
+                st.button("🔒 解雇不可 (コア保護)", key=f"btn_offboard_disabled_{e_id}", disabled=True, use_container_width=True)
+            else:
+                if st.button(f"❌ 解雇・オフボーディング (0円)", key=f"btn_offboard_{e_id}", type="secondary", use_container_width=True):
+                    try:
+                        record = st.session_state.hr_manager.offboard_employee(e_id, reason="代表者の経営判断による人員整理")
+                        st.warning(f"🚪 AI社員【{record['name']}（{record['role']}）】を解雇・オフボーディングしました（費用0円）。\n2Dオフィスから退場し、全社名簿から抹消されました。")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"オフボーディング処理エラー: {e}")
+
     # 🤝 新規AI社員 募集・採用管理デスク
     st.markdown("---")
     st.markdown(f"#### 🤝 {'新規AI専門社員 募集・採用管理デスク (即時雇用・費用0円)' if lang=='ja' else 'AI Employee Recruitment & Onboarding Desk (Zero Cost)'}")
@@ -2268,17 +2311,20 @@ elif page_id == "hr":
     hiring_history = st.session_state.hr_manager.get_hiring_history()
     if hiring_history:
         st.markdown("---")
-        st.markdown(f"#### 📜 {'AI社員雇用台帳 ＆ 配属履歴 (全社公式記録)' if lang=='ja' else 'Company Hiring Ledger & Placement History'}")
+        st.markdown(f"#### 📜 {'AI社員 人事異動・雇用・解雇台帳 (全社公式記録)' if lang=='ja' else 'AI Employee Personnel, Hiring & Offboarding Ledger'}")
         ledger_df_data = []
         for h in reversed(hiring_history):
+            action_label = h.get("action", "採用・配属")
+            action_tag = "🚪 解雇・退場" if "解雇" in action_label else "🤝 採用・配属"
             ledger_df_data.append({
-                "雇用日時" if lang=="ja" else "Hired At": h.get("timestamp"),
+                "区分" if lang=="ja" else "Action": action_tag,
+                "日時" if lang=="ja" else "Timestamp": h.get("timestamp"),
                 "社員名" if lang=="ja" else "Name": f"{h.get('icon', '👤')} {h.get('name')}",
                 "役職" if lang=="ja" else "Role": h.get("role"),
                 "配属部署" if lang=="ja" else "Department": h.get("department"),
-                "人件費・追加費用" if lang=="ja" else "Cost": h.get("cost", "¥0"),
-                "承認者" if lang=="ja" else "Authorized By": h.get("authorized_by"),
-                "配属効果・影響" if lang=="ja" else "Impact": h.get("impact")
+                "費用・手当" if lang=="ja" else "Cost/Severance": h.get("cost", "¥0"),
+                "決裁者" if lang=="ja" else "Authorized By": h.get("authorized_by"),
+                "異動・退場詳細" if lang=="ja" else "Details": h.get("impact")
             })
         st.dataframe(pd.DataFrame(ledger_df_data), use_container_width=True)
 
