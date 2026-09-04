@@ -83,7 +83,7 @@ class NoteOneWorkflow:
         morikawa_p = self.get_prompt("morikawa")
         res_article = self.ai_client.generate_response(
             system_prompt=morikawa_p,
-            prompt=f"編集長のアウトライン:\n{res_outline}\n\n上記構成に従い、note読者が即実践できるコピペ用テンプレートや図解構成を含めた完成原稿（無料公開部分〜有料限定部分までマークダウン形式）を執筆してください。"
+            prompt=f"【執筆対象テーマ】「{topic}」\n想定ターゲット: {target_audience}\n編集長のアウトライン:\n{res_outline}\n\n上記構成に従い、note読者が即実践できるコピペ用テンプレートや図解構成を含めた完成原稿（無料公開部分〜有料限定部分までマークダウン形式）を執筆してください。"
         )
         yield {
             "step": 3,
@@ -154,9 +154,9 @@ class NoteOneWorkflow:
             }
         }
 
-        # Extract title
+        # Ensure title strictly inherits approved topic title
         first_line = res_article.strip().split("\n")[0].replace("#", "").strip()
-        title = first_line if first_line else topic
+        title = clean_article_text(topic) if topic else (first_line or "新規作成記事")
         
         # Determine price
         price = 500

@@ -992,7 +992,8 @@ elif page_id == "office":
         
         def format_radio_label(key):
             it = pending_key_map[key]
-            return f"{it['icon']} [{it['dept']}] {it['title']}  ({it['status']})"
+            date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
+            return f"{it['icon']} [{it['dept']}]{date_str} {it['title']} ({it['status']})"
 
         # If previous selected key is no longer in pending items, reset it
         valid_options = [it["unique_key"] for it in pending_items]
@@ -1642,7 +1643,20 @@ elif page_id == "content_creation":
             if completed_article:
                 st.session_state.prefill_topic = ""
                 st.session_state.prefill_audience = ""
-                st.success(f"🎉 記事『{clean_txt(completed_article['title'])}』が作成されました！「🏢 {t('nav_office', lang)}」または「✨ {t('nav_qa', lang)}」にて最終承認を行ってください。" if lang == "ja" else f"🎉 Article '{clean_txt(completed_article['title'])}' created! Please review and approve in '🏢 {t('nav_office', lang)}' or '✨ {t('nav_qa', lang)}'.")
+                st.session_state.auto_start_creation = False
+                st.success(f"🎉 記事『{clean_txt(completed_article['title'])}』の作成が完了しました！勝手な外部公開を防ぐため「🔒 オーナー最終承認待ち」として全社統合決裁センターへ上申・ロックされました。" if lang == "ja" else f"🎉 Article '{clean_txt(completed_article['title'])}' created! Locked awaiting final executive approval.")
+                
+                c_post1, c_post2 = st.columns([1, 1])
+                with c_post1:
+                    if st.button(f"👑 {'全社統合決裁センターでこの記事を査読・承認する' if lang=='ja' else 'Inspect & Approve in Executive Center'}", type="primary", use_container_width=True, key=f"btn_nav_office_after_{completed_article['id']}"):
+                        st.session_state.active_page_id = "office"
+                        st.session_state.scroll_trigger += 1
+                        st.rerun()
+                with c_post2:
+                    if st.button(f"✨ {'品質管理課（QA）で採点・監査詳細を確認する' if lang=='ja' else 'Review QA Audit in QA Division'}", use_container_width=True, key=f"btn_nav_qa_after_{completed_article['id']}"):
+                        st.session_state.active_page_id = "qa"
+                        st.session_state.scroll_trigger += 1
+                        st.rerun()
 
 # ==========================================
 # 5. 📢 Public Relations Division

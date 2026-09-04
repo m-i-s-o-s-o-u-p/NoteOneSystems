@@ -467,7 +467,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
         ]
 
         topics = self._read_topics_raw()
-        active_titles = [t.get("title", "") for t in cur_status["active_topics"]]
+        all_existing_titles = [t.get("title", "") for t in topics]
         newly_added = []
 
         for candidate in candidate_niches:
@@ -475,7 +475,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 break
             
             cand_title = candidate['theme'] if candidate['theme'].startswith("【") else f"【完全保存版】{candidate['theme']}"
-            if any(candidate['theme'][:8] in ex for ex in active_titles):
+            if any(candidate['theme'][:8] in ex for ex in all_existing_titles):
                 continue
 
             topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
@@ -495,27 +495,39 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                         "status": "Pending Owner Approval",
                         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "actor": "風間 涼 (社内規定 Rule-RES-10)",
-                        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+                        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
                     }
                 ]
             }
             newly_added.append(topic_item)
+            all_existing_titles.append(cand_title)
 
         # Procedural fallback generator in case more topics are needed
         if len(newly_added) < needed:
             fallback_domains = [
-                ("Notion", "タスク・プロジェクト管理", "チーム生産性を最大化する", 500),
-                ("ChatGPT", "プロンプトエンジニアリング", "日常業務を9割削減する", 500),
                 ("GAS", "業務自動化", "手作業ゼロを実現するGoogle自動連携コード", 500),
-                ("Canva", "ビジュアルマーケティング", "プロ級のデザインを量産する", 500),
-                ("Python", "スクレイピング・データ収集", "競合の動きを完全把握する", 980)
+                ("Python", "データ収集", "競合の動きを完全可視化するスクレイピング術", 980),
+                ("Canva", "アイキャッチ制作", "クリック率が3倍跳ね上がるサムネイル設計", 500),
+                ("ChatGPT", "プロンプト実務", "日常のメール・議事録作成を10分で終わらせる技術", 500),
+                ("Notion", "情報一元化", "散らばるメモとタスクを完全統合するダッシュボード", 500),
+                ("Claude", "論理思考・壁打ち", "新規事業の骨子を30分で組み立てる対話術", 500),
+                ("セールスコピー", "成約率改善", "読者の感情を動かすPASONA型リード文テンプレート", 980),
+                ("確定申告", "副業税務", "会社員のための損しない経費計上＆確定申告チェックシート", 500),
+                ("副業ロードマップ", "マネタイズ", "初月5万円を稼ぐための売れる商品設計と販売戦略", 500),
+                ("リモートワーク", "非同期連携", "Slack・分報を活用した信頼獲得コミュニケーション", 500)
             ]
+            counter = 1
             for tool, cat, benefit, pr in fallback_domains:
                 if len(newly_added) >= needed:
                     break
                 fb_theme = f"【実践マスター】{tool}×{cat} {benefit}即戦力テンプレート"
-                if any(fb_theme[:10] in ex for ex in active_titles):
+                if any(fb_theme[:10] in ex for ex in all_existing_titles):
+                    date_tag = datetime.now().strftime("%m月版")
+                    fb_theme = f"【最新{date_tag}】{tool}×{cat} vol.{counter} {benefit}"
+                    counter += 1
+                if any(fb_theme in ex for ex in all_existing_titles):
                     continue
+
                 topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
                 newly_added.append({
                     "id": topic_id,
@@ -533,10 +545,11 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                             "status": "Pending Owner Approval",
                             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "actor": "風間 涼 (社内規定 Rule-RES-10)",
-                            "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+                            "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
                         }
                     ]
                 })
+                all_existing_titles.append(fb_theme)
 
         if newly_added:
             for item in newly_added:
