@@ -1318,7 +1318,50 @@ elif page_id == "market_research":
     
     st.info(t("mr_mission", lang))
     
-    with st.expander(f"➕ {t('mr_new_research_header', lang)}", expanded=False):
+    # =============================================================
+    # 🤖 風間 涼の自律オートパイロット（10本自動ストック式リサーチ）
+    # =============================================================
+    stock_info = market_manager.get_stock_status(target_stock_count=10)
+    cur_stock = stock_info["current_count"]
+    needed_stock = stock_info["needed_count"]
+    stock_ratio = min(1.0, cur_stock / 10.0)
+
+    st.markdown(f"""
+    <div style='background: #0F172A; border: 1px solid #334155; border-left: 5px solid #0D9488; border-radius: 8px; padding: 16px; margin-bottom: 16px;'>
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <div>
+                <strong style='color: #5EEAD4; font-size: 1.1rem;'>🤖 {'風間 涼の自律オートパイロット（10本自動ストック式リサーチ）' if lang=='ja' else 'Autonomous Stock Replenishment (10-Slot Pipeline)'}</strong>
+                <div style='color: #94A3B8; font-size: 0.85rem; margin-top: 4px;'>{'noteの売れ筋4大ジャンル（AI実務・副業・自動化・時間術）から、常に最大10本の企画トピックを自律補充します。' if lang=='ja' else 'Continuously replenishes up to 10 trending note topics autonomously.'}</div>
+            </div>
+            <div style='text-align: right;'>
+                <span style='background: #134E4A; color: #5EEAD4; font-weight: 800; font-size: 0.95rem; padding: 4px 12px; border-radius: 6px; border: 1px solid #0D9488;'>
+                    📦 ストック: {cur_stock} / 10 本
+                </span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.progress(stock_ratio, text=f"企画トピック充填率: {int(stock_ratio*100)}% ({cur_stock} / 10本)")
+
+    c_ap1, c_ap2 = st.columns([3, 2])
+    with c_ap1:
+        if needed_stock > 0:
+            st.write(f"💡 現在、ストック枠に **{needed_stock}本** の空きがあります。ボタンを押すと風間アナリストが自律調査して満タンに補充します。")
+        else:
+            st.success("✅ **ストック枠は10本満タンです！** 企画が記事制作課へ送られて消費されると、再び補充が可能になります。")
+    with c_ap2:
+        if needed_stock > 0:
+            if st.button(f"⚡ 10本満タンまで自動ストック補充 ({needed_stock}本追加)", type="primary", use_container_width=True, key="mr_btn_auto_replenish"):
+                with st.spinner(f"風間アナリストがnote市場から {needed_stock}本の売れ筋テーマを自律調査中..."):
+                    new_added = market_manager.auto_replenish_stock(target_stock_count=10)
+                    st.success(f"🎉 風間アナリストが新たに {len(new_added)}本の売れ筋トピックを自動調査し、ストックを10本満タンにしました！")
+                    st.session_state.scroll_trigger += 1
+                    st.rerun()
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+    with st.expander(f"➕ 手動でキーワードを指定して調査する（手動リサーチ）", expanded=False):
         c_rs1, c_rs2 = st.columns([3, 2])
         with c_rs1:
             rs_kw = st.text_input(t("mr_keyword_label", lang), placeholder=t("mr_keyword_ph", lang))

@@ -108,7 +108,7 @@
       "cost": "0円 (Open API)"
     }
   },
-  "status": "Pending Owner Approval",
+  "status": "Approved",
   "status_history": [
     {
       "status": "Pre-Publication",
@@ -187,6 +187,12 @@
       "timestamp": "2026-09-05 00:19:21",
       "actor": "記事制作課 (森川 拓真 & 結城 紬)",
       "note": "オーナー修正指示（最低4000字以上、信憑性向上、実践テンプレート拡充）を完全反映し、文字数 6,318 文字の本格原稿として再執筆・再申請完了。"
+    },
+    {
+      "status": "Approved",
+      "timestamp": "2026-09-05 01:31:21",
+      "actor": "Owner (オーナー)",
+      "note": "オーナー最終承認完了。投稿およびSNS配信のロックを解除しました。"
     }
   ],
   "latest_feedback": "記事の文字数が少なすぎるので市場調査課と話し合って文字数を最低4000字以上にして再提出してください。"

@@ -203,21 +203,172 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 return True
         return False
 
-    def reject_topic(self, topic_id: str, reason: str = "不採用", requester_name: str = "Owner (オーナー)"):
-        """Rejects the topic."""
+    def get_stock_status(self, target_stock_count: int = 10):
+        """Returns the current topic stock count and remaining capacity up to target_stock_count."""
+        topics = self.list_topics()
+        # Active stock includes topics that are Pending Owner Approval or Approved (not rejected)
+        active_topics = [t for t in topics if t.get("status") != "Rejected"]
+        current_count = len(active_topics)
+        needed = max(0, target_stock_count - current_count)
+        return {
+            "current_count": current_count,
+            "max_capacity": target_stock_count,
+            "needed_count": needed,
+            "active_topics": active_topics
+        }
+
+    def auto_replenish_stock(self, target_stock_count: int = 10):
+        """
+        Autonomously generates trending note topics until stock reaches target_stock_count (default: 10).
+        Ensures diverse high-intent commercial niches with no duplicate topics.
+        """
+        cur_status = self.get_stock_status(target_stock_count)
+        needed = cur_status["needed_count"]
+        if needed <= 0:
+            return []
+
+        # Curated candidate niches tailored for ¥500 - ¥980 note sales
+        candidate_niches = [
+            {
+                "theme": "Excel×ChatGPT 経理・事務作業を半減させるコピペ関数＆マクロ自動化集",
+                "audience": "毎月の締め作業や集計業務に追われる事務・経理担当者",
+                "category": "業務自動化・Excel",
+                "demand": "note内で『Excel時短』『事務効率化』は恒常的な高成約ジャンル。",
+                "gap": "複雑なVBAコードではなく、1行関数とプロンプトで動く初心者向け即戦力テンプレに特化。",
+                "price": 500
+            },
+            {
+                "theme": "副業初心者が初月からnoteで3万円稼ぐ『売れる有料記事テーマ選定シート』",
+                "audience": "自分の知識や経験をお金に変えたい会社員・副業初心者",
+                "category": "副業・コンテンツ販売",
+                "demand": "note副業の第一歩として『何を書けばいいか分からない』層の検索数がトップクラス。",
+                "gap": "抽象論を排し、10の質問に答えるだけで自分の売れ筋テーマが決まるワークシートを同梱。",
+                "price": 500
+            },
+            {
+                "theme": "フリーランスのための『値上げ交渉＆トラブル防止契約書テンプレ集』",
+                "audience": "単価アップを目指すWebライター、デザイナー、エンジニア",
+                "category": "フリーランス・独立支援",
+                "demand": "インフレに伴いクリエイターの『価格交渉術』の需要が急増。",
+                "gap": "角を立てずに単価を20%上げるメール雛形と、未払い防止の覚書条項をセット化。",
+                "price": 980
+            },
+            {
+                "theme": "Canva×AI 誰でも30分でプロ級のnoteアイキャッチ画像を作るデザインレシピ",
+                "audience": "記事のクリック率（CTR）を上げたいnoteクリエイター",
+                "category": "デザイン・SNSマーケティング",
+                "demand": "記事の売上を左右する『サムネイル・アイキャッチ』の自作ノウハウは需要絶大。",
+                "gap": "黄金比レイアウトの無料Canva共有リンクと、クリック率が跳ね上がるフォント配色集を提供。",
+                "price": 500
+            },
+            {
+                "theme": "新任リーダーのための『部下の本音を引き出す1on1アジェンダ50選』",
+                "audience": "部下のマネジメントや離職防止に悩む新任マネージャー・リーダー",
+                "category": "マネジメント・ビジネス実務",
+                "demand": "若手社員とのコミュニケーション課題に対する具体的な質問集への課金意欲が高い。",
+                "gap": "精神論ではなく、心理的安全性を担保しながら課題を特定する心理学的フレームワークを網羅。",
+                "price": 500
+            },
+            {
+                "theme": "SNS運用代行で月10万円を堅実に稼ぐ『クライアント提案書＆業務マニュアル』",
+                "audience": "SNSスキルを活かして在宅ワーク・副業を受注したい個人",
+                "category": "SNS運用・受託副業",
+                "demand": "『SNS副業』の中でも『運用代行』は再現性が高く、即戦力マニュアルの需要が高い。",
+                "gap": "初回ヒアリングシートから月次報告レポートのテンプレートまで、そのまま使える実務一式を完備。",
+                "price": 980
+            },
+            {
+                "theme": "文系・初心者向け『Pythonで競合リサーチを全自動化する超簡単スクリプト』",
+                "audience": "プログラミング未経験だが日常のデータ収集を自動化したいビジネスパーソン",
+                "category": "プログラミング・自動化",
+                "demand": "環境構築で挫折する層が多く、コピペで動くGoogle Colab完結型の需要が強い。",
+                "gap": "PCへのインストール不要、ブラウザ上で1クリック実行できる完成コードを提供。",
+                "price": 500
+            },
+            {
+                "theme": "ChatGPT×企画書作成 10分で上司のOKが出る『プレゼン骨子ジェネレーター』",
+                "audience": "新規事業や業務改善の企画書作成に毎回何日も悩んでいる会社員",
+                "category": "AI×企画力向上",
+                "demand": "『企画が通らない』悩みを解決する構造化プロンプトへの関心が非常に高い。",
+                "gap": "課題提起から投資対効果（ROI）算出までのストーリーラインを自動生成するプロンプト群。",
+                "price": 500
+            },
+            {
+                "theme": "個人開発者のための『初期ユーザー100人を完全無料で集めるWeb集客プレイブック』",
+                "audience": "プロダクトやサービスを作ったが集客に困っているインディー開発者",
+                "category": "マーケティング・起業",
+                "demand": "広告費ゼロで初動ユーザーを獲得する泥臭い実践ノウハウは希少価値が高い。",
+                "gap": "ProductHunt、X、コミュニティ活用など、実際に100人集めたチェックリストを公開。",
+                "price": 980
+            },
+            {
+                "theme": "残業月60時間をゼロにした『Notion×Googleカレンダー時間割タスク術』",
+                "audience": "毎日タスクに追われて自分の時間が取れないワーカホリックな社会人",
+                "category": "タイムマネジメント・生産性",
+                "demand": "『時間術』『タスク管理』は自己啓発・ビジネス両面で安定したベストセラージャンル。",
+                "gap": "時間割ブロック方式で1日のスケジュールを自動同期するNotion構築マニュアル。",
+                "price": 500
+            }
+        ]
+
+        existing_titles = [t.get("title", "") for t in self.list_topics()]
+        newly_added = []
+
+        for candidate in candidate_niches:
+            if len(newly_added) >= needed:
+                break
+            
+            # Check duplicate by theme similarity
+            cand_title = f"【完全保存版】{candidate['theme']}"
+            if any(candidate['category'] in ex or candidate['theme'][:10] in ex for ex in existing_titles):
+                continue
+
+            topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
+            topic_item = {
+                "id": topic_id,
+                "title": cand_title,
+                "target_audience": candidate["audience"],
+                "category": candidate["category"],
+                "demand_summary": candidate["demand"],
+                "competitor_gap": candidate["gap"],
+                "recommended_price": candidate["price"],
+                "status": "Pending Owner Approval",
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "analyst": "風間 涼 (市場調査課・自律オートパイロット)",
+                "status_history": [
+                    {
+                        "status": "Pending Owner Approval",
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "actor": "風間 涼 (自律オートパイロット)",
+                        "note": f"自律トレンド分析完了。10本ストック枠へ自動起票（オーナー承認待ち）。"
+                    }
+                ]
+            }
+            newly_added.append(topic_item)
+
+        if newly_added:
+            topics = self.list_topics()
+            for item in newly_added:
+                topics.insert(0, item)
+            with open(self.topics_file, "w", encoding="utf-8") as f:
+                json.dump(topics, f, ensure_ascii=False, indent=2)
+
+        return newly_added
+
+    def update_topic_status(self, topic_id: str, new_status: str, actor: str = "User"):
         topics = self.list_topics()
         for t in topics:
             if t.get("id") == topic_id:
-                t["status"] = "Rejected"
+                t["status"] = new_status
                 if "status_history" not in t:
                     t["status_history"] = []
                 t["status_history"].append({
-                    "status": "Rejected",
+                    "status": new_status,
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "actor": requester_name,
-                    "note": f"オーナーによる却下: {reason}"
+                    "actor": actor
                 })
                 with open(self.topics_file, "w", encoding="utf-8") as f:
                     json.dump(topics, f, ensure_ascii=False, indent=2)
                 return True
         return False
+

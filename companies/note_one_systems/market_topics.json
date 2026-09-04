@@ -7,7 +7,7 @@
     "demand_summary": "note内で『残業削減』『ChatGPT実務』の検索ボリュームが急増中。コピペで動くプロンプトの需要が極めて高い。",
     "competitor_gap": "一般的なプロンプト集は抽象的。当社は『メール返信』『議事録要約』『Excel関数生成』の即戦力3分野に特化して差別化。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "Approved",
     "created_at": "2026-08-25 10:00:00",
     "analyst": "風間 涼 (Ryo Kazama)",
     "status_history": [
@@ -16,6 +16,12 @@
         "timestamp": "2026-08-25 10:00:00",
         "actor": "風間 涼 (市場調査課)",
         "note": "note市場トレンド分析完了。オーナーのトピック承認待ち（ロック中）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-08-25 19:09:36",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
       }
     ]
   },
@@ -53,7 +59,7 @@
     "demand_summary": "NotionデータベースとAI連携によるタスク自動管理のニーズが国内企業で拡大中。",
     "competitor_gap": "設定手順のスクリーンショット図解と、ワンクリック複製可能な公開Notionテンプレートを同梱して高付加価値化。",
     "recommended_price": 980,
-    "status": "Pending Owner Approval",
+    "status": "Approved",
     "created_at": "2026-08-25 11:00:00",
     "analyst": "風間 涼 (Ryo Kazama)",
     "status_history": [
@@ -62,7 +68,20 @@
         "timestamp": "2026-08-25 11:00:00",
         "actor": "風間 涼 (市場調査課)",
         "note": "市場調査完了。オーナー承認待ち。"
+      },
+      {
+        "status": "Revision Requested",
+        "timestamp": "2026-08-25 20:11:08",
+        "actor": "Owner (オーナー)",
+        "note": "オーナーからの再調査・切り口指示: 調査分析データ量を見直して。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-08-25 20:41:24",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
       }
-    ]
+    ],
+    "latest_feedback": "調査分析データ量を見直して。"
   }
 ]
