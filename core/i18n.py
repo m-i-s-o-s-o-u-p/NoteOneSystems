@@ -8,7 +8,7 @@ MESSAGES = {
     "ja": {
         # App Title & Headers
         "app_title": "Note One Systems, Inc. | AI Enterprise Platform",
-        "sidebar_subtitle": "AIバーチャル企業ホールディングス",
+        "sidebar_subtitle": "Studio 0% Holdings",
         "dept_editorial": "📝 編集部",
         "dept_admin": "🏛️ 管理部",
         "nav_dashboard": "🏢 カンパニーダッシュボード",
@@ -187,7 +187,7 @@ MESSAGES = {
     "en": {
         # App Title & Headers
         "app_title": "Note One Systems, Inc. | AI Enterprise Platform",
-        "sidebar_subtitle": "AI Enterprise Holdings Platform",
+        "sidebar_subtitle": "Studio 0% Holdings",
         "dept_editorial": "📝 Editorial Department",
         "dept_admin": "🏛️ Administration Department",
         "nav_dashboard": "🏢 Company Dashboard",

@@ -14,7 +14,7 @@ class HoldingsManager:
     def _init_data(self):
         if not os.path.exists(self.holdings_info_file):
             default_holdings = {
-                "name": "AI Virtual Holdings Inc.（バーチャルAI企業ホールディングス）",
+                "name": "Studio 0% Holdings",
                 "vision": "完全自動・費用0円で複数のデジタル事業を展開する次世代AI持株会社",
                 "founded_date": "2026-08-24",
                 "companies": [
