@@ -9,5 +9,16 @@
     "cost": "¥0（完全無料API枠）",
     "authorized_by": "代表者（オーナー承認）",
     "impact": "森川 拓真の負荷スコアを 100% ➔ 50% へ半減"
+  },
+  {
+    "timestamp": "2026-09-05 05:45:51",
+    "employee_id": "misaki",
+    "name": "美咲 華 (Hana Misaki)",
+    "role": "クリエイティブデザイナー / アイキャッチ制作",
+    "icon": "🎨",
+    "department": "コンテンツ制作本部",
+    "cost": "¥0（完全無料API枠）",
+    "authorized_by": "代表者（オーナー承認）",
+    "impact": "結城 紬の負荷スコアを 50% ➔ 40% へ半減"
   }
 ]

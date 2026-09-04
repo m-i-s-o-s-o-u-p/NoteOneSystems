@@ -11,7 +11,7 @@
     "role": "統括編集長",
     "tasks": 14,
     "words_generated": 8914,
-    "workload_score": 50
+    "workload_score": 40
   },
   "kazama": {
     "name": "風間 涼",
@@ -65,6 +65,13 @@
   "kiryu": {
     "name": "桐生 蓮 (Ren Kiryu)",
     "role": "アシスタントライター / サブライター",
+    "tasks": 1,
+    "words_generated": 0,
+    "workload_score": 15
+  },
+  "misaki": {
+    "name": "美咲 華 (Hana Misaki)",
+    "role": "クリエイティブデザイナー / アイキャッチ制作",
     "tasks": 1,
     "words_generated": 0,
     "workload_score": 15

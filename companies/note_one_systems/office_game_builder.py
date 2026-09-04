@@ -1,19 +1,33 @@
 import json
+import os
 
 def get_office_game_html(lang: str = "en") -> str:
-    """Generates the interactive 2D Virtual Office HTML with full i18n support."""
+    """Generates the interactive 2D Virtual Office HTML with full dynamic employee support and i18n."""
     is_ja = (lang == "ja")
+
+    # Load dynamic employees from company_info.json
+    info_path = os.path.join(os.path.dirname(__file__), "company_info.json")
+    all_employees = []
+    if os.path.exists(info_path):
+        try:
+            with open(info_path, "r", encoding="utf-8") as f:
+                c_data = json.load(f)
+                all_employees = c_data.get("employees", [])
+        except Exception:
+            all_employees = []
+            
+    total_staff = len(all_employees) if all_employees else 9
 
     # Texts and labels
     hud_title = "🏢 Note One Systems バーチャルオフィスフロア" if is_ja else "🏢 Note One Systems Virtual Office Floor"
-    hud_live = "出社中: 9名（全員稼働中）" if is_ja else "Live in Office: 9/9"
+    hud_live = f"出社中: {total_staff}名（全員稼働中）" if is_ja else f"Live in Office: {total_staff}/{total_staff}"
     
     zone_ceo = "👑 役員執務室 (CEO)" if is_ja else "👑 Executive Suite"
     zone_admin = "🏛️ 管理部 (法務・人事・財務)" if is_ja else "🏛️ Administration"
     zone_center_title = "🗣️ ガラス張り戦略会議室" if is_ja else "🗣️ Strategy Glass Room"
     zone_center_table = "💡 全社戦略ミーティングテーブル" if is_ja else "💡 Central Strategy Table"
     zone_pr = "📢 広報課 (5大SNS運用)" if is_ja else "📢 Public Relations"
-    zone_editorial = "📝 編集制作部 (調査・編集・執筆・QA)" if is_ja else "📝 Editorial Dept"
+    zone_editorial = "📝 編集制作部 (調査・編集・執筆・増員ブース・QA)" if is_ja else "📝 Editorial Dept"
 
     # Employee names
     emp_names = {
@@ -25,7 +39,8 @@ def get_office_game_html(lang: str = "en") -> str:
         "yuki": "結城 紬 (編集長)" if is_ja else "Yuki (Editor)",
         "morikawa": "森川 拓真 (ライター)" if is_ja else "Morikawa (Writer)",
         "kanzaki": "神崎 玲奈 (品質管理)" if is_ja else "Kanzaki (QA)",
-        "sasaki": "佐々木 翼 (広報)" if is_ja else "Sasaki (PR)"
+        "sasaki": "佐々木 翼 (広報)" if is_ja else "Sasaki (PR)",
+        "kiryu": "桐生 蓮 (サブライター)" if is_ja else "Kiryu (Writer Assist)"
     }
 
     # Employee dialogue pools
@@ -43,12 +58,12 @@ def get_office_game_html(lang: str = "en") -> str:
             ],
             "ayase": [
                 "全社員の業務負荷スコア監視中：健全稼働です ✨",
-                "就業規則Ver0.9に基づき円滑にオフィスを運営中。",
+                "就業規則Ver1.0に基づき円滑にオフィスを運営中。",
                 "必要に応じた無料増員計画のスタンバイも万全です。"
             ],
             "shiraishi": [
                 "月額固定費0円（完全無料）確認完了 💰",
-                "単価500円〜1,480円での売上シミュレーション実行中 📈",
+                "基本価格300円基準規程（粗利率85%）を厳格監査中 📈",
                 "経理帳簿は正常、1円の無駄も発生していません。"
             ],
             "kazama": [
@@ -75,6 +90,11 @@ def get_office_game_html(lang: str = "en") -> str:
                 "X・Threads・Blueskyへ同時告知準備完了 📢",
                 "Instagramカルーセルスライド案を制作中！",
                 "Mastodonにも最新ノウハウ要約を投稿スタンバイ ✨"
+            ],
+            "kiryu": [
+                "森川先輩の執筆を全力バックアップ中！テンプレート量産完了 🖋️",
+                "4,000字以上の実践ノウハウ、速筆リライト体制万全です！",
+                "先輩の負荷スコアを半減させるため、本日も全力執筆します！"
             ]
         }
     else:
@@ -91,12 +111,12 @@ def get_office_game_html(lang: str = "en") -> str:
             ],
             "ayase": [
                 "Monitoring workload metrics: Healthy distribution ✨",
-                "Operating under Corporate Rulebook v0.9.",
+                "Operating under Corporate Rulebook v1.0.",
                 "Zero-cost staffing expansion ready if needed."
             ],
             "shiraishi": [
                 "Monthly fixed costs verified at ¥0 (Zero Cost) 💰",
-                "Simulating revenue at 500 JPY unit price!",
+                "Rule-PRC-300 standard pricing audited with ~85% net margin!",
                 "Accounting ledger balanced and operating smoothly 📈"
             ],
             "kazama": [
@@ -123,11 +143,98 @@ def get_office_game_html(lang: str = "en") -> str:
                 "Multi-syndicating across X, Threads & Bluesky 📢",
                 "Instagram carousel assets prepared!",
                 "Broadcasting actionable insights on Mastodon ✨"
+            ],
+            "kiryu": [
+                "Supporting Morikawa-san with high-speed template drafting! 🖋️",
+                "4,000+ words actionable content drafted & verified.",
+                "Halving workload bottlenecks with autonomous writing sprints!"
             ]
         }
 
     from .dialogue_engine import EmployeeDialogueEngine
     dialogue_engine = EmployeeDialogueEngine()
+
+    # Dynamic positioning & avatar setup
+    BASE_POSITIONS = {
+        "ichijo": {"top": "100px", "left": "100px", "walk": True},
+        "tachibana": {"top": "290px", "left": "50px", "walk": False},
+        "ayase": {"top": "405px", "left": "50px", "walk": True},
+        "shiraishi": {"top": "350px", "left": "180px", "walk": False},
+        "kazama": {"top": "290px", "left": "340px", "walk": False},
+        "yuki": {"top": "290px", "left": "470px", "walk": True},
+        "morikawa": {"top": "290px", "left": "600px", "walk": False},
+        "kanzaki": {"top": "405px", "left": "470px", "walk": False},
+        "sasaki": {"top": "100px", "left": "760px", "walk": True},
+        "kiryu": {"top": "405px", "left": "600px", "walk": True},
+    }
+
+    EXPANSION_SLOTS = [
+        {"top": "405px", "left": "600px", "walk": True},   # Under Morikawa (Kiryu / Writer assistant)
+        {"top": "405px", "left": "340px", "walk": True},   # Under Kazama (Saotome / SEO)
+        {"top": "100px", "left": "660px", "walk": True},   # Near Sasaki (PR Expansion)
+        {"top": "195px", "left": "450px", "walk": True},   # Meeting Table Center (Misaki / Design)
+        {"top": "195px", "left": "380px", "walk": True},   # Meeting Table Left
+        {"top": "195px", "left": "520px", "walk": True},   # Meeting Table Right
+        {"top": "240px", "left": "180px", "walk": True},   # Admin Wing
+        {"top": "180px", "left": "780px", "walk": True},   # PR Wing lower
+    ]
+
+    dynamic_css_lines = []
+    dynamic_avatars = []
+    used_positions = set()
+    for e_id, pos in BASE_POSITIONS.items():
+        used_positions.add((pos["top"], pos["left"]))
+        dynamic_css_lines.append(f"  #emp-{e_id} {{ top: {pos['top']}; left: {pos['left']}; }}")
+
+    exp_slot_idx = 0
+
+    # Ensure all employees in all_employees are registered
+    for emp in all_employees:
+        e_id = emp["id"]
+        e_name = emp_names.get(e_id, f"{emp['name']} ({emp.get('role', 'AI')[:4]})")
+        
+        # Speeches
+        if e_id not in speeches:
+            motto = emp.get("motto", "読者に価値を届けるため、全力で業務を遂行します。")
+            role = emp.get("role", "専門AI")
+            speeches[e_id] = [
+                f"「{motto}」✨",
+                f"{role}として、チームの生産性と記事品質を全力支援中！",
+                f"配属完了！代表者様、いつでもご指示をお待ちしています！"
+            ]
+            
+        # Position
+        if e_id in BASE_POSITIONS:
+            walk_cls = "walk-around" if BASE_POSITIONS[e_id]["walk"] else ""
+        else:
+            # Pick from expansion slot
+            while exp_slot_idx < len(EXPANSION_SLOTS) and (EXPANSION_SLOTS[exp_slot_idx]["top"], EXPANSION_SLOTS[exp_slot_idx]["left"]) in used_positions:
+                exp_slot_idx += 1
+            if exp_slot_idx < len(EXPANSION_SLOTS):
+                slot = EXPANSION_SLOTS[exp_slot_idx]
+                exp_slot_idx += 1
+            else:
+                slot = {"top": "195px", "left": f"{350 + (exp_slot_idx * 30) % 200}px", "walk": True}
+                exp_slot_idx += 1
+            used_positions.add((slot["top"], slot["left"]))
+            walk_cls = "walk-around" if slot["walk"] else ""
+            dynamic_css_lines.append(f"  #emp-{e_id} {{ top: {slot['top']}; left: {slot['left']}; }}")
+
+        e_color = emp.get("color", "#38BDF8")
+        e_icon = emp.get("icon", "👤")
+        bubble_init = speeches[e_id][0]
+        
+        dynamic_avatars.append(f"""  <div class="chibi-avatar {walk_cls}" id="emp-{e_id}" onclick="triggerSpeak('{e_id}')">
+    <div class="speech-bubble" id="bubble-{e_id}">{bubble_init}</div>
+    <div class="chibi-head" style="background:{e_color}; border-color:#F8FAFC;">{e_icon}</div>
+    <div class="chibi-body" style="background:{e_color};"></div>
+    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
+    <div class="avatar-name">{e_name}</div>
+  </div>""")
+
+    dynamic_css = "\n".join(dynamic_css_lines)
+    dynamic_avatars_html = "\n\n".join(dynamic_avatars)
+
     grumbles_json = json.dumps(dialogue_engine.grumble_templates, ensure_ascii=False)
     speeches_json = json.dumps(speeches, ensure_ascii=False)
 
@@ -464,17 +571,7 @@ def get_office_game_html(lang: str = "en") -> str:
     transform: none;
   }}
 
-  #emp-ichijo   {{ top: 100px; left: 100px; }}
-  #emp-tachibana{{ top: 290px; left: 50px; }}
-  #emp-ayase    {{ top: 405px; left: 50px; }}
-  #emp-shiraishi{{ top: 350px; left: 180px; }}
-
-  #emp-kazama   {{ top: 290px; left: 340px; }}
-  #emp-yuki     {{ top: 290px; left: 470px; }}
-  #emp-morikawa {{ top: 290px; left: 600px; }}
-  #emp-kanzaki  {{ top: 405px; left: 470px; }}
-
-  #emp-sasaki   {{ top: 100px; right: 110px; }}
+{dynamic_css}
 
   .walk-around {{
     animation: gentleWander 14s infinite alternate ease-in-out;
@@ -534,6 +631,9 @@ def get_office_game_html(lang: str = "en") -> str:
     <span class="zone-label">{zone_pr}</span>
     <div class="desk" style="top:55px; left:60px; width:80px; height:45px;"></div>
     <div class="pc-screen" style="top:67px; left:90px;"></div>
+    <!-- Extra Expansion Desk for PR & Global Marketing -->
+    <div class="desk" style="top:55px; left:160px; width:70px; height:45px; border-color:#6366F1;"></div>
+    <div class="pc-screen" style="top:67px; left:185px; background:#6366F1; box-shadow:0 0 10px #6366F1;"></div>
   </div>
 
   <!-- 5. Editorial Zone -->
@@ -551,80 +651,16 @@ def get_office_game_html(lang: str = "en") -> str:
 
     <div class="desk" style="top:155px; left:155px; width:80px; height:40px; border-color:#DC2626;"></div>
     <div class="pc-screen" style="top:165px; left:185px; background:#EF4444; box-shadow:0 0 10px #EF4444;"></div>
+
+    <!-- Expansion Desks in Editorial Zone (Writer & Research Assistance) -->
+    <div class="desk" style="top:155px; left:285px; width:80px; height:40px; border-color:#F97316;"></div>
+    <div class="pc-screen" style="top:165px; left:315px; background:#F97316; box-shadow:0 0 10px #F97316;"></div>
+    <div class="desk" style="top:155px; left:25px; width:80px; height:40px; border-color:#10B981;"></div>
+    <div class="pc-screen" style="top:165px; left:55px; background:#10B981; box-shadow:0 0 10px #10B981;"></div>
   </div>
 
-  <!-- 9 Chibi Characters -->
-  <div class="chibi-avatar walk-around" id="emp-ichijo" onclick="triggerSpeak('ichijo')">
-    <div class="speech-bubble" id="bubble-ichijo">{speeches['ichijo'][0]}</div>
-    <div class="chibi-head" style="background:#1E3A8A; border-color:#93C5FD;">👩‍💼</div>
-    <div class="chibi-body" style="background:#1E3A8A;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['ichijo']}</div>
-  </div>
-
-  <div class="chibi-avatar" id="emp-tachibana" onclick="triggerSpeak('tachibana')">
-    <div class="speech-bubble" id="bubble-tachibana">{speeches['tachibana'][0]}</div>
-    <div class="chibi-head" style="background:#334155; border-color:#94A3B8;">⚖️</div>
-    <div class="chibi-body" style="background:#334155;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['tachibana']}</div>
-  </div>
-
-  <div class="chibi-avatar walk-around" id="emp-ayase" onclick="triggerSpeak('ayase')">
-    <div class="speech-bubble" id="bubble-ayase">{speeches['ayase'][0]}</div>
-    <div class="chibi-head" style="background:#059669; border-color:#6EE7B7;">🤝</div>
-    <div class="chibi-body" style="background:#059669;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['ayase']}</div>
-  </div>
-
-  <div class="chibi-avatar" id="emp-shiraishi" onclick="triggerSpeak('shiraishi')">
-    <div class="speech-bubble" id="bubble-shiraishi">{speeches['shiraishi'][0]}</div>
-    <div class="chibi-head" style="background:#7C3AED; border-color:#C4B5FD;">📊</div>
-    <div class="chibi-body" style="background:#7C3AED;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['shiraishi']}</div>
-  </div>
-
-  <div class="chibi-avatar" id="emp-kazama" onclick="triggerSpeak('kazama')">
-    <div class="speech-bubble" id="bubble-kazama">{speeches['kazama'][0]}</div>
-    <div class="chibi-head" style="background:#0D9488; border-color:#5EEAD4;">🔍</div>
-    <div class="chibi-body" style="background:#0D9488;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['kazama']}</div>
-  </div>
-
-  <div class="chibi-avatar walk-around" id="emp-yuki" onclick="triggerSpeak('yuki')">
-    <div class="speech-bubble" id="bubble-yuki">{speeches['yuki'][0]}</div>
-    <div class="chibi-head" style="background:#D97706; border-color:#FCD34D;">📑</div>
-    <div class="chibi-body" style="background:#D97706;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['yuki']}</div>
-  </div>
-
-  <div class="chibi-avatar" id="emp-morikawa" onclick="triggerSpeak('morikawa')">
-    <div class="speech-bubble" id="bubble-morikawa">{speeches['morikawa'][0]}</div>
-    <div class="chibi-head" style="background:#EA580C; border-color:#FDBA74;">✍️</div>
-    <div class="chibi-body" style="background:#EA580C;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['morikawa']}</div>
-  </div>
-
-  <div class="chibi-avatar" id="emp-kanzaki" onclick="triggerSpeak('kanzaki')">
-    <div class="speech-bubble" id="bubble-kanzaki">{speeches['kanzaki'][0]}</div>
-    <div class="chibi-head" style="background:#DC2626; border-color:#FCA5A5;">🛡️</div>
-    <div class="chibi-body" style="background:#DC2626;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['kanzaki']}</div>
-  </div>
-
-  <div class="chibi-avatar walk-around" id="emp-sasaki" onclick="triggerSpeak('sasaki')">
-    <div class="speech-bubble" id="bubble-sasaki">{speeches['sasaki'][0]}</div>
-    <div class="chibi-head" style="background:#2563EB; border-color:#93C5FD;">📢</div>
-    <div class="chibi-body" style="background:#2563EB;"></div>
-    <div class="chibi-legs"><div class="chibi-leg"></div><div class="chibi-leg"></div></div>
-    <div class="avatar-name">{emp_names['sasaki']}</div>
-  </div>
+  <!-- Dynamic Chibi Characters (Automatically spawns any recruited AI specialists) -->
+{dynamic_avatars_html}
 
 </div>
 

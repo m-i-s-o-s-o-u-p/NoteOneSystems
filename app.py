@@ -1314,6 +1314,23 @@ elif page_id == "office":
     st.markdown(f"<div class='section-title'>{t('consult_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
 
+    # Load dynamic employees from company_info.json
+    comp_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/company_info.json")
+    if os.path.exists(comp_file):
+        with open(comp_file, "r", encoding="utf-8") as f:
+            all_c_info = json.load(f)
+        all_emps = all_c_info.get("employees", [])
+    else:
+        all_emps = []
+
+    assign_options = [t("consult_assign_auto", lang)]
+    assignee_map = {t("consult_assign_auto", lang): "auto"}
+    for e in all_emps:
+        short_role = e.get("role", "AI").split("/")[0].strip()
+        opt_str = f"{e.get('icon', '👤')} {e['name']} ({short_role})"
+        assign_options.append(opt_str)
+        assignee_map[opt_str] = e["id"]
+
     with st.form("office_consultation_form", clear_on_submit=True):
         c_in_q1, c_in_q2 = st.columns([4, 1])
         with c_in_q1:
@@ -1322,34 +1339,10 @@ elif page_id == "office":
                 placeholder=t("consult_placeholder", lang)
             )
         with c_in_q2:
-            assign_options = [
-                t("consult_assign_auto", lang),
-                "一条 蓮 (CEO)" if lang == "ja" else "Ren Ichijo (CEO)",
-                "風間 涼 (市場調査)" if lang == "ja" else "Ryo Kazama (Research)",
-                "結城 紬 (編集長)" if lang == "ja" else "Tsumugi Yuki (Editor)",
-                "森川 拓真 (ライター)" if lang == "ja" else "Takuma Morikawa (Writer)",
-                "佐々木 翼 (広報)" if lang == "ja" else "Tsubasa Sasaki (PR)",
-                "神崎 玲奈 (QA)" if lang == "ja" else "Reina Kanzaki (QA)",
-                "綾瀬 七海 (人事)" if lang == "ja" else "Nanami Ayase (HR)",
-                "橘 律 (法務)" if lang == "ja" else "Ritsu Tachibana (Legal)",
-                "白石 葵 (財務・経理)" if lang == "ja" else "Aoi Shiraishi (Finance & Accounting)"
-            ]
             target_assignee = st.selectbox(t("consult_assign_label", lang), assign_options)
         submit_inquiry = st.form_submit_button(t("consult_submit_btn", lang), type="primary", use_container_width=True)
 
     if submit_inquiry and user_inquiry.strip():
-        assignee_map = {
-            t("consult_assign_auto", lang): "auto",
-            "一条 蓮 (CEO)": "ichijo", "Ren Ichijo (CEO)": "ichijo",
-            "風間 涼 (市場調査)": "kazama", "Ryo Kazama (Research)": "kazama",
-            "結城 紬 (編集長)": "yuki", "Tsumugi Yuki (Editor)": "yuki",
-            "森川 拓真 (ライター)": "morikawa", "Takuma Morikawa (Writer)": "morikawa",
-            "佐々木 翼 (広報)": "sasaki", "Tsubasa Sasaki (PR)": "sasaki",
-            "神崎 玲奈 (QA)": "kanzaki", "Reina Kanzaki (QA)": "kanzaki",
-            "綾瀬 七海 (人事)": "ayase", "Nanami Ayase (HR)": "ayase",
-            "橘 律 (法務)": "tachibana", "Ritsu Tachibana (Legal)": "tachibana",
-            "白石 葵 (財務・経理)": "shiraishi", "Aoi Shiraishi (Finance & Accounting)": "shiraishi"
-        }
         chosen_emp = assignee_map.get(target_assignee, "auto")
         
         with st.spinner("担当者がデスクで回答を作成中..." if lang == "ja" else "Specialist is drafting the response..."):
@@ -1523,6 +1516,31 @@ elif page_id == "office":
             <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」' if lang=='ja' else '"Verified ¥0 monthly fixed costs. Ready for price optimization models."'}</div>
         </div>
         """, unsafe_allow_html=True)
+
+    # -------------------------------------------------------------
+    # ✨ 新規配属・増員スペシャリストデスク (Newly Recruited AI Specialists)
+    # -------------------------------------------------------------
+    base_9_ids = {"ichijo", "tachibana", "ayase", "kazama", "yuki", "morikawa", "kanzaki", "sasaki", "shiraishi"}
+    new_hired = [e for e in all_emps if e.get("id") not in base_9_ids]
+    
+    if new_hired:
+        st.markdown(f"#### ✨ {'新規配属・増員スペシャリストデスク (稼働中)' if lang=='ja' else 'Reinforcement & Newly Recruited Specialists (Active)'}")
+        cols_nh = st.columns(min(len(new_hired), 3))
+        for idx, emp in enumerate(new_hired):
+            c_nh = cols_nh[idx % len(cols_nh)]
+            with c_nh:
+                st.markdown(f"""
+                <div class='desk-card' style='border: 1px solid #38BDF8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15); border-left: 5px solid {emp.get("color", "#38BDF8")};'>
+                    <div style='display: flex; justify-content: space-between;'>
+                        <span style='font-size: 1.6rem;'>{emp.get('icon', '👤')}</span>
+                        <span class='status-live' style='color: #38BDF8; border-color: #38BDF8;'><span class='pulse-dot' style='background: #38BDF8;'></span>{'即時稼働中' if lang=='ja' else 'Active'}</span>
+                    </div>
+                    <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{emp.get('name')}</div>
+                    <div style='font-size: 0.85rem; color: #38BDF8; font-weight: 700;'>{emp.get('role')}</div>
+                    <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 {emp.get('department')}（増員配属ブース）</div>
+                    <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「{clean_txt(emp.get('motto', '業務稼働中'))}」</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # 3. 🔍 Market Research Division
