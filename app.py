@@ -1580,6 +1580,55 @@ elif page_id == "hr":
         for prop in proposals:
             st.warning(f"**【増員提案】対象部署: {prop['target_role']}（{prop['target_name']} / 負荷: {prop['workload_score']}%）** ➔ {prop['proposed_role']} の増員（費用0円）" if lang == "ja" else f"**[Staffing Proposal] Target Unit: {prop['target_role']} ({prop['target_name']} / Load: {prop['workload_score']}%)** ➔ Recommended Addition: {prop['proposed_role']}")
 
+    st.markdown("---")
+    # 📮 全社10万通り・社内目安箱（社員の本音ボヤキ＆関係性パトロール）
+    st.markdown(f"#### 📮 {'社内目安箱・本音ボヤキ巡回デスク（全社9万通り・関係性パトロール）' if lang=='ja' else 'Internal Suggestion Box & Sentiment Patrol (90,000+ Combinations)'}")
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 12px;'>{'綾瀬人事責任者が各社員の現場の本音・他部署への不満・業務摩擦を吸い上げています（1人あたり10,000通りのユニークなボヤキからランダム抽出）。会社の業務フロー改善にお役立てください。' if lang=='ja' else 'Nanami Ayase gathers authentic sentiments, inter-departmental friction, and operational bottlenecks across all specialists.'}</div>", unsafe_allow_html=True)
+
+    c_hr_btn1, c_hr_btn2 = st.columns([3, 1])
+    with c_hr_btn2:
+        if st.button("🔄 本音を吸い上げる (再巡回)", key="hr_btn_refresh_grumbles", use_container_width=True):
+            st.rerun()
+
+    from companies.note_one_systems.dialogue_engine import EmployeeDialogueEngine
+    hr_engine = EmployeeDialogueEngine()
+
+    emp_list = [
+        {"id": "morikawa", "name": "森川 拓真", "role": "記事制作課 (ライター)", "icon": "✍️", "color": "#EA580C"},
+        {"id": "yuki", "name": "結城 紬", "role": "記事制作課 (編集長)", "icon": "📑", "color": "#D97706"},
+        {"id": "kanzaki", "name": "神崎 玲奈", "role": "品質管理課 (QA)", "icon": "🛡️", "color": "#DC2626"},
+        {"id": "sasaki", "name": "佐々木 翼", "role": "広報課", "icon": "📢", "color": "#2563EB"},
+        {"id": "tachibana", "name": "橘 律", "role": "法務コンプライアンス課", "icon": "⚖️", "color": "#475569"},
+        {"id": "shiraishi", "name": "白石 葵", "role": "財務課 ＆ 経理課", "icon": "📊", "color": "#7C3AED"},
+        {"id": "kazama", "name": "風間 涼", "role": "市場調査課", "icon": "🔍", "color": "#0D9488"},
+        {"id": "ayase", "name": "綾瀬 七海", "role": "人事課", "icon": "🤝", "color": "#059669"},
+        {"id": "ichijo", "name": "一条 蓮", "role": "代表取締役CEO", "icon": "👩‍💼", "color": "#1E3A8A"},
+    ]
+
+    for emp in emp_list:
+        grumble_data = hr_engine.get_random_grumble(emp["id"], lang=lang)
+        with st.container():
+            st.markdown(f"""
+            <div style='background: #0F172A; border: 1px solid #334155; border-left: 5px solid {emp["color"]}; border-radius: 8px; padding: 14px; margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                    <div>
+                        <span style='font-size: 1.3rem;'>{emp["icon"]}</span>
+                        <strong style='color: #FFFFFF; font-size: 1.05rem; margin-left: 6px;'>{emp["name"]}</strong>
+                        <span style='color: #94A3B8; font-size: 0.85rem; margin-left: 8px;'>({emp["role"]})</span>
+                    </div>
+                    <span style='background: #1E293B; color: #38BDF8; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155;'>
+                        パターン #{grumble_data['combination_id']:,} / 全{grumble_data['total_variations']:,}通り
+                    </span>
+                </div>
+                <div style='margin-top: 6px; font-size: 0.82rem; color: #F59E0B;'>
+                    ⚡ <strong>検知された摩擦対象:</strong> {grumble_data['target']}
+                </div>
+                <div style='margin-top: 8px; font-size: 0.95rem; color: #F8FAFC; background: #1E293B; padding: 10px 14px; border-radius: 6px; border-left: 3px solid #F43F5E; line-height: 1.6;'>
+                    {grumble_data['text']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
 # ==========================================
 # 8. 📚 Legal & Compliance Division
 # ==========================================

@@ -126,6 +126,9 @@ def get_office_game_html(lang: str = "en") -> str:
             ]
         }
 
+    from .dialogue_engine import EmployeeDialogueEngine
+    dialogue_engine = EmployeeDialogueEngine()
+    grumbles_json = json.dumps(dialogue_engine.grumble_templates, ensure_ascii=False)
     speeches_json = json.dumps(speeches, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
@@ -360,6 +363,17 @@ def get_office_game_html(lang: str = "en") -> str:
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 9999 !important;
     border: 2px solid #38BDF8;
+    max-width: 340px;
+    white-space: normal;
+    line-height: 1.4;
+  }}
+  .speech-bubble.grumble {{
+    background: #FFF1F2 !important;
+    color: #9F1239 !important;
+    border-color: #F43F5E !important;
+  }}
+  .speech-bubble.grumble::after {{
+    border-color: #FFF1F2 transparent !important;
   }}
   .speech-bubble::after {{
     content: '';
@@ -544,18 +558,44 @@ def get_office_game_html(lang: str = "en") -> str:
 
 <script>
   const speeches = {speeches_json};
+  const grumbleTemplates = {grumbles_json};
   const employeeIds = Object.keys(speeches);
+
+  function generateGrumble(id) {{
+    const tmpl = grumbleTemplates[id];
+    if (!tmpl) return null;
+    const t = tmpl.targets[Math.floor(Math.random() * tmpl.targets.length)];
+    const a = tmpl.actions[Math.floor(Math.random() * tmpl.actions.length)];
+    const i = tmpl.impacts[Math.floor(Math.random() * tmpl.impacts.length)];
+    const e = tmpl.endings[Math.floor(Math.random() * tmpl.endings.length)];
+    return "💢 " + t + a + i + e;
+  }}
 
   function triggerSpeak(id) {{
     const bubble = document.getElementById('bubble-' + id);
-    const lines = speeches[id];
-    if (!lines || lines.length === 0) return;
-    const line = lines[Math.floor(Math.random() * lines.length)];
+    if (!bubble) return;
+    
+    // 50% chance of official duty report, 50% chance of 10,000 combinations authentic grumble
+    const isGrumble = Math.random() < 0.5;
+    let line = "";
+    
+    if (isGrumble) {{
+      line = generateGrumble(id);
+      bubble.classList.add('grumble');
+    }} else {{
+      const lines = speeches[id];
+      if (lines && lines.length > 0) {{
+        line = lines[Math.floor(Math.random() * lines.length)];
+      }}
+      bubble.classList.remove('grumble');
+    }}
+
+    if (!line) return;
     bubble.innerText = line;
     bubble.classList.add('show');
     setTimeout(() => {{
       bubble.classList.remove('show');
-    }}, 4000);
+    }}, 4500);
   }}
 
   // Auto dialogue rotation every 5 seconds
