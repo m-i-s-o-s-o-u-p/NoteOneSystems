@@ -114,6 +114,13 @@ def get_article_dossier_html(art: dict, lang: str = "ja") -> str:
     return f"""
     <div class="review-paper-white" style="border-left: 6px solid #0284C7; background-color:#FFFFFF; padding:28px; border-radius:12px; border:2px solid #CBD5E1; box-shadow:0 6px 24px rgba(0,0,0,0.15); margin: 18px 0;">
         <div style="background: #F1F5F9; border-radius: 10px; padding: 18px 20px; border: 1px solid #CBD5E1; margin-bottom: 24px;">
+            <div style="background: #E0F2FE; border: 1.5px solid #38BDF8; border-radius: 8px; padding: 10px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="background: #0284C7; color: #FFFFFF !important; font-weight: 800; font-size: 0.95rem; padding: 3px 12px; border-radius: 6px; letter-spacing: 0.05em;">{art.get('article_no', 'No.01')}</span>
+                    <strong style="color: #0369A1 !important; font-size: 1.02rem;">🔖 記事管理番号: {art.get('article_code', 'ART-001')} （通算第{art.get('article_number', 1)}号）</strong>
+                </div>
+                <span style="background: #BAE6FD; color: #0369A1; font-size: 0.78rem; font-weight: 800; padding: 2px 8px; border-radius: 4px;">公式ナンバリング付与済</span>
+            </div>
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #CBD5E1; padding-bottom: 8px;">
                 <span style="font-weight: 800; font-size: 1.05rem; color: #0F172A !important;">📋 査読前提・品質監査情報 (Executive Review Header)</span>
                 <span style="background: #0284C7; color: #FFFFFF !important; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px;">Ready for Sign-off</span>
@@ -840,12 +847,13 @@ if page_id == "dashboard":
     # 記事の分類
     for art in articles:
         st_val = art.get("status", "Pending Owner Approval")
+        art_no_str = f"[{art.get('article_no', 'No.01')}] " if art.get("article_no") else ""
         if st_val == "Pending Owner Approval":
-            p4_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "記事制作・広報課", "progress": 95, "icon": "📄", "words": len(art.get("content", "")), "price": art.get("price", 500)})
+            p4_items.append({"type": "article", "data": art, "title": f"{art_no_str}{art.get('title', '')}", "dept": "記事制作・広報課", "progress": 95, "icon": "📄", "words": len(art.get("content", "")), "price": art.get("price", 500)})
         elif st_val == "Revision Requested":
-            p2_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "記事制作課", "progress": 55, "icon": "✍️", "words": len(art.get("content", "")), "note": "指示反映・加筆中"})
+            p2_items.append({"type": "article", "data": art, "title": f"{art_no_str}{art.get('title', '')}", "dept": "記事制作課", "progress": 55, "icon": "✍️", "words": len(art.get("content", "")), "note": "指示反映・加筆中"})
         elif st_val in ["Approved", "Published", "Pre-Publication"]:
-            p5_items.append({"type": "article", "data": art, "title": art.get("title", ""), "dept": "note販売チャンネル", "progress": 100, "icon": "🎉", "words": len(art.get("content", "")), "price": art.get("price", 500)})
+            p5_items.append({"type": "article", "data": art, "title": f"{art_no_str}{art.get('title', '')}", "dept": "note販売チャンネル", "progress": 100, "icon": "🎉", "words": len(art.get("content", "")), "price": art.get("price", 500)})
 
     lane_c1, lane_c2, lane_c3, lane_c4, lane_c5 = st.columns(5)
 
@@ -1019,13 +1027,14 @@ elif page_id == "office":
         if art.get("status") == "Pending Owner Approval":
             r_dept = art.get("routed_dept", "qa")
             r_name = art.get("routed_dept_name", "品質管理課 (神崎 玲奈)")
+            art_no_tag = f"[{art.get('article_no', 'No.01')}] " if art.get("article_no") else ""
             pending_items.append({
                 "unique_key": f"art_{art['id']}",
                 "type": "article",
                 "id": art["id"],
                 "dept": r_name,
                 "icon": "📄",
-                "title": clean_txt(art.get("title", "")),
+                "title": f"{art_no_tag}{clean_txt(art.get('title', ''))}",
                 "date": art.get("created_at", ""),
                 "status": art.get("status", "Pending Owner Approval"),
                 "data": art
@@ -1262,12 +1271,13 @@ elif page_id == "office":
             r_dept = art.get("routed_dept", "content_creation")
             r_icon = "🔍" if r_dept == "market_research" else ("📢" if r_dept == "pr" else "✍️")
             r_name = art.get("routed_dept_name", "記事制作課 (結城 紬 & 森川 拓真)")
+            art_no_tag = f"[{art.get('article_no', 'No.01')}] " if art.get("article_no") else ""
             in_revision_items.append({
                 "id": art["id"],
                 "type": "article",
                 "dept": r_name,
                 "icon": r_icon,
-                "title": clean_txt(art.get("title", "")),
+                "title": f"{art_no_tag}{clean_txt(art.get('title', ''))}",
                 "feedback": clean_txt(art.get("latest_feedback", "修正対応中")),
                 "date": art.get("created_at", "")
             })
@@ -1976,7 +1986,7 @@ elif page_id == "qa":
                     selected_idx = idx
                     break
 
-        article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {clean_txt(art.get('title', ''))}" for art in all_articles]
+        article_titles = [f"[{art.get('article_no', f'No.{idx+1:02d}')}] [{art.get('status', 'Pending Owner Approval')}] {clean_txt(art.get('title', ''))}" for idx, art in enumerate(all_articles)]
         selected_idx = st.selectbox(t("qa_select_label", lang), range(len(all_articles)), index=selected_idx, format_func=lambda x: article_titles[x])
         art = all_articles[selected_idx]
         cur_status = art.get("status", "Pending Owner Approval")

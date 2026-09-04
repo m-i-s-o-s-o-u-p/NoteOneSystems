@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import re
 from datetime import datetime
 
 def clean_article_text(text: str) -> str:
@@ -181,11 +182,27 @@ class NoteOneWorkflow:
             f"   note決済手数料（5%）＋プラットフォーム利用料（10%）控除後、1部あたり手残り純益は約¥{net_profit_per_copy:,}（利益率約85%）です。当社の0円運用インフラにより月100部で¥{net_profit_per_copy*100:,}、月300部で¥{net_profit_per_copy*300:,}の確実な利益を生み出します。"
         )
 
+        # Calculate article sequential number
+        existing_articles = self.list_articles()
+        existing_nums = [a.get("article_number", 0) for a in existing_articles if isinstance(a.get("article_number"), int)]
+        next_num = max(existing_nums, default=0) + 1 if existing_nums else len(existing_articles) + 1
+        art_no = f"No.{next_num:02d}"
+        art_code = f"ART-{next_num:03d}"
+
+        clean_t = clean_article_text(title)
+        if not re.search(r"【第\d+号", clean_t):
+            formatted_title = f"【第{next_num}号】{clean_t}"
+        else:
+            formatted_title = clean_t
+
         # Save article with LOCKED status: Pending Owner Approval (Auto-sent to 品質管理課)
         art_id = f"art_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         article_data = {
             "id": art_id,
-            "title": clean_article_text(title),
+            "article_number": next_num,
+            "article_no": art_no,
+            "article_code": art_code,
+            "title": formatted_title,
             "topic": topic,
             "price": price,
             "pricing_rationale": pricing_rationale,
@@ -236,6 +253,17 @@ class NoteOneWorkflow:
                         articles.append(data)
                 except Exception:
                     pass
+
+        # Ensure all articles have article_number, article_no, and article_code
+        articles_chron = sorted(articles, key=lambda x: x.get("created_at", x.get("id", "")))
+        for i, art in enumerate(articles_chron, 1):
+            if "article_number" not in art or not isinstance(art.get("article_number"), int):
+                art["article_number"] = i
+            if "article_no" not in art:
+                art["article_no"] = f"No.{art['article_number']:02d}"
+            if "article_code" not in art:
+                art["article_code"] = f"ART-{art['article_number']:03d}"
+
         return articles
 
     def get_article(self, article_id: str):
