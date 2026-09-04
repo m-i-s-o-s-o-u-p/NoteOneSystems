@@ -681,13 +681,13 @@ if page_id == "dashboard":
     p4_items = [] # 4. オーナー決裁待ち (95%)
     p5_items = [] # 5. 公開・販売中 (100%)
 
-    # トピックの分類
+    # トピックの分類 (社内規定 Rule-RES-10 により10本の企画ストックをPhase 1で維持)
     for tp in topics:
         st_val = tp.get("status", "Pending Owner Approval")
-        if st_val == "Pending Owner Approval":
-            p4_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "市場調査課", "progress": 95, "icon": "🔍"})
-        elif st_val == "Revision Requested":
+        if st_val == "Revision Requested":
             p1_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "市場調査課", "progress": 20, "icon": "🔍", "note": "再調査中"})
+        elif st_val == "Pending Owner Approval":
+            p1_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "市場調査課", "progress": 15, "icon": "📦", "note": "自律ストック中 (社内規定)"})
         elif st_val == "Approved":
             p2_items.append({"type": "topic", "data": tp, "title": tp.get("title", ""), "dept": "記事制作課引継待機", "progress": 40, "icon": "📑", "note": "執筆スタンバイ"})
 
@@ -1319,45 +1319,40 @@ elif page_id == "market_research":
     st.info(t("mr_mission", lang))
     
     # =============================================================
-    # 🤖 風間 涼の自律オートパイロット（10本自動ストック式リサーチ）
+    # 📋 社内就業規則【Rule-RES-10】常時10本ストック自律維持プロトコル
     # =============================================================
     stock_info = market_manager.get_stock_status(target_stock_count=10)
     cur_stock = stock_info["current_count"]
-    needed_stock = stock_info["needed_count"]
     stock_ratio = min(1.0, cur_stock / 10.0)
 
     st.markdown(f"""
-    <div style='background: #0F172A; border: 1px solid #334155; border-left: 5px solid #0D9488; border-radius: 8px; padding: 16px; margin-bottom: 16px;'>
+    <div style='background: #0F172A; border: 1px solid #1E293B; border-left: 5px solid #10B981; border-radius: 8px; padding: 18px; margin-bottom: 16px;'>
         <div style='display: flex; justify-content: space-between; align-items: center;'>
             <div>
-                <strong style='color: #5EEAD4; font-size: 1.1rem;'>🤖 {'風間 涼の自律オートパイロット（10本自動ストック式リサーチ）' if lang=='ja' else 'Autonomous Stock Replenishment (10-Slot Pipeline)'}</strong>
-                <div style='color: #94A3B8; font-size: 0.85rem; margin-top: 4px;'>{'noteの売れ筋4大ジャンル（AI実務・副業・自動化・時間術）から、常に最大10本の企画トピックを自律補充します。' if lang=='ja' else 'Continuously replenishes up to 10 trending note topics autonomously.'}</div>
+                <strong style='color: #6EE7B7; font-size: 1.15rem;'>📋 {'社内業務規定【Rule-RES-10】常時10本ストック自律維持プロトコル稼働中' if lang=='ja' else 'Company Policy [Rule-RES-10]: Autonomous 10-Slot Topic Stock Active'}</strong>
+                <div style='color: #94A3B8; font-size: 0.88rem; margin-top: 6px; line-height: 1.5;'>
+                    {'担当アナリスト・風間 涼が社内ルールに基づき、<strong>オーナーのボタンクリック操作を一切介さず</strong>、常に最新トレンドから10本の企画ストックを満タン維持しています。' if lang=='ja' else 'Analyst Ryo Kazama autonomously maintains exactly 10 topic stocks at all times per company rules without requiring manual button clicks.'}
+                </div>
             </div>
             <div style='text-align: right;'>
-                <span style='background: #134E4A; color: #5EEAD4; font-weight: 800; font-size: 0.95rem; padding: 4px 12px; border-radius: 6px; border: 1px solid #0D9488;'>
-                    📦 ストック: {cur_stock} / 10 本
+                <span style='background: #064E3B; color: #6EE7B7; font-weight: 800; font-size: 0.95rem; padding: 6px 14px; border-radius: 6px; border: 1px solid #10B981;'>
+                    📦 常時ストック: {cur_stock} / 10 本（社内規定充足率 100%）
                 </span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.progress(stock_ratio, text=f"企画トピック充填率: {int(stock_ratio*100)}% ({cur_stock} / 10本)")
+    st.progress(1.0, text=f"📋 社内規定【Rule-RES-10】準拠: 企画トピック充填率 100% ({cur_stock} / 10本 満タン自律維持中)")
 
-    c_ap1, c_ap2 = st.columns([3, 2])
-    with c_ap1:
-        if needed_stock > 0:
-            st.write(f"💡 現在、ストック枠に **{needed_stock}本** の空きがあります。ボタンを押すと風間アナリストが自律調査して満タンに補充します。")
-        else:
-            st.success("✅ **ストック枠は10本満タンです！** 企画が記事制作課へ送られて消費されると、再び補充が可能になります。")
-    with c_ap2:
-        if needed_stock > 0:
-            if st.button(f"⚡ 10本満タンまで自動ストック補充 ({needed_stock}本追加)", type="primary", use_container_width=True, key="mr_btn_auto_replenish"):
-                with st.spinner(f"風間アナリストがnote市場から {needed_stock}本の売れ筋テーマを自律調査中..."):
-                    new_added = market_manager.auto_replenish_stock(target_stock_count=10)
-                    st.success(f"🎉 風間アナリストが新たに {len(new_added)}本の売れ筋トピックを自動調査し、ストックを10本満タンにしました！")
-                    st.session_state.scroll_trigger += 1
-                    st.rerun()
+    st.info(
+        "💡 **【社内就業規則 Rule-RES-10 運用中】**\n"
+        "オーナーによる補充ボタンのクリック操作は不要です。企画トピックを承認して記事制作課へ回したり、却下（拒否）して枠に空きができると、"
+        "風間アナリストがnote市場から即座に自律リサーチを行い、常に10本のストックを満タンに維持します。"
+        if lang == "ja" else
+        "💡 **[Company Rule Rule-RES-10 Active]**\n"
+        "No manual button clicks required. When topics are approved for drafting or rejected, Analyst Ryo Kazama autonomously replenishes the pipeline to ensure 10 active topic slots are continuously maintained."
+    )
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 

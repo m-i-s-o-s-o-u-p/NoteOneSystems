@@ -8,6 +8,8 @@ class MarketResearchManager:
         self.base_dir = os.path.dirname(__file__)
         self.topics_file = os.path.join(self.base_dir, "market_topics.json")
         self._init_default_topics()
+        # 社内規定 [Rule-RES-10] を自動執行して常時10本ストックを自律維持
+        self.enforce_stock_rule(target_stock_count=10)
 
     def _init_default_topics(self):
         if not os.path.exists(self.topics_file):
@@ -82,14 +84,30 @@ class MarketResearchManager:
             with open(self.topics_file, "w", encoding="utf-8") as f:
                 json.dump(default_topics, f, ensure_ascii=False, indent=2)
 
-    def list_topics(self):
+    def _read_topics_raw(self):
         if not os.path.exists(self.topics_file):
+            self._init_default_topics()
+        try:
+            with open(self.topics_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
             return []
-        with open(self.topics_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+
+    def _save_topics_raw(self, topics):
+        with open(self.topics_file, "w", encoding="utf-8") as f:
+            json.dump(topics, f, ensure_ascii=False, indent=2)
+
+    def list_topics(self, auto_replenish: bool = True):
+        """
+        Lists all market research topics.
+        Under Company Rule [Rule-RES-10], automatically enforces 10-slot autonomous stock without button clicks.
+        """
+        if auto_replenish:
+            self.enforce_stock_rule(target_stock_count=10)
+        return self._read_topics_raw()
 
     def get_topic(self, topic_id: str):
-        topics = self.list_topics()
+        topics = self._read_topics_raw()
         for t in topics:
             if t.get("id") == topic_id:
                 return t
@@ -157,16 +175,15 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
             ]
         }
 
-        topics = self.list_topics()
+        topics = self._read_topics_raw()
         topics.insert(0, new_topic)
-        with open(self.topics_file, "w", encoding="utf-8") as f:
-            json.dump(topics, f, ensure_ascii=False, indent=2)
+        self._save_topics_raw(topics)
 
         return new_topic
 
     def approve_topic(self, topic_id: str, approver_name: str = "Owner (オーナー)"):
         """Approves the topic for article creation."""
-        topics = self.list_topics()
+        topics = self._read_topics_raw()
         for t in topics:
             if t.get("id") == topic_id:
                 t["status"] = "Approved"
@@ -178,14 +195,13 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                     "actor": approver_name,
                     "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
                 })
-                with open(self.topics_file, "w", encoding="utf-8") as f:
-                    json.dump(topics, f, ensure_ascii=False, indent=2)
+                self._save_topics_raw(topics)
                 return True
         return False
 
     def request_revision(self, topic_id: str, feedback: str, requester_name: str = "Owner (オーナー)"):
         """Requests topic angle revisions."""
-        topics = self.list_topics()
+        topics = self._read_topics_raw()
         for t in topics:
             if t.get("id") == topic_id:
                 t["status"] = "Revision Requested"
@@ -198,16 +214,64 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                     "actor": requester_name,
                     "note": f"オーナーからの再調査・切り口指示: {feedback}"
                 })
-                with open(self.topics_file, "w", encoding="utf-8") as f:
-                    json.dump(topics, f, ensure_ascii=False, indent=2)
+                self._save_topics_raw(topics)
                 return True
+        return False
+
+    def reject_topic(self, topic_id: str, actor: str = "Owner (オーナー)"):
+        """
+        Rejects a topic and autonomously invokes Rule-RES-10 to replenish the vacant slot immediately.
+        """
+        topics = self._read_topics_raw()
+        found = False
+        for t in topics:
+            if t.get("id") == topic_id:
+                t["status"] = "Rejected"
+                if "status_history" not in t:
+                    t["status_history"] = []
+                t["status_history"].append({
+                    "status": "Rejected",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "actor": actor,
+                    "note": "オーナーにより企画却下。社内規定【Rule-RES-10】に基づき風間アナリストが即座に代替トピックを自律起票します。"
+                })
+                found = True
+                break
+        if found:
+            self._save_topics_raw(topics)
+            # Instantly replenish to maintain 10-slot company rule
+            self.enforce_stock_rule(target_stock_count=10)
+            return True
+        return False
+
+    def mark_topic_in_production(self, topic_id: str, actor: str = "記事制作課 (結城・森川)"):
+        """Marks a topic as transitioning into production and replenishes research stock."""
+        topics = self._read_topics_raw()
+        found = False
+        for t in topics:
+            if t.get("id") == topic_id:
+                t["status"] = "In Production"
+                if "status_history" not in t:
+                    t["status_history"] = []
+                t["status_history"].append({
+                    "status": "In Production",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "actor": actor,
+                    "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+                })
+                found = True
+                break
+        if found:
+            self._save_topics_raw(topics)
+            self.enforce_stock_rule(target_stock_count=10)
+            return True
         return False
 
     def get_stock_status(self, target_stock_count: int = 10):
         """Returns the current topic stock count and remaining capacity up to target_stock_count."""
-        topics = self.list_topics()
-        # Active stock includes topics that are Pending Owner Approval or Approved (not rejected)
-        active_topics = [t for t in topics if t.get("status") != "Rejected"]
+        topics = self._read_topics_raw()
+        # Active stock includes topics in research stock (not Rejected, not In Production, not Archived)
+        active_topics = [t for t in topics if t.get("status") not in ["Rejected", "In Production", "Archived"]]
         current_count = len(active_topics)
         needed = max(0, target_stock_count - current_count)
         return {
@@ -216,6 +280,17 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
             "needed_count": needed,
             "active_topics": active_topics
         }
+
+    def enforce_stock_rule(self, target_stock_count: int = 10):
+        """
+        社内就業規則【Rule-RES-10: 企画トピック常時10本自律ストック維持規程】
+        オーナーのボタン操作を一切介さず、企画ストックが10本未満になった場合は
+        風間 涼がnote市場トレンドから即座に自律起票して10本満タンを常時維持する。
+        """
+        cur_status = self.get_stock_status(target_stock_count=target_stock_count)
+        if cur_status["needed_count"] > 0:
+            return self.auto_replenish_stock(target_stock_count=target_stock_count)
+        return []
 
     def auto_replenish_stock(self, target_stock_count: int = 10):
         """
@@ -308,19 +383,99 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "demand": "『時間術』『タスク管理』は自己啓発・ビジネス両面で安定したベストセラージャンル。",
                 "gap": "時間割ブロック方式で1日のスケジュールを自動同期するNotion構築マニュアル。",
                 "price": 500
+            },
+            {
+                "theme": "Google Apps Script (GAS) で毎朝のSlack＆メール通知を全自動化する時短コード集",
+                "audience": "毎朝の情報共有やルーチン通知を手動で行っているチームリーダー",
+                "category": "業務自動化・GAS",
+                "demand": "完全無料で使えるGASによる通知自動化は中小企業・個人事業主で高い関心。",
+                "gap": "トリガー設定の画面付きマニュアルと、コピペですぐ動くエラー対策済みコードを完備。",
+                "price": 500
+            },
+            {
+                "theme": "未経験から月5万円を稼ぐ『Kindle出版×noteクロス展開マーケティング戦略』",
+                "audience": "書いたコンテンツの収益を最大化したい個人作家・ブロガー",
+                "category": "電子書籍・メディア展開",
+                "demand": "Kindleの印税とnoteの有料販売を連動させるハイブリッド収益化への注目度が高い。",
+                "gap": "章立ての流用方法から相互送客リンクの配置まで、具体例を交えて設計図を提示。",
+                "price": 980
+            },
+            {
+                "theme": "Midjourney×商用デザイン 売れるストックフォト＆Web素材プロンプト完全攻略法",
+                "audience": "AI画像生成で副収入を得たいクリエイター・デザイナー",
+                "category": "生成AI・画像制作",
+                "demand": "プロンプトの微調整で失敗する人が多く、高クオリティ出力の再現呪文が求められている。",
+                "gap": "審査に通る解像度・構図・照明の黄金パラメータをジャンル別に完全網羅。",
+                "price": 500
+            },
+            {
+                "theme": "コンサル直伝！『読まれる提案書・報告書を作るロジカルシンキング7つの型』",
+                "audience": "上司やクライアントへの説明がわかりにくいと言われるビジネスパーソン",
+                "category": "ドキュメント作成・論理思考",
+                "demand": "説得力のある資料作成スキルの向上は、全職種で普遍的な強いニーズ。",
+                "gap": "抽象的なピラミッドストラクチャーではなく、スライド1枚ずつの型式テンプレートを提供。",
+                "price": 500
+            },
+            {
+                "theme": "会社員のための『週末3時間で完成する確定申告・副業節税チェックシート』",
+                "audience": "副業収入が出てきたが税金や申告に不安を抱えるサラリーマン",
+                "category": "税務・マネーリテラシー",
+                "demand": "年末年始や確定申告シーズンに検索数が爆発する定番の高収益ジャンル。",
+                "gap": "税理士監修レベルの経費計上基準と、freee/マネーフォワード入力補助チェック表を同梱。",
+                "price": 500
+            },
+            {
+                "theme": "購買心理学で売上を倍増させる『成約率特化型セールスコピーライティング雛形集』",
+                "audience": "自社商品やnote有料記事の販売成約率（CVR）を上げたい販売者",
+                "category": "コピーライティング・マーケ",
+                "demand": "『読まれるけど買われない』悩みを抱えるクリエイターの購買意欲が極めて高い。",
+                "gap": "PASONAの法則をnote特化型に落とし込んだ、穴埋め式のリード文＆クロージング文テンプレート。",
+                "price": 980
+            },
+            {
+                "theme": "ChatGPT×英語学習 『TOEIC200点アップ＆日常英会話を完全一人で習得する対話プロンプト』",
+                "audience": "高額なオンライン英会話に通わずスキマ時間で英語力を伸ばしたい社会人",
+                "category": "語学・リスキリング",
+                "demand": "AIを専属ネイティブ講師に見立てた英語学習プロンプトの検索数が急増中。",
+                "gap": "レベル別のシチュエーション会話プロンプトと、英文添削・文法解説の出力指示書を同梱。",
+                "price": 500
+            },
+            {
+                "theme": "リモートワークの評価を爆上げする『非同期コミュニケーション＆Slack分報ガイド』",
+                "audience": "在宅勤務で成果が見えにくく社内評価に不安を感じているリモートワーカー",
+                "category": "働き方・組織開発",
+                "demand": "フルリモート組織でのコミュニケーション摩擦解消ノウハウに強い共感。",
+                "gap": "『分報（times）』チャンネルの運用規約と、自己アピール嫌いでも信頼されるテキスト術。",
+                "price": 500
+            },
+            {
+                "theme": "ゼロから始める『Claude 3.5×Artifacts 高度分析＆業務ダッシュボード即時構築術』",
+                "audience": "最新AIツールを活用して社内業務を一歩先へ進めたいテック担当者",
+                "category": "先端AIツール・データ分析",
+                "demand": "Claude 3.5のArtifacts機能によるWebアプリ・ダッシュボード作成の実例需要が高い。",
+                "gap": "専門的なプログラミング知識なしで、CSVデータをドラッグ＆ドロップして可視化する雛形集。",
+                "price": 500
+            },
+            {
+                "theme": "独立初年度を生き抜く『フリーランスのための資金繰り＆キャッシュフロー管理表』",
+                "audience": "独立したばかりで売上と入金のズレ、税金支払いに胃を痛めている個人事業主",
+                "category": "財務管理・個人事業",
+                "demand": "黒字倒産を防ぐリアルな現金管理ツールの需要は切実。",
+                "gap": "3ヶ月先・6ヶ月先の口座残高推移を自動試算するGoogleスプレッドシート完成版を提供。",
+                "price": 980
             }
         ]
 
-        existing_titles = [t.get("title", "") for t in self.list_topics()]
+        topics = self._read_topics_raw()
+        existing_titles = [t.get("title", "") for t in topics]
         newly_added = []
 
         for candidate in candidate_niches:
             if len(newly_added) >= needed:
                 break
             
-            # Check duplicate by theme similarity
-            cand_title = f"【完全保存版】{candidate['theme']}"
-            if any(candidate['category'] in ex or candidate['theme'][:10] in ex for ex in existing_titles):
+            cand_title = candidate['theme'] if candidate['theme'].startswith("【") else f"【完全保存版】{candidate['theme']}"
+            if any(candidate['theme'][:8] in ex for ex in existing_titles):
                 continue
 
             topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
@@ -334,29 +489,64 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "recommended_price": candidate["price"],
                 "status": "Pending Owner Approval",
                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "analyst": "風間 涼 (市場調査課・自律オートパイロット)",
+                "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
                 "status_history": [
                     {
                         "status": "Pending Owner Approval",
                         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "actor": "風間 涼 (自律オートパイロット)",
-                        "note": f"自律トレンド分析完了。10本ストック枠へ自動起票（オーナー承認待ち）。"
+                        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+                        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
                     }
                 ]
             }
             newly_added.append(topic_item)
 
+        # Procedural fallback generator in case more topics are needed
+        if len(newly_added) < needed:
+            fallback_domains = [
+                ("Notion", "タスク・プロジェクト管理", "チーム生産性を最大化する", 500),
+                ("ChatGPT", "プロンプトエンジニアリング", "日常業務を9割削減する", 500),
+                ("GAS", "業務自動化", "手作業ゼロを実現するGoogle自動連携コード", 500),
+                ("Canva", "ビジュアルマーケティング", "プロ級のデザインを量産する", 500),
+                ("Python", "スクレイピング・データ収集", "競合の動きを完全把握する", 980)
+            ]
+            for tool, cat, benefit, pr in fallback_domains:
+                if len(newly_added) >= needed:
+                    break
+                fb_theme = f"【実践マスター】{tool}×{cat} {benefit}即戦力テンプレート"
+                if any(fb_theme[:10] in ex for ex in existing_titles):
+                    continue
+                topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
+                newly_added.append({
+                    "id": topic_id,
+                    "title": fb_theme,
+                    "target_audience": f"{tool}を活用して業務効率を劇的に改善したいビジネスパーソン",
+                    "category": cat,
+                    "demand_summary": f"note内で「{tool}」と「{cat}」の組み合わせに対する購買意欲が常に上位。",
+                    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+                    "recommended_price": pr,
+                    "status": "Pending Owner Approval",
+                    "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+                    "status_history": [
+                        {
+                            "status": "Pending Owner Approval",
+                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "actor": "風間 涼 (社内規定 Rule-RES-10)",
+                            "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+                        }
+                    ]
+                })
+
         if newly_added:
-            topics = self.list_topics()
             for item in newly_added:
                 topics.insert(0, item)
-            with open(self.topics_file, "w", encoding="utf-8") as f:
-                json.dump(topics, f, ensure_ascii=False, indent=2)
+            self._save_topics_raw(topics)
 
         return newly_added
 
     def update_topic_status(self, topic_id: str, new_status: str, actor: str = "User"):
-        topics = self.list_topics()
+        topics = self._read_topics_raw()
         for t in topics:
             if t.get("id") == topic_id:
                 t["status"] = new_status
@@ -367,8 +557,9 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "actor": actor
                 })
-                with open(self.topics_file, "w", encoding="utf-8") as f:
-                    json.dump(topics, f, ensure_ascii=False, indent=2)
+                self._save_topics_raw(topics)
+                if new_status in ["Rejected", "In Production", "Archived"]:
+                    self.enforce_stock_rule(target_stock_count=10)
                 return True
         return False
 

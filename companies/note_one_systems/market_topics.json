@@ -1,5 +1,171 @@
 [
   {
+    "id": "topic_20260905_022117_1",
+    "title": "【完全保存版】ChatGPT×企画書作成 10分で上司のOKが出る『プレゼン骨子ジェネレーター』",
+    "target_audience": "新規事業や業務改善の企画書作成に毎回何日も悩んでいる会社員",
+    "category": "AI×企画力向上",
+    "demand_summary": "『企画が通らない』悩みを解決する構造化プロンプトへの関心が非常に高い。",
+    "competitor_gap": "課題提起から投資対効果（ROI）算出までのストーリーラインを自動生成するプロンプト群。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:17",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:17",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_7",
+    "title": "【完全保存版】文系・初心者向け『Pythonで競合リサーチを全自動化する超簡単スクリプト』",
+    "target_audience": "プログラミング未経験だが日常のデータ収集を自動化したいビジネスパーソン",
+    "category": "プログラミング・自動化",
+    "demand_summary": "環境構築で挫折する層が多く、コピペで動くGoogle Colab完結型の需要が強い。",
+    "competitor_gap": "PCへのインストール不要、ブラウザ上で1クリック実行できる完成コードを提供。",
+    "recommended_price": 500,
+    "status": "Rejected",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Rejected",
+        "timestamp": "2026-09-05 02:21:17",
+        "actor": "Owner (オーナー)",
+        "note": "オーナーにより企画却下。社内規定【Rule-RES-10】に基づき風間アナリストが即座に代替トピックを自律起票します。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_6",
+    "title": "【完全保存版】SNS運用代行で月10万円を堅実に稼ぐ『クライアント提案書＆業務マニュアル』",
+    "target_audience": "SNSスキルを活かして在宅ワーク・副業を受注したい個人",
+    "category": "SNS運用・受託副業",
+    "demand_summary": "『SNS副業』の中でも『運用代行』は再現性が高く、即戦力マニュアルの需要が高い。",
+    "competitor_gap": "初回ヒアリングシートから月次報告レポートのテンプレートまで、そのまま使える実務一式を完備。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_5",
+    "title": "【完全保存版】新任リーダーのための『部下の本音を引き出す1on1アジェンダ50選』",
+    "target_audience": "部下のマネジメントや離職防止に悩む新任マネージャー・リーダー",
+    "category": "マネジメント・ビジネス実務",
+    "demand_summary": "若手社員とのコミュニケーション課題に対する具体的な質問集への課金意欲が高い。",
+    "competitor_gap": "精神論ではなく、心理的安全性を担保しながら課題を特定する心理学的フレームワークを網羅。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_4",
+    "title": "【完全保存版】Canva×AI 誰でも30分でプロ級のnoteアイキャッチ画像を作るデザインレシピ",
+    "target_audience": "記事のクリック率（CTR）を上げたいnoteクリエイター",
+    "category": "デザイン・SNSマーケティング",
+    "demand_summary": "記事の売上を左右する『サムネイル・アイキャッチ』の自作ノウハウは需要絶大。",
+    "competitor_gap": "黄金比レイアウトの無料Canva共有リンクと、クリック率が跳ね上がるフォント配色集を提供。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_3",
+    "title": "【完全保存版】フリーランスのための『値上げ交渉＆トラブル防止契約書テンプレ集』",
+    "target_audience": "単価アップを目指すWebライター、デザイナー、エンジニア",
+    "category": "フリーランス・独立支援",
+    "demand_summary": "インフレに伴いクリエイターの『価格交渉術』の需要が急増。",
+    "competitor_gap": "角を立てずに単価を20%上げるメール雛形と、未払い防止の覚書条項をセット化。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_2",
+    "title": "【完全保存版】副業初心者が初月からnoteで3万円稼ぐ『売れる有料記事テーマ選定シート』",
+    "target_audience": "自分の知識や経験をお金に変えたい会社員・副業初心者",
+    "category": "副業・コンテンツ販売",
+    "demand_summary": "note副業の第一歩として『何を書けばいいか分からない』層の検索数がトップクラス。",
+    "competitor_gap": "抽象論を排し、10の質問に答えるだけで自分の売れ筋テーマが決まるワークシートを同梱。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_022114_1",
+    "title": "【完全保存版】Excel×ChatGPT 経理・事務作業を半減させるコピペ関数＆マクロ自動化集",
+    "target_audience": "毎月の締め作業や集計業務に追われる事務・経理担当者",
+    "category": "業務自動化・Excel",
+    "demand_summary": "note内で『Excel時短』『事務効率化』は恒常的な高成約ジャンル。",
+    "competitor_gap": "複雑なVBAコードではなく、1行関数とプロンプトで動く初心者向け即戦力テンプレに特化。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:21:14",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:21:14",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
     "id": "topic_20260825_001",
     "title": "ChatGPTで残業をゼロにする実務プロンプト50選＆自動化テンプレ",
     "target_audience": "残業を削減したいデスクワーカー・ビジネスパーソン",
