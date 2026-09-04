@@ -731,9 +731,9 @@ elif page_id == "office":
 
     pending_items = []
     
-    # 1. 記事制作課・広報課（記事・広告）
+    # 1. 記事制作課・広報課（記事・広告）- 決裁待ち(Pending Owner Approval)のみ抽出
     for art in workflow.list_articles():
-        if art.get("status") in ["Pending Owner Approval", "Revision Requested"]:
+        if art.get("status") == "Pending Owner Approval":
             pending_items.append({
                 "unique_key": f"art_{art['id']}",
                 "type": "article",
@@ -746,9 +746,9 @@ elif page_id == "office":
                 "data": art
             })
             
-    # 2. 市場調査課（企画トピック）
+    # 2. 市場調査課（企画トピック）- 決裁待ち(Pending Owner Approval)のみ抽出
     for tp in market_manager.list_topics():
-        if tp.get("status") in ["Pending Owner Approval", "Revision Requested"]:
+        if tp.get("status") == "Pending Owner Approval":
             pending_items.append({
                 "unique_key": f"topic_{tp['id']}",
                 "type": "topic",
@@ -786,9 +786,14 @@ elif page_id == "office":
             it = pending_key_map[key]
             return f"{it['icon']} [{it['dept']}] {it['title']}  ({it['status']})"
 
+        # If previous selected key is no longer in pending items, reset it
+        valid_options = [it["unique_key"] for it in pending_items]
+        if "univ_pending_radio_selector" in st.session_state and st.session_state.univ_pending_radio_selector not in valid_options:
+            del st.session_state["univ_pending_radio_selector"]
+
         selected_key = st.radio(
             "👇 査読・決裁を行う申請を1件選択してください:",
-            options=[it["unique_key"] for it in pending_items],
+            options=valid_options,
             format_func=format_radio_label,
             key="univ_pending_radio_selector"
         )
@@ -834,6 +839,9 @@ elif page_id == "office":
                     market_manager.approve_topic(current_item["id"])
                     st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
                 st.session_state.show_univ_rev_form = False
+                if "univ_pending_radio_selector" in st.session_state:
+                    del st.session_state["univ_pending_radio_selector"]
+                st.session_state.scroll_trigger += 1
                 st.rerun()
 
         with col_dec2:
@@ -850,6 +858,9 @@ elif page_id == "office":
                     market_manager.reject_topic(current_item["id"])
                     st.info("トピックを拒否（却下）しました。")
                 st.session_state.show_univ_rev_form = False
+                if "univ_pending_radio_selector" in st.session_state:
+                    del st.session_state["univ_pending_radio_selector"]
+                st.session_state.scroll_trigger += 1
                 st.rerun()
 
         # 否認時の指示入力フォーム
@@ -867,14 +878,68 @@ elif page_id == "office":
                         if fb_text.strip():
                             if item_type == "article":
                                 workflow.request_revision(current_item["id"], fb_text)
-                                st.warning("編集部に修正指示を伝達しました。")
+                                st.warning("編集部に修正指示を伝達しました（編集部にて修正・加筆が開始されます）。")
                             else:
                                 market_manager.request_revision(current_item["id"], fb_text)
-                                st.warning("市場調査課に再調査指示を伝達しました。")
+                                st.warning("市場調査課に再調査指示を伝達しました（市場調査課にて再調査が開始されます）。")
                             st.session_state.show_univ_rev_form = False
+                            if "univ_pending_radio_selector" in st.session_state:
+                                del st.session_state["univ_pending_radio_selector"]
+                            st.session_state.scroll_trigger += 1
                             st.rerun()
                         else:
                             st.error("指示内容を入力してください。")
+
+    # -------------------------------------------------------------
+    # 🔄 編集部・市場調査課にて修正・再執筆対応中の案件 (Revision Queue)
+    # -------------------------------------------------------------
+    in_revision_items = []
+    for art in workflow.list_articles():
+        if art.get("status") == "Revision Requested":
+            in_revision_items.append({
+                "id": art["id"],
+                "type": "article",
+                "dept": "記事制作課・広報課",
+                "icon": "✍️",
+                "title": clean_txt(art.get("title", "")),
+                "feedback": clean_txt(art.get("latest_feedback", "修正対応中")),
+                "date": art.get("created_at", "")
+            })
+    for tp in market_manager.list_topics():
+        if tp.get("status") == "Revision Requested":
+            in_revision_items.append({
+                "id": tp["id"],
+                "type": "topic",
+                "dept": "市場調査課",
+                "icon": "🔍",
+                "title": clean_txt(tp.get("title", "")),
+                "feedback": clean_txt(tp.get("latest_feedback", "再調査対応中")),
+                "date": tp.get("created_at", "")
+            })
+
+    if in_revision_items:
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+        st.markdown(f"#### 🔄 {'編集部・調査課にて修正・再執筆中の案件' if lang=='ja' else 'Revisions In-Progress by Editorial & Research'}")
+        for rev_it in in_revision_items:
+            with st.container():
+                c_rv1, c_rv2 = st.columns([4, 1])
+                with c_rv1:
+                    st.markdown(f"""
+                    <div style='background: #1E1B4B; border: 1px solid #6366F1; border-radius: 8px; padding: 14px; margin-bottom: 8px;'>
+                        <strong style='color: #A5B4FC; font-size: 0.95rem;'>{rev_it['icon']} [{rev_it['dept']}] {rev_it['title']}</strong>
+                        <div style='color: #E0E7FF; font-size: 0.88rem; margin-top: 4px;'><strong>💬 オーナーからの指示:</strong> {rev_it['feedback']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with c_rv2:
+                    st.write("")
+                    if st.button("🚀 再提出を完了", key=f"btn_complete_rev_{rev_it['id']}", use_container_width=True, help="修正・加筆を完了し、決裁待ち（Pending Owner Approval）へ再提出します"):
+                        if rev_it["type"] == "article":
+                            workflow.update_article_status(rev_it["id"], "Pending Owner Approval", actor="記事制作課 (森川・結城 修正完了)")
+                        else:
+                            market_manager.update_topic_status(rev_it["id"], "Pending Owner Approval", actor="市場調査課 (風間 再調査完了)")
+                        st.session_state.scroll_trigger += 1
+                        st.success("再執筆が完了し、決裁待ちへ再提出されました！")
+                        st.rerun()
 
     # -------------------------------------------------------------
     # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
