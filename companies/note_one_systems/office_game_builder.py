@@ -402,36 +402,65 @@ def get_office_game_html(lang: str = "en") -> str:
     transform: translateX(-50%) translateY(0) scale(1);
   }}
 
-  /* 画面端の吹き出し位置自動クランプ（はみ出し防止） */
-  #emp-ichijo .speech-bubble,
-  #emp-tachibana .speech-bubble,
-  #emp-ayase .speech-bubble {{
+  /* 画面端・上部の見切れ防止自動配置 */
+  /* 1. 上段キャラクター (一条CEO・佐々木広報): 上ではなく下向きに吹き出しを展開して上部見切れを完全防止 */
+  #emp-ichijo .speech-bubble {{
+    bottom: auto;
+    top: 85px;
     left: 20px;
-    transform: translateX(0) translateY(10px) scale(0.9);
+    transform: translateX(0) translateY(-10px) scale(0.9);
   }}
-  #emp-ichijo .speech-bubble.show,
-  #emp-tachibana .speech-bubble.show,
-  #emp-ayase .speech-bubble.show {{
+  #emp-ichijo .speech-bubble.show {{
     transform: translateX(0) translateY(0) scale(1);
   }}
-  #emp-ichijo .speech-bubble::after,
-  #emp-tachibana .speech-bubble::after,
-  #emp-ayase .speech-bubble::after {{
+  #emp-ichijo .speech-bubble::after {{
+    bottom: auto;
+    top: -9px;
     left: 25px;
     transform: none;
+    border-width: 0 8px 9px;
+    border-color: #FFFFFF transparent;
+  }}
+  #emp-ichijo .speech-bubble.grumble::after {{
+    border-color: #FFF1F2 transparent !important;
   }}
 
   #emp-sasaki .speech-bubble {{
+    bottom: auto;
+    top: 85px;
     left: auto;
     right: 20px;
-    transform: translateX(0) translateY(10px) scale(0.9);
+    transform: translateX(0) translateY(-10px) scale(0.9);
   }}
   #emp-sasaki .speech-bubble.show {{
     transform: translateX(0) translateY(0) scale(1);
   }}
   #emp-sasaki .speech-bubble::after {{
+    bottom: auto;
+    top: -9px;
     left: auto;
     right: 25px;
+    transform: none;
+    border-width: 0 8px 9px;
+    border-color: #FFFFFF transparent;
+  }}
+  #emp-sasaki .speech-bubble.grumble::after {{
+    border-color: #FFF1F2 transparent !important;
+  }}
+
+  /* 2. 左端中下段キャラクター (橘法務・綾瀬人事): 横はみ出し防止 */
+  #emp-tachibana .speech-bubble,
+  #emp-ayase .speech-bubble {{
+    left: 20px;
+    transform: translateX(0) translateY(10px) scale(0.9);
+  }}
+  #emp-tachibana .speech-bubble.show,
+  #emp-ayase .speech-bubble.show {{
+    transform: translateX(0) translateY(0) scale(1);
+  }}
+  #emp-tachibana .speech-bubble::after,
+  #emp-ayase .speech-bubble::after {{
+    left: 25px;
     transform: none;
   }}
 
