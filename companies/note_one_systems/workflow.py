@@ -311,3 +311,25 @@ class NoteOneWorkflow:
                 json.dump(art, fp, ensure_ascii=False, indent=2)
             return True
         return False
+
+    def update_article_price(self, article_id: str, new_price: int, actor: str = "Owner (オーナー)"):
+        """Updates article selling price and records in history."""
+        file_path = os.path.join(self.articles_dir, f"{article_id}.json")
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as fp:
+                art = json.load(fp)
+            old_price = art.get("price", 500)
+            art["price"] = int(new_price)
+            if "status_history" not in art:
+                art["status_history"] = []
+            art["status_history"].append({
+                "status": art.get("status", "Draft"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "actor": actor,
+                "note": f"販売価格を ¥{old_price:,} から ¥{int(new_price):,} へ変更"
+            })
+            with open(file_path, "w", encoding="utf-8") as fp:
+                json.dump(art, fp, ensure_ascii=False, indent=2)
+            return True
+        return False
+

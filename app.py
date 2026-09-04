@@ -816,6 +816,27 @@ elif page_id == "office":
         st.markdown("---")
         st.markdown(f"<div class='section-title'>👑 {'オーナー最終決裁欄' if lang=='ja' else 'Executive Decision Gateway'}</div>", unsafe_allow_html=True)
         
+        # 💰 価格変更ウィジェット（記事の場合）
+        if item_type == "article":
+            cur_price = item_raw.get("price", 500)
+            c_pr1, c_pr2 = st.columns([3, 1])
+            with c_pr1:
+                new_price_val = st.number_input(
+                    "💰 販売価格の変更・調整 (note販売価格):",
+                    min_value=100,
+                    max_value=50000,
+                    value=int(cur_price),
+                    step=50,
+                    key=f"univ_price_input_{item_raw['id']}",
+                    help="noteでの販売価格（100円〜50,000円）を設定できます。売上目標や財務試算に即時反映されます。"
+                )
+            with c_pr2:
+                st.write("")
+                if st.button("💾 価格を更新", key=f"univ_price_btn_{item_raw['id']}", use_container_width=True):
+                    workflow.update_article_price(item_raw["id"], new_price_val)
+                    st.success(f"販売価格を ¥{new_price_val:,} に更新しました！")
+                    st.rerun()
+
         st.markdown(f"""
         <div class='approval-box-locked'>
             <div style='display: flex; justify-content: space-between; align-items: center;'>
@@ -1421,6 +1442,26 @@ elif page_id == "qa":
         # 👑 オーナー決裁欄（プレビューの直後に配置）
         st.markdown("---")
         st.markdown(f"<div class='section-title'>{t('qa_approval_header', lang)}</div>", unsafe_allow_html=True)
+
+        # 💰 価格変更ウィジェット
+        cur_qa_price = art.get("price", 500)
+        c_qa_p1, c_qa_p2 = st.columns([3, 1])
+        with c_qa_p1:
+            qa_new_price = st.number_input(
+                "💰 販売価格の変更・調整 (note販売価格):",
+                min_value=100,
+                max_value=50000,
+                value=int(cur_qa_price),
+                step=50,
+                key=f"qa_price_input_{art['id']}",
+                help="noteでの販売価格（100円〜50,000円）を設定できます。売上目標や財務試算に即時反映されます。"
+            )
+        with c_qa_p2:
+            st.write("")
+            if st.button("💾 価格を更新", key=f"qa_price_btn_{art['id']}", use_container_width=True):
+                workflow.update_article_price(art["id"], qa_new_price)
+                st.success(f"販売価格を ¥{qa_new_price:,} に更新しました！")
+                st.rerun()
 
         if is_locked:
             st.markdown(f"""
