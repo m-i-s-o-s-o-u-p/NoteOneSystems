@@ -945,14 +945,16 @@ elif page_id == "office":
 
     pending_items = []
     
-    # 1. 記事制作課・広報課（記事・広告）- 決裁待ち(Pending Owner Approval)のみ抽出
+    # 1. 記事制作課・品質管理課（記事・成果物）- 決裁待ち(Pending Owner Approval)のみ抽出
     for art in workflow.list_articles():
         if art.get("status") == "Pending Owner Approval":
+            r_dept = art.get("routed_dept", "qa")
+            r_name = art.get("routed_dept_name", "品質管理課 (神崎 玲奈)")
             pending_items.append({
                 "unique_key": f"art_{art['id']}",
                 "type": "article",
                 "id": art["id"],
-                "dept": "記事制作課・広報課",
+                "dept": r_name,
                 "icon": "📄",
                 "title": clean_txt(art.get("title", "")),
                 "date": art.get("created_at", ""),
@@ -967,7 +969,7 @@ elif page_id == "office":
                 "unique_key": f"topic_{tp['id']}",
                 "type": "topic",
                 "id": tp["id"],
-                "dept": "市場調査課",
+                "dept": "市場調査課 (風間 涼)",
                 "icon": "🔍",
                 "title": clean_txt(tp.get("title", "")),
                 "date": tp.get("created_at", ""),
@@ -978,39 +980,71 @@ elif page_id == "office":
     if not pending_items:
         st.success("✅ 現在、全社で決裁待ちの案件はありません（すべての部門の案件が承認・処理済みです）。" if lang=="ja" else "✅ All company-wide submissions have been reviewed and approved.")
     else:
+        topic_items = [it for it in pending_items if it["type"] == "topic"]
+        art_items = [it for it in pending_items if it["type"] == "article"]
+
+        # カテゴリー分類タブ・フィルター
+        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+        c_flt1, c_flt2 = st.columns([3, 1])
+        with c_flt1:
+            cat_options = []
+            if topic_items:
+                cat_options.append("topics")
+            if art_items:
+                cat_options.append("articles")
+            if topic_items and art_items:
+                cat_options.append("all")
+            
+            filter_mode = st.radio(
+                "📂 決裁カテゴリーの選択:",
+                options=cat_options,
+                format_func=lambda x: {
+                    "topics": f"🔍 市場調査課・企画決裁 ({len(topic_items)}件)",
+                    "articles": f"📄 記事・成果物最終決裁 ({len(art_items)}件)",
+                    "all": f"🌐 全社すべての申請 ({len(pending_items)}件)"
+                }.get(x, x),
+                horizontal=True,
+                key="univ_cat_filter"
+            )
+        with c_flt2:
+            st.caption("🛡️ 社内規程【Rule-OPS-AUTO】準拠\n承認完了後は指定先部署へ自動連携されます。")
+
+        filtered_items = topic_items if filter_mode == "topics" else (art_items if filter_mode == "articles" else pending_items)
+        if not filtered_items:
+            filtered_items = pending_items
+
         # 1. 承認が必要な申請のレコード一覧（テーブル表示）
         st.markdown(f"#### 📋 {'決裁待ち申請レコード一覧' if lang=='ja' else 'Pending Submissions Queue'}")
         
         record_df = []
-        for idx, it in enumerate(pending_items, 1):
+        for idx, it in enumerate(filtered_items, 1):
             record_df.append({
                 "No.": idx,
-                "種別 / 部門": f"{it['icon']} {it['dept']}",
+                "種別 / 所属": f"{it['icon']} {it['dept']}",
                 "申請件名 / タイトル": it["title"],
-                "申請ステータス": it["status"],
+                "ステータス": it["status"],
                 "申請日時": it["date"]
             })
         st.dataframe(pd.DataFrame(record_df), use_container_width=True)
 
-        # 2. ラジオボタンによる1件選択
+        # 2. セレクトボックスによるスマートな1件選択（縦長圧迫を解消）
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         pending_key_map = {it["unique_key"]: it for it in pending_items}
         
         def format_radio_label(key):
             it = pending_key_map[key]
             date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
-            return f"{it['icon']} [{it['dept']}]{date_str} {it['title']} ({it['status']})"
+            return f"{it['icon']} [{it['dept']}]{date_str} {it['title']}"
 
-        # If previous selected key is no longer in pending items, reset it
-        valid_options = [it["unique_key"] for it in pending_items]
-        if "univ_pending_radio_selector" in st.session_state and st.session_state.univ_pending_radio_selector not in valid_options:
-            del st.session_state["univ_pending_radio_selector"]
+        valid_options = [it["unique_key"] for it in filtered_items]
+        if "univ_pending_selector" in st.session_state and st.session_state.univ_pending_selector not in valid_options:
+            del st.session_state["univ_pending_selector"]
 
-        selected_key = st.radio(
+        selected_key = st.selectbox(
             "👇 査読・決裁を行う申請を1件選択してください:",
             options=valid_options,
             format_func=format_radio_label,
-            key="univ_pending_radio_selector"
+            key="univ_pending_selector"
         )
 
         current_item = pending_key_map[selected_key]
@@ -1079,8 +1113,8 @@ elif page_id == "office":
                     st.session_state.auto_start_creation = True
                     st.session_state.active_page_id = "content_creation"
                 st.session_state.show_univ_rev_form = False
-                if "univ_pending_radio_selector" in st.session_state:
-                    del st.session_state["univ_pending_radio_selector"]
+                if "univ_pending_selector" in st.session_state:
+                    del st.session_state["univ_pending_selector"]
                 st.session_state.scroll_trigger += 1
                 st.rerun()
 
@@ -1098,8 +1132,8 @@ elif page_id == "office":
                     market_manager.reject_topic(current_item["id"])
                     st.info("トピックを拒否（却下）しました。")
                 st.session_state.show_univ_rev_form = False
-                if "univ_pending_radio_selector" in st.session_state:
-                    del st.session_state["univ_pending_radio_selector"]
+                if "univ_pending_selector" in st.session_state:
+                    del st.session_state["univ_pending_selector"]
                 st.session_state.scroll_trigger += 1
                 st.rerun()
 
@@ -1137,8 +1171,8 @@ elif page_id == "office":
                                 market_manager.request_revision(current_item["id"], fb_text)
                                 st.warning("市場調査課に再調査指示を伝達しました（市場調査課にて再調査が開始されます）。")
                             st.session_state.show_univ_rev_form = False
-                            if "univ_pending_radio_selector" in st.session_state:
-                                del st.session_state["univ_pending_radio_selector"]
+                            if "univ_pending_selector" in st.session_state:
+                                del st.session_state["univ_pending_selector"]
                             st.session_state.scroll_trigger += 1
                             st.rerun()
                         else:

@@ -270,8 +270,8 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
     def get_stock_status(self, target_stock_count: int = 10):
         """Returns the current topic stock count and remaining capacity up to target_stock_count."""
         topics = self._read_topics_raw()
-        # Active stock includes topics in research stock (not Rejected, not In Production, not Archived)
-        active_topics = [t for t in topics if t.get("status") not in ["Rejected", "In Production", "Archived"]]
+        # Active stock includes topics in research stock waiting for owner approval
+        active_topics = [t for t in topics if t.get("status") == "Pending Owner Approval"]
         current_count = len(active_topics)
         needed = max(0, target_stock_count - current_count)
         return {
