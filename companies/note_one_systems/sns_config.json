@@ -1,4 +1,11 @@
 {
+  "note": {
+    "brand_name": "noteone",
+    "creator_url": "https://note.com/noteone",
+    "account_id": "noteone",
+    "payout_status": "未設定 / 設定済",
+    "notes": "対外ブランド名は会社法第7条に準拠した『noteone』を推奨"
+  },
   "x": {
     "account_name": "@NoteOneSystems",
     "api_key": "",

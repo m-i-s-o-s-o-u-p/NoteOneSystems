@@ -1350,13 +1350,28 @@ elif page_id == "pr":
     st.markdown(f"<div class='main-header'>{t('pr_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('pr_sub', lang)}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"#### {t('pr_hub_title', lang)}")
+    st.markdown(f"#### 📝 {'note公式販売アカウント設定 ＆ 投稿ハブ' if lang=='ja' else 'note Official Creator Account & Publishing Hub'}")
     cfg_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/sns_config.json")
     if os.path.exists(cfg_path):
         with open(cfg_path, "r", encoding="utf-8") as f:
             sns_cfg = json.load(f)
     else:
         sns_cfg = {}
+    
+    note_cfg = sns_cfg.get("note", {})
+    c_nt1, c_nt2 = st.columns([3, 2])
+    with c_nt1:
+        note_brand = st.text_input("🏢 note販売者名 / ブランド名", value=note_cfg.get("brand_name", "noteone"), help="会社法・商号規制に準拠した対外ブランド名")
+        note_url = st.text_input("🔗 noteクリエイターページURL", value=note_cfg.get("creator_url", "https://note.com/noteone"), placeholder="https://note.com/あなたのnoteID")
+    with c_nt2:
+        note_id = st.text_input("🆔 noteクリエイターID", value=note_cfg.get("account_id", "noteone"), placeholder="あなたのnote ID")
+        st.write("")
+        st.link_button("🚀 note新規投稿画面を開く (note.com)", "https://note.com/notes/new", use_container_width=True)
+
+    st.caption("🛡️ **投稿手順**: 承認済み記事の「Markdown Source」をコピーし、上記ボタンから開くnote投稿画面に貼り付けて有料ラインを設定してください。")
+
+    st.markdown("---")
+    st.markdown(f"#### 📢 {'5大SNSマルチプロモーション設定' if lang=='ja' else '5 Major SNS Syndication Settings'}")
     
     col_s1, col_s2 = st.columns(2)
     with col_s1:
@@ -1368,6 +1383,11 @@ elif page_id == "pr":
         mast_inst = st.text_input("🐘 Mastodon Instance URL", value=sns_cfg.get("mastodon", {}).get("instance", "https://mstdn.jp"))
     
     if st.button(t("pr_save_btn", lang), type="primary"):
+        sns_cfg["note"] = {
+            "brand_name": note_brand,
+            "creator_url": note_url,
+            "account_id": note_id
+        }
         sns_cfg["x"] = {"account_name": x_acc}
         sns_cfg["instagram"] = {"account_name": ig_acc}
         sns_cfg["threads"] = {"account_name": th_acc}
@@ -1375,7 +1395,7 @@ elif page_id == "pr":
         sns_cfg["mastodon"] = {"instance": mast_inst}
         with open(cfg_path, "w", encoding="utf-8") as f:
             json.dump(sns_cfg, f, ensure_ascii=False, indent=2)
-        st.success("広報課のSNS設定を保存しました。" if lang == "ja" else "Social media configuration saved successfully.")
+        st.success("note販売アカウントおよび各SNSの設定を保存しました！" if lang == "ja" else "note account and social media configuration saved successfully.")
 
 # ==========================================
 # 6. ✨ Quality Assurance Division
