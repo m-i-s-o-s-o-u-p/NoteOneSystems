@@ -1381,6 +1381,13 @@ elif page_id == "office":
             </div>
             """, unsafe_allow_html=True)
 
+            if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "hire", "recruit"]):
+                c_jump1, c_jump2 = st.columns([2, 1])
+                with c_jump2:
+                    if st.button("👉 🤝 人事課（HR）の採用・雇用デスクへ移動", key=f"btn_jump_hr_{item.get('timestamp')}", use_container_width=True, type="primary"):
+                        st.session_state.active_page_id = "hr"
+                        st.rerun()
+
         if st.button(t("consult_clear_btn", lang)):
             st.session_state.office_chat_history = []
             st.rerun()
@@ -2115,8 +2122,147 @@ elif page_id == "hr":
     
     proposals = st.session_state.hr_manager.get_staffing_proposals()
     if proposals:
+        st.markdown(f"#### 🚨 {'過負荷検知 ＆ 社内増員提案（即時雇用承認デスク）' if lang=='ja' else 'Overload Detection & Staffing Proposals (Instant Approval)'}")
+        st.markdown(f"<div style='color: #94A3B8; font-size: 0.88rem; margin-bottom: 12px;'>{'綾瀬人事責任者が社員の業務負荷を常時検知し、ボトルネック解消のための増員を起案しています。オーナー承認により即時配属（費用0円）され、過負荷が緩和されます。' if lang=='ja' else 'HR detected elevated workload and proposed autonomous AI reinforcement. Approval executes 0-cost onboarding.'}</div>", unsafe_allow_html=True)
         for prop in proposals:
-            st.warning(f"**【増員提案】対象部署: {prop['target_role']}（{prop['target_name']} / 負荷: {prop['workload_score']}%）** ➔ {prop['proposed_role']} の増員（費用0円）" if lang == "ja" else f"**[Staffing Proposal] Target Unit: {prop['target_role']} ({prop['target_name']} / Load: {prop['workload_score']}%)** ➔ Recommended Addition: {prop['proposed_role']}")
+            with st.container():
+                st.markdown(f"""
+                <div style='background: #1E293B; border: 1px solid #F59E0B; border-left: 5px solid #F59E0B; border-radius: 8px; padding: 14px; margin-bottom: 12px;'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <strong style='color: #F59E0B; font-size: 1.05rem;'>⚡ 【増員提案】{prop['target_role']}（{prop['target_name']}）の業務負荷: {prop['workload_score']}%</strong>
+                        </div>
+                        <span style='background: #0F172A; color: #10B981; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; border: 1px solid #10B981;'>
+                            費用: {prop['cost']}
+                        </span>
+                    </div>
+                    <div style='margin-top: 8px; color: #E2E8F0; font-size: 0.9rem; line-height: 1.5;'>
+                        {prop['reason']}
+                    </div>
+                    <div style='margin-top: 8px; color: #38BDF8; font-size: 0.88rem;'>
+                        👤 <strong>推薦配属候補:</strong> {prop['recommended_candidate']}（{prop['proposed_role']}）
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                c_pr1, c_pr2 = st.columns([3, 2])
+                with c_pr2:
+                    if st.button(f"🤝 この増員提案を承認して即時雇用する (0円)", key=f"btn_hire_prop_{prop['id']}", use_container_width=True, type="primary"):
+                        try:
+                            hired_emp = st.session_state.hr_manager.hire_from_proposal(prop["id"])
+                            st.balloons()
+                            st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）\n{prop['target_name']}の業務負荷スコアが半減しました。")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"雇用処理エラー: {e}")
+
+    # 🤝 新規AI社員 募集・採用管理デスク
+    st.markdown("---")
+    st.markdown(f"#### 🤝 {'新規AI専門社員 募集・採用管理デスク (即時雇用・費用0円)' if lang=='ja' else 'AI Employee Recruitment & Onboarding Desk (Zero Cost)'}")
+    st.markdown(f"<div style='color: #94A3B8; font-size: 0.88rem; margin-bottom: 14px;'>{'オーナーの経営判断により、事業拡大や特定業務補佐のためのAIスペシャリストを即座に雇用・配属できます。完全無料API枠・純Python設計のため、何名採用しても追加費用は永久に0円です。' if lang=='ja' else 'Deploy specialized AI agents on-demand with zero additional marginal cost.'}</div>", unsafe_allow_html=True)
+
+    tab_preset, tab_custom = st.tabs([
+        "🎯 人事課おすすめの即戦力スペシャリスト (ワンクリック採用)" if lang=="ja" else "🎯 Recommended Specialists (1-Click Hire)",
+        "✍️ オーナー自由指定 採用フォーム (完全カスタムAI社員)" if lang=="ja" else "✍️ Custom Recruitment Form"
+    ])
+
+    with tab_preset:
+        presets = st.session_state.hr_manager.get_candidate_presets()
+        for idx, cand in enumerate(presets):
+            c_card, c_btn = st.columns([3, 1])
+            with c_card:
+                st.markdown(f"""
+                <div style='background: #0F172A; border: 1px solid #334155; border-left: 4px solid {cand["color"]}; border-radius: 8px; padding: 12px; margin-bottom: 10px;'>
+                    <div style='display: flex; justify-content: space-between;'>
+                        <div>
+                            <span style='font-size: 1.2rem;'>{cand["icon"]}</span>
+                            <strong style='color: #FFFFFF; font-size: 1.05rem; margin-left: 6px;'>{cand["name"]}</strong>
+                            <span style='color: #93C5FD; font-size: 0.85rem; margin-left: 8px;'>（{cand["role"]} / {cand["department"]}）</span>
+                        </div>
+                        <span style='color: #10B981; font-weight: 700; font-size: 0.8rem;'>費用: ¥0</span>
+                    </div>
+                    <div style='margin-top: 6px; color: #E2E8F0; font-size: 0.88rem;'>
+                        <strong>モットー:</strong> <em>「{cand['motto']}」</em>
+                    </div>
+                    <div style='margin-top: 4px; color: #94A3B8; font-size: 0.82rem;'>
+                        💡 <strong>採用メリット:</strong> {cand['recommendation_reason']}
+                    </div>
+                    <div style='margin-top: 4px; color: #64748B; font-size: 0.78rem;'>
+                        🛠️ スキル: {', '.join(cand['skills'])}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            with c_btn:
+                st.write("")
+                if st.button(f"🤝 採用する (0円)", key=f"btn_hire_preset_{cand['id']}_{idx}", use_container_width=True, type="primary"):
+                    hired_emp = st.session_state.hr_manager.hire_employee(cand)
+                    st.balloons()
+                    st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）")
+                    st.rerun()
+
+    with tab_custom:
+        with st.form("form_custom_hire"):
+            st.markdown(f"##### {'自由指定 AI社員採用スペック策定' if lang=='ja' else 'Custom AI Employee Specifications'}")
+            col_h1, col_h2 = st.columns(2)
+            with col_h1:
+                custom_name = st.text_input("社員名 (氏名)", placeholder="例: 桐生 蓮 / 桜井 葵")
+                custom_role = st.text_input("役職名", placeholder="例: TikTok動画プロモーター / GAS自動化エンジニア")
+                dept_choices = [
+                    "コンテンツ制作本部",
+                    "マーケティング・リサーチ本部",
+                    "広報・宣伝本部",
+                    "経営企画本部",
+                    "内部統制・ガバナンス本部",
+                    "財務・経理統括本部"
+                ]
+                custom_dept = st.selectbox("配属部署", dept_choices)
+            with col_h2:
+                custom_icon = st.text_input("アイコン (絵文字)", value="👤", help="Slack風の社員アイコン（絵文字1字）")
+                custom_motto = st.text_input("プロフェッショナルモットー", placeholder="例: 迅速丁寧な作業で読者に最高の価値を届けます。")
+                custom_skills = st.text_input("主要スキル (カンマ区切り)", placeholder="例: ショート動画台本制作, トレンド分析, リライト")
+
+            custom_prompt = st.text_area(
+                "システムプロンプト (行動規範・役割定義)",
+                placeholder="あなたはNoteOneSystems株式会社の専門AI社員です。...",
+                height=100
+            )
+
+            submit_custom_hire = st.form_submit_button("🤝 この内容でAI社員を雇用・配属する (費用0円)", type="primary", use_container_width=True)
+            if submit_custom_hire:
+                if custom_name.strip() and custom_role.strip():
+                    new_cand_data = {
+                        "id": f"custom_{int(datetime.now().timestamp())}",
+                        "name": custom_name.strip(),
+                        "role": custom_role.strip(),
+                        "icon": custom_icon.strip() or "👤",
+                        "color": "#38BDF8",
+                        "department": custom_dept,
+                        "motto": custom_motto.strip() or "読者のために誠実に行動します。",
+                        "skills": [s.strip() for s in custom_skills.split(",") if s.strip()] or ["業務迅速化"],
+                        "prompt": custom_prompt.strip() or f"あなたはNoteOneSystems株式会社の{custom_role}『{custom_name}』です。"
+                    }
+                    hired_emp = st.session_state.hr_manager.hire_employee(new_cand_data)
+                    st.balloons()
+                    st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）")
+                    st.rerun()
+                else:
+                    st.error("社員名と役職名は必須入力です。")
+
+    hiring_history = st.session_state.hr_manager.get_hiring_history()
+    if hiring_history:
+        st.markdown("---")
+        st.markdown(f"#### 📜 {'AI社員雇用台帳 ＆ 配属履歴 (全社公式記録)' if lang=='ja' else 'Company Hiring Ledger & Placement History'}")
+        ledger_df_data = []
+        for h in reversed(hiring_history):
+            ledger_df_data.append({
+                "雇用日時" if lang=="ja" else "Hired At": h.get("timestamp"),
+                "社員名" if lang=="ja" else "Name": f"{h.get('icon', '👤')} {h.get('name')}",
+                "役職" if lang=="ja" else "Role": h.get("role"),
+                "配属部署" if lang=="ja" else "Department": h.get("department"),
+                "人件費・追加費用" if lang=="ja" else "Cost": h.get("cost", "¥0"),
+                "承認者" if lang=="ja" else "Authorized By": h.get("authorized_by"),
+                "配属効果・影響" if lang=="ja" else "Impact": h.get("impact")
+            })
+        st.dataframe(pd.DataFrame(ledger_df_data), use_container_width=True)
 
     st.markdown("---")
     # 📮 全社10万通り・社内目安箱（社員の本音ボヤキ＆関係性パトロール）

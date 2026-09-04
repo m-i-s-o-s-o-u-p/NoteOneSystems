@@ -4,7 +4,7 @@
     "role": "チーフライター",
     "tasks": 14,
     "words_generated": 38852,
-    "workload_score": 100
+    "workload_score": 50
   },
   "yuki": {
     "name": "結城 紬",
@@ -61,5 +61,12 @@
     "tasks": 14,
     "words_generated": 3400,
     "workload_score": 36
+  },
+  "kiryu": {
+    "name": "桐生 蓮 (Ren Kiryu)",
+    "role": "アシスタントライター / サブライター",
+    "tasks": 1,
+    "words_generated": 0,
+    "workload_score": 15
   }
 }

@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-09-05 05:40:12",
+    "employee_id": "kiryu",
+    "name": "桐生 蓮 (Ren Kiryu)",
+    "role": "アシスタントライター / サブライター",
+    "icon": "🖋️",
+    "department": "コンテンツ制作本部",
+    "cost": "¥0（完全無料API枠）",
+    "authorized_by": "代表者（オーナー承認）",
+    "impact": "森川 拓真の負荷スコアを 100% ➔ 50% へ半減"
+  }
+]
