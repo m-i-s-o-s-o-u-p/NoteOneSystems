@@ -467,7 +467,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
         ]
 
         topics = self._read_topics_raw()
-        existing_titles = [t.get("title", "") for t in topics]
+        active_titles = [t.get("title", "") for t in cur_status["active_topics"]]
         newly_added = []
 
         for candidate in candidate_niches:
@@ -475,7 +475,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 break
             
             cand_title = candidate['theme'] if candidate['theme'].startswith("【") else f"【完全保存版】{candidate['theme']}"
-            if any(candidate['theme'][:8] in ex for ex in existing_titles):
+            if any(candidate['theme'][:8] in ex for ex in active_titles):
                 continue
 
             topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
@@ -514,7 +514,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 if len(newly_added) >= needed:
                     break
                 fb_theme = f"【実践マスター】{tool}×{cat} {benefit}即戦力テンプレート"
-                if any(fb_theme[:10] in ex for ex in existing_titles):
+                if any(fb_theme[:10] in ex for ex in active_titles):
                     continue
                 topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
                 newly_added.append({
