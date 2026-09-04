@@ -517,21 +517,19 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 ("リモートワーク", "非同期連携", "Slack・分報を活用した信頼獲得コミュニケーション", 500)
             ]
             counter = 1
-            for tool, cat, benefit, pr in fallback_domains:
-                if len(newly_added) >= needed:
-                    break
-                fb_theme = f"【実践マスター】{tool}×{cat} {benefit}即戦力テンプレート"
-                if any(fb_theme[:10] in ex for ex in all_existing_titles):
-                    date_tag = datetime.now().strftime("%m月版")
-                    fb_theme = f"【最新{date_tag}】{tool}×{cat} vol.{counter} {benefit}"
+            while len(newly_added) < needed and counter < 100:
+                for tool, cat, benefit, pr in fallback_domains:
+                    if len(newly_added) >= needed:
+                        break
+                    fb_theme = f"【最新実務】{tool}×{cat} vol.{counter} {benefit}"
                     counter += 1
-                if any(fb_theme in ex for ex in all_existing_titles):
-                    continue
+                    if fb_theme in all_existing_titles:
+                        continue
 
-                topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
-                newly_added.append({
-                    "id": topic_id,
-                    "title": fb_theme,
+                    topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(newly_added)+1}"
+                    newly_added.append({
+                        "id": topic_id,
+                        "title": fb_theme,
                     "target_audience": f"{tool}を活用して業務効率を劇的に改善したいビジネスパーソン",
                     "category": cat,
                     "demand_summary": f"note内で「{tool}」と「{cat}」の組み合わせに対する購買意欲が常に上位。",

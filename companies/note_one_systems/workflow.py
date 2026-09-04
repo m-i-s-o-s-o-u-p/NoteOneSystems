@@ -165,7 +165,7 @@ class NoteOneWorkflow:
         elif "980" in price_preference:
             price = 980
 
-        # Save article with LOCKED status: Pending Owner Approval
+        # Save article with LOCKED status: Pending Owner Approval (Auto-sent to 品質管理課)
         art_id = f"art_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         article_data = {
             "id": art_id,
@@ -180,13 +180,15 @@ class NoteOneWorkflow:
             "qa_score": clean_article_text(res_qa),
             "marketing": clean_article_text(res_marketing),
             "status": "Pending Owner Approval",
+            "routed_dept": "qa",
+            "routed_dept_name": "品質管理課 (神崎 玲奈)",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "status_history": [
                 {
                     "status": "Pending Owner Approval",
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "actor": "System Pipeline (AI Team Complete)",
-                    "note": "9名のAI社員による作成・法務審査・QA完了。オーナーの最終承認待ち（ロック中）。"
+                    "actor": "記事制作課 (結城 紬 & 森川 拓真)",
+                    "note": "社内ルール【Rule-OPS-AUTO】に基づき、記事制作課での執筆完了に伴い自動で品質管理課（神崎 玲奈）へ送付されました。"
                 }
             ]
         }
@@ -251,22 +253,65 @@ class NoteOneWorkflow:
             return True
         return False
 
-    def request_revision(self, article_id: str, feedback: str, requester_name: str = "Owner (オーナー)"):
-        """Requests revisions with specific feedback from owner."""
+    def request_revision(self, article_id: str, feedback: str, target_dept: str = "content_creation", requester_name: str = "品質管理課 (神崎 玲奈 / オーナー)"):
+        """
+        Requests revisions under Company Rule [Rule-OPS-AUTO].
+        Routes the task specifically to target_dept ('market_research' | 'content_creation' | 'pr').
+        """
         file_path = os.path.join(self.articles_dir, f"{article_id}.json")
         if os.path.exists(file_path):
             with open(file_path, "r", encoding="utf-8") as fp:
                 art = json.load(fp)
             
+            dept_names = {
+                "market_research": "市場調査課 (風間 涼)",
+                "content_creation": "記事制作課 (結城 紬 & 森川 拓真)",
+                "pr": "広報課 (佐々木 翼)"
+            }
+            dept_label = dept_names.get(target_dept, "記事制作課 (結城 紬 & 森川 拓真)")
+
             art["status"] = "Revision Requested"
+            art["routed_dept"] = target_dept
+            art["routed_dept_name"] = dept_label
             art["latest_feedback"] = feedback
             if "status_history" not in art:
                 art["status_history"] = []
             art["status_history"].append({
-                "status": "Revision Requested",
+                "status": f"Revision Requested ({dept_label})",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "actor": requester_name,
-                "note": f"オーナーからの修正指示: {feedback}"
+                "note": f"社内ルール【Rule-OPS-AUTO】に基づき、{dept_label}へ差し戻し送付。指示: {feedback}"
+            })
+            with open(file_path, "w", encoding="utf-8") as fp:
+                json.dump(art, fp, ensure_ascii=False, indent=2)
+            return True
+        return False
+
+    def resolve_revision_to_qa(self, article_id: str, actor_dept_name: str, resolution_note: str, new_content: dict = None):
+        """
+        Under Company Rule [Rule-OPS-AUTO], once a department completes its revision task,
+        it automatically sends the updated work back to 品質管理課 (QA Division).
+        """
+        file_path = os.path.join(self.articles_dir, f"{article_id}.json")
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as fp:
+                art = json.load(fp)
+            
+            if new_content:
+                for k, v in new_content.items():
+                    if v:
+                        art[k] = clean_article_text(v) if isinstance(v, str) else v
+            
+            art["status"] = "Pending Owner Approval"
+            art["routed_dept"] = "qa"
+            art["routed_dept_name"] = "品質管理課 (神崎 玲奈)"
+            if "status_history" not in art:
+                art["status_history"] = []
+            art["status_history"].append({
+                "status": "Pending Owner Approval",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "actor": actor_dept_name,
+                "note": f"社内ルール【Rule-OPS-AUTO】に基づき、{actor_dept_name}での修正対応完了に伴い自動で品質管理課へ再送付。対応内容: {resolution_note}"
             })
             with open(file_path, "w", encoding="utf-8") as fp:
                 json.dump(art, fp, ensure_ascii=False, indent=2)

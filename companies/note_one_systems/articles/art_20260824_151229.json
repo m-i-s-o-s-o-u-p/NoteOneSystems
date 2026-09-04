@@ -76,8 +76,8 @@
       "content": "全工程の業務負荷を記録しました。ライター森川さんの執筆負荷が高まっていますが、各社員が就業規則を遵守して円滑に連携しています。"
     }
   ],
-  "status": "Approved",
-  "latest_feedback": "最低4000字は書いて",
+  "status": "Revision Requested",
+  "latest_feedback": "ブラッシュアップしてください。",
   "status_history": [
     {
       "status": "Revision Requested",
@@ -126,6 +126,12 @@
       "timestamp": "2026-09-05 01:33:24",
       "actor": "Owner (オーナー)",
       "note": "オーナー最終承認完了。投稿およびSNS配信のロックを解除しました。"
+    },
+    {
+      "status": "Revision Requested",
+      "timestamp": "2026-09-05 02:39:29",
+      "actor": "Owner (オーナー)",
+      "note": "オーナーからの修正指示: ブラッシュアップしてください。"
     }
   ]
 }

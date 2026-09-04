@@ -108,7 +108,7 @@
       "cost": "0円 (Open API)"
     }
   },
-  "status": "Approved",
+  "status": "Revision Requested",
   "status_history": [
     {
       "status": "Pre-Publication",
@@ -193,7 +193,13 @@
       "timestamp": "2026-09-05 01:31:21",
       "actor": "Owner (オーナー)",
       "note": "オーナー最終承認完了。投稿およびSNS配信のロックを解除しました。"
+    },
+    {
+      "status": "Revision Requested",
+      "timestamp": "2026-09-05 02:38:34",
+      "actor": "Owner (オーナー)",
+      "note": "オーナーからの修正指示: ブラッシュアップしてください。"
     }
   ],
-  "latest_feedback": "記事の文字数が少なすぎるので市場調査課と話し合って文字数を最低4000字以上にして再提出してください。"
+  "latest_feedback": "ブラッシュアップしてください。"
 }

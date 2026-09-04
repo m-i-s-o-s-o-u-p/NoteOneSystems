@@ -324,6 +324,12 @@ if "show_mr_tp_rev" not in st.session_state:
     st.session_state.show_mr_tp_rev = False
 if "show_qa_art_rev" not in st.session_state:
     st.session_state.show_qa_art_rev = False
+if "auto_transferred_to_qa" not in st.session_state:
+    st.session_state.auto_transferred_to_qa = False
+if "qa_selected_art_id" not in st.session_state:
+    st.session_state.qa_selected_art_id = None
+if "just_sent_to_qa_title" not in st.session_state:
+    st.session_state.just_sent_to_qa_title = ""
 
 def navigate_to(target_id: str):
     st.session_state.active_page_id = target_id
@@ -1100,8 +1106,21 @@ elif page_id == "office":
         # 否認時の指示入力フォーム
         if st.session_state.show_univ_rev_form:
             with st.container():
-                st.markdown(f"#### ✍️ {'否認・修正指示の入力' if lang=='ja' else 'Denial & Revision Directives'}")
+                st.markdown(f"#### ✍️ {'否認・修正指示の入力（社内ルール【Rule-OPS-AUTO】）' if lang=='ja' else 'Denial & Revision Directives'}")
                 with st.form("univ_revision_form", clear_on_submit=True):
+                    univ_target_dept = "content_creation"
+                    if item_type == "article":
+                        univ_target_dept = st.radio(
+                            "🎯 差し戻し・業務送付先を選択してください（社内ルール【Rule-OPS-AUTO】）:",
+                            options=["content_creation", "market_research", "pr"],
+                            format_func=lambda x: {
+                                "content_creation": "✍️ 記事制作課（結城 紬 & 森川 拓真）- 構成案・執筆・有料テンプレートの再修正",
+                                "market_research": "🔍 市場調査課（風間 涼）- ターゲット読者層・市場ニーズ・競合ギャップの再調査",
+                                "pr": "📢 広報課（佐々木 翼）- 5大SNSプロモーション文・キャッチコピーの再考"
+                            }.get(x, x),
+                            index=0,
+                            help="社内業務連携規程に基づき、否認理由に応じてタスクを再送付する部署を選択します。"
+                        )
                     fb_text = st.text_area(
                         "修正・再調査の具体的な指示内容を入力してください:",
                         placeholder="例: 有料部分のテンプレートの具体例をもう1つ追加してください。 / ターゲット層を20代若手社員向けに変更して再調査してください。",
@@ -1111,8 +1130,9 @@ elif page_id == "office":
                     if submit_univ_rev:
                         if fb_text.strip():
                             if item_type == "article":
-                                workflow.request_revision(current_item["id"], fb_text)
-                                st.warning("編集部に修正指示を伝達しました（編集部にて修正・加筆が開始されます）。")
+                                workflow.request_revision(current_item["id"], fb_text, target_dept=univ_target_dept)
+                                dept_label = {"content_creation": "記事制作課", "market_research": "市場調査課", "pr": "広報課"}.get(univ_target_dept, "担当課")
+                                st.warning(f"社内ルール【Rule-OPS-AUTO】に基づき、{dept_label}へ否認・差し戻し指示を送付しました。")
                             else:
                                 market_manager.request_revision(current_item["id"], fb_text)
                                 st.warning("市場調査課に再調査指示を伝達しました（市場調査課にて再調査が開始されます）。")
@@ -1125,16 +1145,19 @@ elif page_id == "office":
                             st.error("指示内容を入力してください。")
 
     # -------------------------------------------------------------
-    # 🔄 編集部・市場調査課にて修正・再執筆対応中の案件 (Revision Queue)
+    # 🔄 担当課にて修正・再執筆対応中の案件 (Revision Queue)
     # -------------------------------------------------------------
     in_revision_items = []
     for art in workflow.list_articles():
         if art.get("status") == "Revision Requested":
+            r_dept = art.get("routed_dept", "content_creation")
+            r_icon = "🔍" if r_dept == "market_research" else ("📢" if r_dept == "pr" else "✍️")
+            r_name = art.get("routed_dept_name", "記事制作課 (結城 紬 & 森川 拓真)")
             in_revision_items.append({
                 "id": art["id"],
                 "type": "article",
-                "dept": "記事制作課・広報課",
-                "icon": "✍️",
+                "dept": r_name,
+                "icon": r_icon,
                 "title": clean_txt(art.get("title", "")),
                 "feedback": clean_txt(art.get("latest_feedback", "修正対応中")),
                 "date": art.get("created_at", "")
@@ -1144,7 +1167,7 @@ elif page_id == "office":
             in_revision_items.append({
                 "id": tp["id"],
                 "type": "topic",
-                "dept": "市場調査課",
+                "dept": "市場調査課 (風間 涼)",
                 "icon": "🔍",
                 "title": clean_txt(tp.get("title", "")),
                 "feedback": clean_txt(tp.get("latest_feedback", "再調査対応中")),
@@ -1153,7 +1176,7 @@ elif page_id == "office":
 
     if in_revision_items:
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-        st.markdown(f"#### 🔄 {'編集部・調査課にて修正・再執筆中の案件' if lang=='ja' else 'Revisions In-Progress by Editorial & Research'}")
+        st.markdown(f"#### 🔄 {'各課にて修正・再調査対応中の案件 (Rule-OPS-AUTO)' if lang=='ja' else 'Revisions In-Progress by Departments'}")
         for rev_it in in_revision_items:
             with st.container():
                 c_rv1, c_rv2 = st.columns([4, 1])
@@ -1161,18 +1184,18 @@ elif page_id == "office":
                     st.markdown(f"""
                     <div style='background: #1E1B4B; border: 1px solid #6366F1; border-radius: 8px; padding: 14px; margin-bottom: 8px;'>
                         <strong style='color: #A5B4FC; font-size: 0.95rem;'>{rev_it['icon']} [{rev_it['dept']}] {rev_it['title']}</strong>
-                        <div style='color: #E0E7FF; font-size: 0.88rem; margin-top: 4px;'><strong>💬 オーナーからの指示:</strong> {rev_it['feedback']}</div>
+                        <div style='color: #E0E7FF; font-size: 0.88rem; margin-top: 4px;'><strong>💬 指示内容:</strong> {rev_it['feedback']}</div>
                     </div>
                     """, unsafe_allow_html=True)
                 with c_rv2:
                     st.write("")
-                    if st.button("🚀 再提出を完了", key=f"btn_complete_rev_{rev_it['id']}", use_container_width=True, help="修正・加筆を完了し、決裁待ち（Pending Owner Approval）へ再提出します"):
+                    if st.button("🚀 再提出を完了", key=f"btn_complete_rev_{rev_it['id']}", use_container_width=True, help="修正・加筆を完了し、品質管理課へ再提出します"):
                         if rev_it["type"] == "article":
-                            workflow.update_article_status(rev_it["id"], "Pending Owner Approval", actor="記事制作課 (森川・結城 修正完了)")
+                            workflow.resolve_revision_to_qa(rev_it["id"], rev_it["dept"], "各課での修正・対応完了に伴い品質管理課へ再送付")
                         else:
                             market_manager.update_topic_status(rev_it["id"], "Pending Owner Approval", actor="市場調査課 (風間 再調査完了)")
                         st.session_state.scroll_trigger += 1
-                        st.success("再執筆が完了し、決裁待ちへ再提出されました！")
+                        st.success("対応が完了し、品質管理課へ再提出されました！")
                         st.rerun()
 
     # -------------------------------------------------------------
@@ -1457,6 +1480,36 @@ elif page_id == "market_research":
     </div>
     """)
 
+    # Rule-OPS-AUTO: 品質管理課から市場調査課へ差し戻された案件の受付
+    mr_rev_articles = [a for a in workflow.list_articles() if a.get("status") == "Revision Requested" and a.get("routed_dept") == "market_research"]
+    if mr_rev_articles:
+        st.html("""
+        <div style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border: 1.5px solid #38BDF8; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.15);">
+            <div style="color: #7DD3FC; font-weight: 800; font-size: 1.05rem;">
+                🔍 【品質管理課より差し戻し】市場調査課（風間 涼）への再調査要請案件があります
+            </div>
+            <div style="color: #E2E8F0; font-size: 0.88rem; margin-top: 4px;">
+                社内ルール【Rule-OPS-AUTO】に基づき、品質管理課から市場調査課へターゲット層・競合の再調査が要請されました。再調査完了後、自動で品質管理課へ成果物が再送付されます。
+            </div>
+        </div>
+        """)
+        for rev_a in mr_rev_articles:
+            with st.container():
+                st.markdown(f"**📄 対象記事: 『{clean_txt(rev_a.get('title'))}』**")
+                st.info(f"💬 **品質管理課からの指摘事項:** {clean_txt(rev_a.get('latest_feedback'))}")
+                with st.form(f"mr_resolve_form_{rev_a['id']}", clear_on_submit=True):
+                    res_note = st.text_input("🔍 再調査結果・ターゲット見直し報告:", value="最新note市場データに基づきターゲット読者のペルソナと競合ギャップを再分析・精査しました。", key=f"mr_note_{rev_a['id']}")
+                    if st.form_submit_button("✅ 再調査を完了し、品質管理課へ自動再送付する (Rule-OPS-AUTO)", type="primary", use_container_width=True):
+                        workflow.resolve_revision_to_qa(rev_a["id"], "市場調査課 (風間 涼)", res_note)
+                        st.session_state.auto_transferred_to_qa = True
+                        st.session_state.qa_selected_art_id = rev_a["id"]
+                        st.session_state.just_sent_to_qa_title = clean_txt(rev_a.get("title"))
+                        st.session_state.active_page_id = "qa"
+                        st.session_state.scroll_trigger += 1
+                        st.success("再調査を完了し、品質管理課へ成果物を自動再送付しました！")
+                        st.rerun()
+        st.markdown("---")
+
     with st.expander(f"➕ 手動でキーワードを指定して調査する（手動リサーチ）", expanded=False):
         c_rs1, c_rs2 = st.columns([3, 2])
         with c_rs1:
@@ -1572,6 +1625,36 @@ elif page_id == "content_creation":
     st.markdown(f"<div class='main-header'>{t('cc_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('cc_sub', lang)}</div>", unsafe_allow_html=True)
 
+    # Rule-OPS-AUTO: 品質管理課から記事制作課へ差し戻された案件の受付
+    cc_rev_articles = [a for a in workflow.list_articles() if a.get("status") == "Revision Requested" and a.get("routed_dept", "content_creation") == "content_creation"]
+    if cc_rev_articles:
+        st.html("""
+        <div style="background: linear-gradient(135deg, #2D1515 0%, #1E1B4B 100%); border: 1.5px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);">
+            <div style="color: #FCD34D; font-weight: 800; font-size: 1.05rem;">
+                ⚠️ 【品質管理課より差し戻し】記事制作課（結城 紬 & 森川 拓真）への修正指示案件があります
+            </div>
+            <div style="color: #E2E8F0; font-size: 0.88rem; margin-top: 4px;">
+                社内ルール【Rule-OPS-AUTO】に基づき、品質管理課から記事制作課へ差し戻された案件です。修正完了後、ボタンを押すと自動で品質管理課へ再送付されます。
+            </div>
+        </div>
+        """)
+        for rev_a in cc_rev_articles:
+            with st.container():
+                st.markdown(f"**📄 対象記事: 『{clean_txt(rev_a.get('title'))}』**")
+                st.info(f"💬 **品質管理課からの指摘事項:** {clean_txt(rev_a.get('latest_feedback'))}")
+                with st.form(f"cc_resolve_form_{rev_a['id']}", clear_on_submit=True):
+                    res_note = st.text_input("✍️ 修正・加筆内容の報告:", value="ご指摘に基づき記事構成・有料部分のテンプレートを強化・加筆しました。", key=f"cc_note_{rev_a['id']}")
+                    if st.form_submit_button("✅ 修正・加筆を完了し、品質管理課へ自動再送付する (Rule-OPS-AUTO)", type="primary", use_container_width=True):
+                        workflow.resolve_revision_to_qa(rev_a["id"], "記事制作課 (結城 紬 & 森川 拓真)", res_note)
+                        st.session_state.auto_transferred_to_qa = True
+                        st.session_state.qa_selected_art_id = rev_a["id"]
+                        st.session_state.just_sent_to_qa_title = clean_txt(rev_a.get("title"))
+                        st.session_state.active_page_id = "qa"
+                        st.session_state.scroll_trigger += 1
+                        st.success("修正・加筆を完了し、品質管理課へ成果物を自動再送付しました！")
+                        st.rerun()
+        st.markdown("---")
+
     auto_started = st.session_state.get("auto_start_creation", False)
     if auto_started:
         st.session_state.auto_start_creation = False
@@ -1638,25 +1721,18 @@ elif page_id == "content_creation":
                 elif event.get("status") == "completed":
                     completed_article = event.get("article")
                     progress_bar.progress(1.0)
-                    status_text.markdown("🔒 **全工程完了！記事はオーナー最終承認待ちとして安全にロックされました。**" if lang == "ja" else "🔒 **Full pipeline completed! Article is securely locked awaiting owner final approval.**")
+                    status_text.markdown("🔒 **全工程完了！社内ルール【Rule-OPS-AUTO】に基づき、品質管理課へ自動送付しています...**")
             
             if completed_article:
                 st.session_state.prefill_topic = ""
                 st.session_state.prefill_audience = ""
                 st.session_state.auto_start_creation = False
-                st.success(f"🎉 記事『{clean_txt(completed_article['title'])}』の作成が完了しました！勝手な外部公開を防ぐため「🔒 オーナー最終承認待ち」として全社統合決裁センターへ上申・ロックされました。" if lang == "ja" else f"🎉 Article '{clean_txt(completed_article['title'])}' created! Locked awaiting final executive approval.")
-                
-                c_post1, c_post2 = st.columns([1, 1])
-                with c_post1:
-                    if st.button(f"👑 {'全社統合決裁センターでこの記事を査読・承認する' if lang=='ja' else 'Inspect & Approve in Executive Center'}", type="primary", use_container_width=True, key=f"btn_nav_office_after_{completed_article['id']}"):
-                        st.session_state.active_page_id = "office"
-                        st.session_state.scroll_trigger += 1
-                        st.rerun()
-                with c_post2:
-                    if st.button(f"✨ {'品質管理課（QA）で採点・監査詳細を確認する' if lang=='ja' else 'Review QA Audit in QA Division'}", use_container_width=True, key=f"btn_nav_qa_after_{completed_article['id']}"):
-                        st.session_state.active_page_id = "qa"
-                        st.session_state.scroll_trigger += 1
-                        st.rerun()
+                st.session_state.auto_transferred_to_qa = True
+                st.session_state.qa_selected_art_id = completed_article["id"]
+                st.session_state.just_sent_to_qa_title = clean_txt(completed_article["title"])
+                st.session_state.active_page_id = "qa"
+                st.session_state.scroll_trigger += 1
+                st.rerun()
 
 # ==========================================
 # 5. 📢 Public Relations Division
@@ -1664,6 +1740,36 @@ elif page_id == "content_creation":
 elif page_id == "pr":
     st.markdown(f"<div class='main-header'>{t('pr_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('pr_sub', lang)}</div>", unsafe_allow_html=True)
+
+    # Rule-OPS-AUTO: 品質管理課から広報課へ差し戻された案件の受付
+    pr_rev_articles = [a for a in workflow.list_articles() if a.get("status") == "Revision Requested" and a.get("routed_dept") == "pr"]
+    if pr_rev_articles:
+        st.html("""
+        <div style="background: linear-gradient(135deg, #311339 0%, #0F172A 100%); border: 1.5px solid #E879F9; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(232, 121, 249, 0.15);">
+            <div style="color: #F0ABFC; font-weight: 800; font-size: 1.05rem;">
+                📢 【品質管理課より差し戻し】広報課（佐々木 翼）へのプロモーション再考指示案件があります
+            </div>
+            <div style="color: #E2E8F0; font-size: 0.88rem; margin-top: 4px;">
+                社内ルール【Rule-OPS-AUTO】に基づき、品質管理課から広報課へ5大SNSプロモーション文・キャッチコピーの再考が要請されました。改定完了後、自動で品質管理課へ再送付されます。
+            </div>
+        </div>
+        """)
+        for rev_a in pr_rev_articles:
+            with st.container():
+                st.markdown(f"**📄 対象記事: 『{clean_txt(rev_a.get('title'))}』**")
+                st.info(f"💬 **品質管理課からの指摘事項:** {clean_txt(rev_a.get('latest_feedback'))}")
+                with st.form(f"pr_resolve_form_{rev_a['id']}", clear_on_submit=True):
+                    res_note = st.text_input("📢 SNSプロモーション・コピー改定報告:", value="5大SNS向けの訴求フック・ハッシュタグおよび導入キャッチコピーを再考・最適化しました。", key=f"pr_note_{rev_a['id']}")
+                    if st.form_submit_button("✅ プロモーション改定を完了し、品質管理課へ自動再送付する (Rule-OPS-AUTO)", type="primary", use_container_width=True):
+                        workflow.resolve_revision_to_qa(rev_a["id"], "広報課 (佐々木 翼)", res_note)
+                        st.session_state.auto_transferred_to_qa = True
+                        st.session_state.qa_selected_art_id = rev_a["id"]
+                        st.session_state.just_sent_to_qa_title = clean_txt(rev_a.get("title"))
+                        st.session_state.active_page_id = "qa"
+                        st.session_state.scroll_trigger += 1
+                        st.success("プロモーション改定を完了し、品質管理課へ成果物を自動再送付しました！")
+                        st.rerun()
+        st.markdown("---")
 
     st.markdown(f"#### 📝 {'note公式販売アカウント設定 ＆ 投稿ハブ' if lang=='ja' else 'note Official Creator Account & Publishing Hub'}")
     cfg_path = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/sns_config.json")
@@ -1719,13 +1825,82 @@ elif page_id == "qa":
     st.markdown(f"<div class='main-header'>{t('qa_title', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('qa_sub', lang)}</div>", unsafe_allow_html=True)
 
+    if st.session_state.get("auto_transferred_to_qa"):
+        st.session_state.auto_transferred_to_qa = False
+        st.html(f"""
+        <div style="background: linear-gradient(135deg, #091E19 0%, #0F172A 100%); border: 1.5px solid #10B981; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.8rem;">🚀</span>
+                <div>
+                    <div style="color: #6EE7B7; font-weight: 800; font-size: 1.05rem;">
+                        【Rule-OPS-AUTO 自動連携】記事作成課（結城 紬・森川 拓真）より自動送付されました
+                    </div>
+                    <div style="color: #E2E8F0; font-size: 0.9rem; margin-top: 4px;">
+                        対象記事: <strong>『{st.session_state.get('just_sent_to_qa_title', '')}』</strong> の執筆が完了し、品質管理課（神崎 玲奈）へ自動引き渡しされました。内容を査読の上、承認または否認（担当課への差し戻し）を行ってください。
+                    </div>
+                </div>
+            </div>
+        </div>
+        """)
+
+    # Rule-OPS-AUTO 規程バナー表示
+    qa_rule_title = "社内業務連携規程【Rule-OPS-AUTO: 3課自律連携・品質管理ルーティング規程】" if lang == "ja" else "Operational Protocol [Rule-OPS-AUTO: 3-Division Autonomous Hand-off & Routing]"
+    qa_rule_sub = "制定: 統括役員室 / 所管: note ONE システムズ全課 / 目的: 完全自動化パイプライン及び厳格な品質管理"
+    st.html(f"""
+    <div style="background: linear-gradient(135deg, #091E19 0%, #0F172A 100%); border: 1.5px solid #10B981; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15); box-sizing: border-box; width: 100%;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 260px; flex: 1;">
+                <span style="font-size: 1.4rem;">📜</span>
+                <div>
+                    <div style="color: #6EE7B7; font-size: 1.08rem; font-weight: 800; letter-spacing: 0.02em; line-height: 1.4;">
+                        {qa_rule_title}
+                    </div>
+                    <div style="color: #94A3B8; font-size: 0.8rem; margin-top: 2px;">
+                        {qa_rule_sub}
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                <span style="background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid #10B981; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <span style="display: inline-block; width: 7px; height: 7px; background: #10B981; border-radius: 50%; box-shadow: 0 0 6px #10B981;"></span>
+                    社内規程施行中
+                </span>
+                <span style="background: #10B981; color: #022C22; font-weight: 900; font-size: 0.84rem; padding: 4px 12px; border-radius: 20px; white-space: nowrap; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                    自律連携パイプライン
+                </span>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px 14px;">
+                <div style="color: #38BDF8; font-weight: 800; font-size: 0.88rem;">1️⃣ 市場調査課 ➔ 記事作成課 (自動移行)</div>
+                <div style="color: #CBD5E1; font-size: 0.82rem; margin-top: 4px; line-height: 1.5;">市場調査課で企画承認された案件は、追加ボタン操作不要で自動的に記事作成課へ引き渡され、即時執筆を開始します。</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 12px 14px;">
+                <div style="color: #34D399; font-weight: 800; font-size: 0.88rem;">2️⃣ 記事作成課 ➔ 品質管理課 (自動送付)</div>
+                <div style="color: #CBD5E1; font-size: 0.82rem; margin-top: 4px; line-height: 1.5;">記事作成課での執筆・推敲・リーガルチェック完了後、自動で品質管理課へ仕事が送付され、査読画面へ遷移します。</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 12px 14px;">
+                <div style="color: #FBBF24; font-weight: 800; font-size: 0.88rem;">3️⃣ 品質管理課 ➔ 3課ルーティング (否認時)</div>
+                <div style="color: #CBD5E1; font-size: 0.82rem; margin-top: 4px; line-height: 1.5;">品質管理課で否認された場合、指摘内容に応じて【市場調査課】【記事制作課】【広報課】を選択して送付します。</div>
+            </div>
+        </div>
+    </div>
+    """)
+
     all_articles = workflow.list_articles()
     
     if not all_articles:
         st.info(t("qa_no_articles", lang))
     else:
+        selected_idx = 0
+        if st.session_state.get("qa_selected_art_id"):
+            for idx, art_item in enumerate(all_articles):
+                if art_item.get("id") == st.session_state.qa_selected_art_id:
+                    selected_idx = idx
+                    break
+
         article_titles = [f"[{art.get('status', 'Pending Owner Approval')}] {art.get('created_at', '')} | {clean_txt(art.get('title', ''))}" for art in all_articles]
-        selected_idx = st.selectbox(t("qa_select_label", lang), range(len(all_articles)), format_func=lambda x: article_titles[x])
+        selected_idx = st.selectbox(t("qa_select_label", lang), range(len(all_articles)), index=selected_idx, format_func=lambda x: article_titles[x])
         art = all_articles[selected_idx]
         cur_status = art.get("status", "Pending Owner Approval")
         is_locked = cur_status in ["Pending Owner Approval", "Revision Requested"]
@@ -1802,15 +1977,31 @@ elif page_id == "qa":
 
         if st.session_state.show_qa_art_rev:
             with st.container():
-                st.markdown(f"#### ✍️ {'否認・修正指示の入力' if lang=='ja' else 'Article Revision Directives'}")
+                st.markdown(f"#### ✍️ {'否認・修正指示の入力（社内ルール【Rule-OPS-AUTO】ルーティング）' if lang=='ja' else 'Article Revision Directives'}")
                 with st.form("qa_page_article_revision_form", clear_on_submit=True):
-                    feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder=t("qa_feedback_ph", lang), key="qa_rev_main_fb")
-                    submit_qa_rev = st.form_submit_button("📨 否認指示を送信する", type="primary", use_container_width=True)
+                    target_dept_choice = st.radio(
+                        "🎯 差し戻し・業務送付先を選択してください（社内ルール）:",
+                        options=["content_creation", "market_research", "pr"],
+                        format_func=lambda x: {
+                            "content_creation": "✍️ 記事制作課（結城 紬 & 森川 拓真）- 構成案・執筆・有料テンプレートの再修正",
+                            "market_research": "🔍 市場調査課（風間 涼）- ターゲット読者層・市場ニーズ・競合ギャップの再調査",
+                            "pr": "📢 広報課（佐々木 翼）- 5大SNSプロモーション文・キャッチコピーの再考"
+                        }.get(x, x),
+                        index=0,
+                        help="品質管理課での否認時、修正が必要な専門部署を選択してタスクを自動ルーティングします。"
+                    )
+                    feedback_txt = st.text_area(t("qa_feedback_label", lang), placeholder="例: ターゲット層のペルソナが曖昧なため、20代若手社員向けにニーズを再調査してください / 有料部分のテンプレート実例をもう1つ追加してください。", key="qa_rev_main_fb")
+                    submit_qa_rev = st.form_submit_button("📨 否認指示を送信し、指定課へ送付する", type="primary", use_container_width=True)
                     if submit_qa_rev:
                         if feedback_txt.strip():
-                            workflow.request_revision(art["id"], feedback_txt)
+                            workflow.request_revision(art["id"], feedback_txt, target_dept=target_dept_choice)
                             st.session_state.show_qa_art_rev = False
-                            st.warning("編集部に修正指示を伝達しました。" if lang == "ja" else "Revision directive sent to editorial team.")
+                            target_name_map = {
+                                "content_creation": "記事制作課（結城・森川）",
+                                "market_research": "市場調査課（風間）",
+                                "pr": "広報課（佐々木）"
+                            }
+                            st.warning(f"社内ルール【Rule-OPS-AUTO】に基づき、{target_name_map.get(target_dept_choice)}へ否認・差し戻し指示を送付しました。")
                             st.rerun()
                         else:
                             st.error("修正指示内容を入力してください。")

@@ -1,5 +1,617 @@
 [
   {
+    "id": "topic_20260905_044845_1",
+    "title": "【最新実務】セールスコピー×成約率改善 vol.7 読者の感情を動かすPASONA型リード文テンプレート",
+    "target_audience": "セールスコピーを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "成約率改善",
+    "demand_summary": "note内で「セールスコピー」と「成約率改善」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:45",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:45",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_6",
+    "title": "【最新実務】Claude×論理思考・壁打ち vol.6 新規事業の骨子を30分で組み立てる対話術",
+    "target_audience": "Claudeを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "論理思考・壁打ち",
+    "demand_summary": "note内で「Claude」と「論理思考・壁打ち」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:48:45",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:48:45",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_5",
+    "title": "【最新実務】Notion×情報一元化 vol.5 散らばるメモとタスクを完全統合するダッシュボード",
+    "target_audience": "Notionを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "情報一元化",
+    "demand_summary": "note内で「Notion」と「情報一元化」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_4",
+    "title": "【最新実務】ChatGPT×プロンプト実務 vol.4 日常のメール・議事録作成を10分で終わらせる技術",
+    "target_audience": "ChatGPTを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "プロンプト実務",
+    "demand_summary": "note内で「ChatGPT」と「プロンプト実務」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_3",
+    "title": "【最新実務】Canva×アイキャッチ制作 vol.3 クリック率が3倍跳ね上がるサムネイル設計",
+    "target_audience": "Canvaを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "アイキャッチ制作",
+    "demand_summary": "note内で「Canva」と「アイキャッチ制作」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_2",
+    "title": "【最新実務】Python×データ収集 vol.2 競合の動きを完全可視化するスクレイピング術",
+    "target_audience": "Pythonを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "データ収集",
+    "demand_summary": "note内で「Python」と「データ収集」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_044840_1",
+    "title": "【最新実務】GAS×業務自動化 vol.1 手作業ゼロを実現するGoogle自動連携コード",
+    "target_audience": "GASを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "業務自動化",
+    "demand_summary": "note内で「GAS」と「業務自動化」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 04:48:40",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:48:40",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041815_1",
+    "title": "【最新09月版】リモートワーク×非同期連携 vol.10 Slack・分報を活用した信頼獲得コミュニケーション",
+    "target_audience": "リモートワークを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "非同期連携",
+    "demand_summary": "note内で「リモートワーク」と「非同期連携」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:18:15",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:18:15",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:59",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:59",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:48:00",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:48:00",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041807_1",
+    "title": "【実践マスター】リモートワーク×非同期連携 Slack・分報を活用した信頼獲得コミュニケーション即戦力テンプレート",
+    "target_audience": "リモートワークを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "非同期連携",
+    "demand_summary": "note内で「リモートワーク」と「非同期連携」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:18:07",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:18:07",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:53",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:53",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041758_1",
+    "title": "【最新09月版】副業ロードマップ×マネタイズ vol.9 初月5万円を稼ぐための売れる商品設計と販売戦略",
+    "target_audience": "副業ロードマップを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "マネタイズ",
+    "demand_summary": "note内で「副業ロードマップ」と「マネタイズ」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:17:58",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:17:58",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:47",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:47",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041749_1",
+    "title": "【実践マスター】副業ロードマップ×マネタイズ 初月5万円を稼ぐための売れる商品設計と販売戦略即戦力テンプレート",
+    "target_audience": "副業ロードマップを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "マネタイズ",
+    "demand_summary": "note内で「副業ロードマップ」と「マネタイズ」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:17:49",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:17:49",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:39",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:39",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041718_1",
+    "title": "【最新09月版】確定申告×副業税務 vol.8 会社員のための損しない経費計上＆確定申告チェックシート",
+    "target_audience": "確定申告を活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "副業税務",
+    "demand_summary": "note内で「確定申告」と「副業税務」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:17:18",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:17:18",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:31",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:31",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041701_1",
+    "title": "【実践マスター】確定申告×副業税務 会社員のための損しない経費計上＆確定申告チェックシート即戦力テンプレート",
+    "target_audience": "確定申告を活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "副業税務",
+    "demand_summary": "note内で「確定申告」と「副業税務」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:17:01",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:17:01",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:17:18",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:17:18",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041651_1",
+    "title": "【最新09月版】セールスコピー×成約率改善 vol.7 読者の感情を動かすPASONA型リード文テンプレート",
+    "target_audience": "セールスコピーを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "成約率改善",
+    "demand_summary": "note内で「セールスコピー」と「成約率改善」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 980,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:16:51",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:16:51",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:17:01",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:17:01",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041610_1",
+    "title": "【実践マスター】セールスコピー×成約率改善 読者の感情を動かすPASONA型リード文テンプレート即戦力テンプレート",
+    "target_audience": "セールスコピーを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "成約率改善",
+    "demand_summary": "note内で「セールスコピー」と「成約率改善」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 980,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:16:10",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:16:10",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:16:51",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:16:51",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041550_1",
+    "title": "【最新09月版】Claude×論理思考・壁打ち vol.6 新規事業の骨子を30分で組み立てる対話術",
+    "target_audience": "Claudeを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "論理思考・壁打ち",
+    "demand_summary": "note内で「Claude」と「論理思考・壁打ち」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:15:50",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:15:50",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:16:10",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:16:10",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041527_1",
+    "title": "【実践マスター】Claude×論理思考・壁打ち 新規事業の骨子を30分で組み立てる対話術即戦力テンプレート",
+    "target_audience": "Claudeを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "論理思考・壁打ち",
+    "demand_summary": "note内で「Claude」と「論理思考・壁打ち」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:15:27",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:15:27",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:15:50",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:15:50",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041515_1",
+    "title": "【最新09月版】Notion×情報一元化 vol.5 散らばるメモとタスクを完全統合するダッシュボード",
+    "target_audience": "Notionを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "情報一元化",
+    "demand_summary": "note内で「Notion」と「情報一元化」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:15:15",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:15:15",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:15:27",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:15:27",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041500_1",
+    "title": "【最新09月版】ChatGPT×プロンプト実務 vol.4 日常のメール・議事録作成を10分で終わらせる技術",
+    "target_audience": "ChatGPTを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "プロンプト実務",
+    "demand_summary": "note内で「ChatGPT」と「プロンプト実務」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:15:00",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:15:00",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:15:15",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:15:15",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041448_1",
+    "title": "【最新09月版】Canva×アイキャッチ制作 vol.3 クリック率が3倍跳ね上がるサムネイル設計",
+    "target_audience": "Canvaを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "アイキャッチ制作",
+    "demand_summary": "note内で「Canva」と「アイキャッチ制作」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 500,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:14:48",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:14:48",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:15:00",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:15:00",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
+    "id": "topic_20260905_041432_1",
+    "title": "【最新09月版】Python×データ収集 vol.2 競合の動きを完全可視化するスクレイピング術",
+    "target_audience": "Pythonを活用して業務効率を劇的に改善したいビジネスパーソン",
+    "category": "データ収集",
+    "demand_summary": "note内で「Python」と「データ収集」の組み合わせに対する購買意欲が常に上位。",
+    "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
+    "recommended_price": 980,
+    "status": "In Production",
+    "created_at": "2026-09-05 04:14:32",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 04:14:32",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:14:48",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:14:48",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
+      }
+    ]
+  },
+  {
     "id": "topic_20260905_041259_1",
     "title": "【最新09月版】GAS×業務自動化 vol.1 手作業ゼロを実現するGoogle自動連携コード",
     "target_audience": "GASを活用して業務効率を劇的に改善したいビジネスパーソン",
@@ -7,7 +619,7 @@
     "demand_summary": "note内で「GAS」と「業務自動化」の組み合わせに対する購買意欲が常に上位。",
     "competitor_gap": "初心者でもコピペで即時導入可能な構造化テンプレートを提供。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 04:12:59",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -16,6 +628,18 @@
         "timestamp": "2026-09-05 04:12:59",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:14:32",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:14:32",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
@@ -59,7 +683,7 @@
     "demand_summary": "若手社員とのコミュニケーション課題に対する具体的な質問集への課金意欲が高い。",
     "competitor_gap": "精神論ではなく、心理的安全性を担保しながら課題を特定する心理学的フレームワークを網羅。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 04:07:59",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -68,6 +692,18 @@
         "timestamp": "2026-09-05 04:07:59",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:23",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:23",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
@@ -79,7 +715,7 @@
     "demand_summary": "インフレに伴いクリエイターの『価格交渉術』の需要が急増。",
     "competitor_gap": "角を立てずに単価を20%上げるメール雛形と、未払い防止の覚書条項をセット化。",
     "recommended_price": 980,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 04:04:53",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -88,6 +724,18 @@
         "timestamp": "2026-09-05 04:04:53",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:15",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:15",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
@@ -99,7 +747,7 @@
     "demand_summary": "記事の売上を左右する『サムネイル・アイキャッチ』の自作ノウハウは需要絶大。",
     "competitor_gap": "黄金比レイアウトの無料Canva共有リンクと、クリック率が跳ね上がるフォント配色集を提供。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 04:04:24",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -108,6 +756,18 @@
         "timestamp": "2026-09-05 04:04:24",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:18:07",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:18:07",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
@@ -119,7 +779,7 @@
     "demand_summary": "『SNS副業』の中でも『運用代行』は再現性が高く、即戦力マニュアルの需要が高い。",
     "competitor_gap": "初回ヒアリングシートから月次報告レポートのテンプレートまで、そのまま使える実務一式を完備。",
     "recommended_price": 980,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 04:02:23",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -128,6 +788,18 @@
         "timestamp": "2026-09-05 04:02:23",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:17:58",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:17:58",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
@@ -139,7 +811,7 @@
     "demand_summary": "note副業の第一歩として『何を書けばいいか分からない』層の検索数がトップクラス。",
     "competitor_gap": "抽象論を排し、10の質問に答えるだけで自分の売れ筋テーマが決まるワークシートを同梱。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 03:47:02",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -148,6 +820,18 @@
         "timestamp": "2026-09-05 03:47:02",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 04:17:49",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 04:17:49",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },
