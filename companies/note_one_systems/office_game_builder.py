@@ -286,6 +286,12 @@ def get_office_game_html(lang: str = "en") -> str:
     transform: scale(1.2) translateY(-6px);
     z-index: 9999;
   }}
+  .chibi-avatar.speaking {{
+    z-index: 999999 !important;
+  }}
+  .chibi-avatar.speaking .speech-bubble {{
+    z-index: 1000000 !important;
+  }}
 
   .chibi-head {{
     width: 34px;
@@ -609,9 +615,14 @@ def get_office_game_html(lang: str = "en") -> str:
   }}
 
   function triggerSpeak(id) {{
+    const avatar = document.getElementById('emp-' + id);
     const bubble = document.getElementById('bubble-' + id);
-    if (!bubble) return;
+    if (!bubble || !avatar) return;
     
+    // 他の吹き出しと最前面クラスを一旦リセット
+    document.querySelectorAll('.chibi-avatar').forEach(el => el.classList.remove('speaking'));
+    document.querySelectorAll('.speech-bubble').forEach(el => el.classList.remove('show'));
+
     // 50% chance of official duty report, 50% chance of 10,000 combinations authentic grumble
     const isGrumble = Math.random() < 0.5;
     let line = "";
@@ -629,9 +640,12 @@ def get_office_game_html(lang: str = "en") -> str:
 
     if (!line) return;
     bubble.innerText = line;
+    avatar.classList.add('speaking');
     bubble.classList.add('show');
+    
     setTimeout(() => {{
       bubble.classList.remove('show');
+      avatar.classList.remove('speaking');
     }}, 6500);
   }}
 
