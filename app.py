@@ -1325,36 +1325,61 @@ elif page_id == "market_research":
     cur_stock = stock_info["current_count"]
     stock_ratio = min(1.0, cur_stock / 10.0)
 
-    st.markdown(f"""
-    <div style='background: #0F172A; border: 1px solid #1E293B; border-left: 5px solid #10B981; border-radius: 8px; padding: 18px; margin-bottom: 16px;'>
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <div>
-                <strong style='color: #6EE7B7; font-size: 1.15rem;'>📋 {'社内業務規定【Rule-RES-10】常時10本ストック自律維持プロトコル稼働中' if lang=='ja' else 'Company Policy [Rule-RES-10]: Autonomous 10-Slot Topic Stock Active'}</strong>
-                <div style='color: #94A3B8; font-size: 0.88rem; margin-top: 6px; line-height: 1.5;'>
-                    {'担当アナリスト・風間 涼が社内ルールに基づき、<strong>オーナーのボタンクリック操作を一切介さず</strong>、常に最新トレンドから10本の企画ストックを満タン維持しています。' if lang=='ja' else 'Analyst Ryo Kazama autonomously maintains exactly 10 topic stocks at all times per company rules without requiring manual button clicks.'}
+    rule_title = "社内業務規定【Rule-RES-10】常時10本ストック自律維持プロトコル" if lang == "ja" else "Company Policy [Rule-RES-10]: Autonomous 10-Slot Topic Stock Active"
+    rule_sub = "担当: 市場調査課 風間 涼 ｜ 運用モード: 完全自律（オーナー操作不要）" if lang == "ja" else "Analyst: Ryo Kazama (Research) | Mode: Fully Autonomous (Zero Owner Effort)"
+    rule_badge_status = "自律稼働中" if lang == "ja" else "AUTONOMOUS"
+    rule_badge_stock = f"📦 {cur_stock} / 10 本（充足率 100%）" if lang == "ja" else f"📦 {cur_stock} / 10 Topics (100%)"
+    rule_meter_label = "📈 企画ストック充填状況: 満タン維持（空き枠 0本）" if lang == "ja" else "📈 Stock Status: Fully Maintained (0 Slots Vacant)"
+    rule_meter_pct = f"{cur_stock} / 10 SLOTS FILLED (100%)"
+    rule_desc = (
+        "💡 <strong>【完全自動運用の仕組み】</strong> 企画が記事制作課へ引き渡されたり、オーナーによって却下（拒否）された場合、社内ルールに基づき風間アナリストが即座に最新note市場から自律起票し、常に10本のストックを満タン維持します。オーナーによる補充ボタンのクリック操作は一切不要です。"
+        if lang == "ja" else
+        "💡 <strong>[Autonomous Operation Protocol]</strong> Whenever a topic is sent to drafting or rejected, Analyst Ryo Kazama instantly analyzes note market trends and replenishes new topics autonomously to guarantee 10 full topic stocks at all times without manual button clicks."
+    )
+
+    st.html(f"""
+    <div style="background: linear-gradient(135deg, #091E19 0%, #0F172A 100%); border: 1.5px solid #10B981; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15); box-sizing: border-box; width: 100%;">
+        <!-- Top Row: Title & Active Badge -->
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 260px; flex: 1;">
+                <span style="font-size: 1.4rem;">📋</span>
+                <div>
+                    <div style="color: #6EE7B7; font-size: 1.08rem; font-weight: 800; letter-spacing: 0.02em; line-height: 1.4;">
+                        {rule_title}
+                    </div>
+                    <div style="color: #94A3B8; font-size: 0.8rem; margin-top: 2px;">
+                        {rule_sub}
+                    </div>
                 </div>
             </div>
-            <div style='text-align: right;'>
-                <span style='background: #064E3B; color: #6EE7B7; font-weight: 800; font-size: 0.95rem; padding: 6px 14px; border-radius: 6px; border: 1px solid #10B981;'>
-                    📦 常時ストック: {cur_stock} / 10 本（社内規定充足率 100%）
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                <span style="background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid #10B981; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <span style="display: inline-block; width: 7px; height: 7px; background: #10B981; border-radius: 50%; box-shadow: 0 0 6px #10B981;"></span>
+                    {rule_badge_status}
+                </span>
+                <span style="background: #10B981; color: #022C22; font-weight: 900; font-size: 0.84rem; padding: 4px 12px; border-radius: 20px; white-space: nowrap; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                    {rule_badge_stock}
                 </span>
             </div>
         </div>
+
+        <!-- Middle: Built-in Custom Progress Meter -->
+        <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #CBD5E1; margin-bottom: 6px; font-weight: 600;">
+                <span>{rule_meter_label}</span>
+                <span style="color: #6EE7B7; font-weight: 800; font-family: monospace;">{rule_meter_pct}</span>
+            </div>
+            <div style="background: #1E293B; border-radius: 8px; height: 8px; overflow: hidden; border: 1px solid #334155;">
+                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);"></div>
+            </div>
+        </div>
+
+        <!-- Bottom: Informative description with employee role -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(51, 65, 85, 0.7); border-radius: 8px; padding: 10px 14px; font-size: 0.84rem; color: #E2E8F0; line-height: 1.6;">
+            {rule_desc}
+        </div>
     </div>
-    """, unsafe_allow_html=True)
-
-    st.progress(1.0, text=f"📋 社内規定【Rule-RES-10】準拠: 企画トピック充填率 100% ({cur_stock} / 10本 満タン自律維持中)")
-
-    st.info(
-        "💡 **【社内就業規則 Rule-RES-10 運用中】**\n"
-        "オーナーによる補充ボタンのクリック操作は不要です。企画トピックを承認して記事制作課へ回したり、却下（拒否）して枠に空きができると、"
-        "風間アナリストがnote市場から即座に自律リサーチを行い、常に10本のストックを満タンに維持します。"
-        if lang == "ja" else
-        "💡 **[Company Rule Rule-RES-10 Active]**\n"
-        "No manual button clicks required. When topics are approved for drafting or rejected, Analyst Ryo Kazama autonomously replenishes the pipeline to ensure 10 active topic slots are continuously maintained."
-    )
-
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    """)
 
     with st.expander(f"➕ 手動でキーワードを指定して調査する（手動リサーチ）", expanded=False):
         c_rs1, c_rs2 = st.columns([3, 2])
