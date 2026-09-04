@@ -227,7 +227,7 @@ st.set_page_config(
 
 # Session State Initialization
 if "language" not in st.session_state:
-    st.session_state.language = "en"
+    st.session_state.language = "ja"
 if "holdings_manager" not in st.session_state:
     st.session_state.holdings_manager = HoldingsManager()
 if "ringi_manager" not in st.session_state:
