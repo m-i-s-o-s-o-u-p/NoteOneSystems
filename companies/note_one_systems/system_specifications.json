@@ -1,142 +1,168 @@
 {
   "system_name": "Note One Systems Platform (AI Enterprise OS)",
-  "version": "2.4.0-Production",
-  "last_updated": "2026-08-28",
+  "holding_company": "Studio 0% Holdings",
+  "operating_company": "NoteOneSystems 株式会社 (対外ブランド名: noteone)",
+  "version": "3.0.0-Production",
+  "last_updated": "2026-09-05",
   "author": "IT Helpdesk & System Engineering Unit (noteone)",
   "executive_summary": {
     "purpose": "完全無料（固定費0円）でnote有料記事・マガジンを自律制作・品質監査・5大SNSプロモーションし、売上を最大化する自律型AI企業プラットフォーム。",
     "brand_name": "noteone",
-    "zero_cost_principle": "Gemini API無料枠、Streamlit Cloud無料ホスティング、GitHub無料永続化ストレージのみで構成され、月額固定費0円を完全厳守。"
+    "zero_cost_principle": "Google Gemini API無料枠、Streamlit Community Cloud無料ホスティング、GitHub無料永続化ストレージのみで構成され、月額固定費0円を完全厳守。"
   },
+  "corporate_rules": [
+    {
+      "rule_id": "Rule-RES-10",
+      "name": "企画トピック常時10本自律ストック維持規程",
+      "description": "市場調査課（風間 涼）は、オーナーの手動ボタン操作を一切介さず、常に未決裁（Pending Owner Approval）の企画トピック10本を自律補充・維持する。"
+    },
+    {
+      "rule_id": "Rule-OPS-AUTO",
+      "name": "3課自律連携・品質管理ルーティング規程",
+      "description": "①市場調査課の企画承認時に記事制作課へ業務が完全自動移行（執筆自動開始）。②記事制作課での執筆完了後、自動で品質管理課（神崎 玲奈）へ送付。③品質管理課で否認時は「記事制作課」「市場調査課」「広報課」のいずれかを選択して差し戻し。④各課での加筆修正・再調査・告知改定は手動ボタン不要で自律完了し、自動で品質管理課へ再送付される。"
+    },
+    {
+      "rule_id": "Rule-PRC-300",
+      "name": "note有料記事基本価格300円基準規程",
+      "description": "note有料記事の基準販売価格を「300円（インパルス・バイ価格）」に設定。カフェのコーヒー1杯未満の衝動買いラインで成約率（CVR 3.8%〜5.2%）と初期SNS口コミ拡散を極大化し、将来の高単価マガジン（1,480円〜）へつなぐフロントエンド商品として運用する。"
+    }
+  ],
   "architecture_layers": [
     {
       "layer": "1. ユーザーインターフェース層 (UI/UX Layer)",
-      "tech_stack": "Streamlit (Python), HTML5/CSS3 (High Contrast Theme), HTML5 Canvas 2D Game Engine, DOM Event Delegation",
-      "description": "統括ダッシュボード、2Dバーチャルオフィス、全社統合決裁センター（Universal Approval Center）、各課ワークスペース、社員相談チャットを単一SPA（Single Page Application）で提供。"
+      "tech_stack": "Streamlit (Python), HTML5/CSS3 (Dark Aesthetic / Glassmorphism), HTML5 Canvas 2D Game Engine",
+      "description": "統括ダッシュボード、2Dバーチャルオフィス、全社統合決裁センター（ラジオボックス直接組み込み型テーブル・単一プレビュー・決裁ゲートウェイ）、各課ワークスペース、社員相談チャットを完全統合。"
     },
     {
       "layer": "2. AIエンジン・プロンプト連携層 (Intelligence Layer)",
-      "tech_stack": "Google Gemini API (Free Tier), Dynamic Role-Playing Prompt Chains, JSON Structured Output",
-      "description": "市場調査、執筆、校正、広報告知、法務スクリーニング、品質採点、人事分析、財務予測の9つの専門AIエージェントを統括オーケストレーション。"
+      "tech_stack": "Google Gemini API (Free Tier), Dynamic Role-Playing Prompt Chains, Clean Text Normalizer",
+      "description": "市場調査、編集アウトライン、執筆、法務スクリーニング、品質採点、マルチSNSマーケティング、人事分析、財務予測の9つの専門AIエージェントを自律オーケストレーション。"
     },
     {
       "layer": "3. 業務ガバナンス・決裁層 (Governance & Workflow Layer)",
-      "tech_stack": "Universal Decision Gateway (Approval / Denial / Rejection), Ringi Ledger Engine",
-      "description": "未承認記事・企画の外部公開・自動進行を物理的にロック。オーナーの1クリック決裁（承認・✍️ 否認・拒否）でのみステータスが遷移。"
+      "tech_stack": "Universal Decision Gateway (Approval / Denial / Rejection), Rule-OPS-AUTO Autonomous Dispatcher",
+      "description": "未承認記事・企画の外部公開を物理的にロック。オーナーの1クリック決裁（承認・✍️ 否認・拒否）により自律パイプラインが駆動。"
     },
     {
       "layer": "4. データストア・永続化層 (Storage & Persistence Layer)",
       "tech_stack": "Local Structured JSON Files, GitHub Version Control (Git)",
-      "description": "RDBMS等の有償DBを使わず、高速かつ軽量なJSON台帳（articles.json, market_topics.json, legal_investigations.json, accounting_data.json, error_logs.json）で全データを永続化。"
+      "description": "RDBMS等の有償DBを使わず、高速かつ軽量なJSON台帳（articles.json, market_topics.json, legal_investigations.json, accounting_data.json, holdings_info.json）で全データを永続化。"
     }
   ],
   "agent_matrix": [
     {
-      "id": "ceo",
-      "name": "AI Executive Lead (CEO)",
+      "id": "ichijo",
+      "name": "一条 蓮 (Ren Ichijo)",
       "dept": "経営企画室",
-      "role": "最高経営責任者",
+      "role": "代表取締役CEO",
       "prompt_feature": "全社統括、事業戦略立案、各部門のKPI進捗モニタリング、オーナー報告。"
     },
     {
-      "id": "ryo",
+      "id": "kazama",
       "name": "風間 涼 (Ryo Kazama)",
       "dept": "市場調査課",
       "role": "シニアリサーチャー",
-      "prompt_feature": "note市場トレンド分析、競合note売れ筋調査、読者ペルソナ分析、販売価格戦略策定。"
+      "prompt_feature": "note市場トレンド分析、読者ペルソナ分析、競合ギャップ分析、Rule-RES-10に基づく10本ストック自律維持。"
     },
     {
-      "id": "takuma",
-      "name": "森川 拓真 (Takuma Morikawa)",
-      "dept": "記事制作課",
-      "role": "リードライター",
-      "prompt_feature": "実践的ノウハウ記事執筆、無料/有料境界線の最適配置（心理的購入トリガー設計）。"
-    },
-    {
-      "id": "tsumugi",
+      "id": "yuki",
       "name": "結城 紬 (Tsumugi Yuki)",
       "dept": "記事制作課",
-      "role": "シニアエディター",
-      "prompt_feature": "推敲、可読性向上、読了時間算出、誤字脱字・専門用語の平易化。"
+      "role": "統括編集長",
+      "prompt_feature": "目次・見出し構成の設計、無料公開エリアと有料エリアの黄金境界線（有料ライン）策定、加筆修正ディレクション。"
     },
     {
-      "id": "tsubasa",
+      "id": "morikawa",
+      "name": "森川 拓真 (Takuma Morikawa)",
+      "dept": "記事制作課",
+      "role": "チーフライター",
+      "prompt_feature": "4,000字超の本格原稿執筆、コピペ用実践テンプレート・チェックリストの同梱、Rule-OPS-AUTOによる自律加筆修正。"
+    },
+    {
+      "id": "sasaki",
       "name": "佐々木 翼 (Tsubasa Sasaki)",
       "dept": "広報課",
-      "role": "SNSマーケター",
-      "prompt_feature": "5大SNS（X, Instagram, Threads, Bluesky, Mastodon）向け最適化プロモーション文作成。"
+      "role": "マルチSNSマーケター",
+      "prompt_feature": "5大SNS（X, Instagram, Threads, Bluesky, Mastodon）向け最適化告知文の作成と自律改定。"
     },
     {
-      "id": "reina",
+      "id": "kanzaki",
       "name": "神崎 玲奈 (Reina Kanzaki)",
       "dept": "品質管理課",
-      "role": "QAスペシャリスト",
-      "prompt_feature": "社内QA規程Ver.2.1に基づく100点満点採点、読者満足度・実践価値の監査。"
+      "role": "品質管理責任者 (QA Director)",
+      "prompt_feature": "ファクトチェック、100点満点品質スコアリング、Rule-OPS-AUTOに基づく厳格な3課選択差し戻しルーティング。"
     },
     {
-      "id": "ritsu",
+      "id": "tachibana",
       "name": "橘 律 (Ritsu Tachibana)",
-      "dept": "法務コンプライアンス課",
-      "role": "法務スペシャリスト",
-      "prompt_feature": "note利用規約、景品表示法、著作権法、会社法第7条（商号規制）の法的スクリーニング。"
+      "dept": "法務・コンプライアンス部",
+      "role": "法務顧問",
+      "prompt_feature": "会社法第7条（商号規制）、著作権法第32条、景品表示法、note利用規約の事前スクリーニング。"
     },
     {
-      "id": "sakura",
-      "name": "一ノ瀬 さくら (Sakura Ichinose)",
+      "id": "ayase",
+      "name": "綾瀬 七海 (Nanami Ayase)",
       "dept": "人事課",
-      "role": "HRマネージャー",
-      "prompt_feature": "社員稼働負荷スコア算出、業務量モニタリング、増員・リソース配分提案。"
+      "role": "人事・労務責任者",
+      "prompt_feature": "社員稼働負荷スコア算出、業務量モニタリング、組織ボトルネック早期解消。"
     },
     {
-      "id": "haruto",
-      "name": "一条 晴斗 (Haruto Ichijo)",
-      "dept": "財務戦略課",
-      "role": "CFO / 財務アナリスト",
-      "prompt_feature": "売上シミュレーション、売上目標達成率モニタリング、収益最大化アドバイス。"
+      "id": "shiraishi",
+      "name": "白石 葵 (Aoi Shiraishi)",
+      "dept": "財務課 ＆ 経理課",
+      "role": "財務アナリスト / Chief Accountant",
+      "prompt_feature": "基本300円インパルス・バイ価格の査定、売上シミュレーション、note決済手数料控除後の手残り純益（85%）算出、稟議ROI試算。"
     }
   ],
   "workflow_steps": [
     {
       "step": 1,
-      "title": "市場調査 & 企画立案",
+      "title": "市場調査 & 企画立案 (Rule-RES-10)",
       "owner": "市場調査課 (風間 涼)",
-      "output": "企画提案書 (market_topics.json)",
-      "gate": "オーナー企画決裁（承認・✍️ 否認・拒否）"
+      "output": "未決裁企画トピック10本常時ストック (market_topics.json)",
+      "gate": "全社統合決裁センターでのオーナー企画決裁（承認・✍️ 否認・拒否）"
     },
     {
       "step": 2,
-      "title": "記事執筆 & 無料/有料境界線設計",
-      "owner": "記事制作課 (森川 拓真 & 結城 紬)",
-      "output": "完成原稿 (articles.json)",
-      "gate": "社内推敲・構成チェック"
+      "title": "自律執筆開始 & 成果物作成 (Rule-OPS-AUTO)",
+      "owner": "記事制作課 (結城 紬 & 森川 拓真)",
+      "output": "完成原稿・実践テンプレート (articles/*.json)",
+      "gate": "企画承認時に手動操作不要で完全自動開始"
     },
     {
       "step": 3,
       "title": "5大SNSマルチプロモーション作成",
       "owner": "広報課 (佐々木 翼)",
       "output": "X, Instagram, Threads, Bluesky, Mastodon 告知文",
-      "gate": "SNS最適化チェック"
+      "gate": "各SNSアルゴリズム適合チェック"
     },
     {
       "step": 4,
-      "title": "法務スクリーニング & 100点品質採点",
-      "owner": "法務課 (橘 律) & 品質管理課 (神崎 玲奈)",
-      "output": "法的適合性レポート & QA監査スコア",
-      "gate": "コンプライアンス基準クリア"
+      "title": "法務スクリーニング & 財務価格査定 (Rule-PRC-300)",
+      "owner": "法務課 (橘 律) & 財務課 (白石 葵)",
+      "output": "法的適合性レポート & 基本300円インパルスバイ査定・手残り純益試算",
+      "gate": "コンプライアンス・収益性チェッククリア"
     },
     {
       "step": 5,
-      "title": "全社統合決裁 (Universal Approval Gateway)",
-      "owner": "代表者・オーナー",
-      "output": "承認フラグ / 否認指示 / 拒否",
-      "gate": "オーナーの承認により投稿ロック解除"
+      "title": "品質管理課 100点採点 & 自動送付 (Rule-OPS-AUTO)",
+      "owner": "品質管理課 (神崎 玲奈)",
+      "output": "QA監査スコア & 決裁待ちステータス (Pending Owner Approval)",
+      "gate": "執筆完了後、自動で品質管理課へ送付され全社決裁センターへ上申"
     },
     {
       "step": 6,
-      "title": "note公開 & SNSプロモーション配信",
+      "title": "全社統合決裁 (Universal Approval Gateway)",
+      "owner": "代表者・オーナー",
+      "output": "承認（投稿ロック解除） / ✍️ 否認（3課選択差し戻し） / 拒否",
+      "gate": "否認時は各課が自律加筆修正し自動で品質管理課へ再送付"
+    },
+    {
+      "step": 7,
+      "title": "note公式公開 & SNSプロモーション展開",
       "owner": "全社連携 (noteone)",
       "output": "note記事販売開始 & 売上計上 (accounting_data.json)",
-      "gate": "売上目標達成モニタリング"
+      "gate": "月商10万円目標モニタリング"
     }
   ],
   "security_and_compliance": {

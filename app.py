@@ -2092,8 +2092,8 @@ elif page_id == "hr":
     else:
         org_data = {"departments": []}
 
-    with st.expander(f"📄 {'社内文書: 組織図 ＆ 職務記述書 (Ver 2.1)' if lang=='ja' else 'Internal Document: Org Chart & Job Descriptions (Ver 2.1)'}", expanded=False):
-        st.write(f"**{'制定者:' if lang=='ja' else 'Authorized by:'}** {org_data.get('author')} | **{'バージョン:' if lang=='ja' else 'Version:'}** {org_data.get('version')}")
+    with st.expander(f"📄 {'社内文書: 組織体制図 ＆ 詳細職務分掌規程 (Ver 1.0 正式運用版)' if lang=='ja' else 'Internal Document: Org Chart & Job Descriptions (Ver 1.0)'}", expanded=False):
+        st.write(f"**{'制定者:' if lang=='ja' else 'Authorized by:'}** {org_data.get('author')} | **{'バージョン:' if lang=='ja' else 'Version:'}** {org_data.get('version')} | **{'施行日:' if lang=='ja' else 'Effective:'}** {org_data.get('effective_date')}")
         for dept in org_data.get("departments", []):
             st.markdown(f"**{dept['icon']} {dept['name']}** ({'統括:' if lang=='ja' else 'Lead:'} {dept['head']})")
             for role in dept.get("roles", []):
@@ -2201,6 +2201,27 @@ elif page_id == "legal":
             </div>
             """, unsafe_allow_html=True)
 
+    # 📄 社内就業規則・業務連携規程の閲覧
+    emp_reg_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/employment_regulations.json")
+    if os.path.exists(emp_reg_file):
+        with open(emp_reg_file, "r", encoding="utf-8") as f:
+            emp_reg_data = json.load(f)
+    else:
+        emp_reg_data = {}
+
+    with st.expander(f"📄 {'社内文書: AI社員就業規則 ＆ 業務連携規程 (Ver 1.0 正式運用版)' if lang=='ja' else 'Internal Document: AI Employee Regulations & Operations Manual (Ver 1.0)'}", expanded=False):
+        st.write(f"**{'制定者:' if lang=='ja' else 'Authorized by:'}** {emp_reg_data.get('author')} | **{'施行日:' if lang=='ja' else 'Effective Date:'}** {emp_reg_data.get('effective_date')} | **{'ステータス:' if lang=='ja' else 'Status:'}** {emp_reg_data.get('status')}")
+        st.info(f"📜 **前文 (Preamble):** {emp_reg_data.get('preamble', '')}")
+        for chap in emp_reg_data.get("chapters", []):
+            st.markdown(f"#### {chap['chapter']}")
+            for art in chap.get("articles", []):
+                st.markdown(f"""
+                <div style='background-color: #0F172A; border: 1px solid #334155; border-left: 3px solid #38BDF8; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;'>
+                    <strong style='color: #38BDF8;'>{art['article']}</strong>
+                    <div style='color: #E2E8F0; font-size: 0.9rem; margin-top: 4px; line-height: 1.6;'>{art['content']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
 # ==========================================
 # 9. 📊 Financial Strategy Division
 # ==========================================
@@ -2291,9 +2312,9 @@ elif page_id == "helpdesk":
     else:
         spec_data = {}
 
-    with st.expander(f"📄 {'社内文書: Note One Systems 会社システム仕様書 (Ver 2.4.0)' if lang=='ja' else 'Internal Document: System Architecture Specifications (Ver 2.4.0)'}", expanded=False):
+    with st.expander(f"📄 {'社内文書: Note One Systems 会社システム仕様書 (Ver 3.0.0 正式運用版)' if lang=='ja' else 'Internal Document: System Architecture Specifications (Ver 3.0.0)'}", expanded=False):
         st.markdown(f"### 🏢 {spec_data.get('system_name', 'Note One Systems Platform')}")
-        st.caption(f"**Version**: {spec_data.get('version', '2.4.0')} | **Last Updated**: {spec_data.get('last_updated', '2026-08-28')} | **Managed By**: {spec_data.get('author', 'IT Helpdesk')}")
+        st.caption(f"**Version**: {spec_data.get('version', '3.0.0')} | **Last Updated**: {spec_data.get('last_updated', '2026-09-05')} | **Holding**: {spec_data.get('holding_company', 'Studio 0% Holdings')} | **Managed By**: {spec_data.get('author', 'IT Helpdesk')}")
 
         # 1. Executive Summary & 0-Cost Stack
         exec_sum = spec_data.get("executive_summary", {})
@@ -2308,6 +2329,18 @@ elif page_id == "helpdesk":
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # 1.5. Corporate Rules
+        corp_rules = spec_data.get("corporate_rules", [])
+        if corp_rules:
+            st.markdown(f"#### 📜 {'全社制定業務規程 (Corporate Operating Rules)' if lang=='ja' else 'Corporate Operating Rules'}")
+            for cr in corp_rules:
+                st.markdown(f"""
+                <div style='background-color: #0F172A; border: 1px solid #38BDF8; border-left: 4px solid #38BDF8; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px;'>
+                    <strong style='color: #38BDF8; font-size: 1.0rem;'>📋 {cr.get('rule_id')}: {cr.get('name')}</strong>
+                    <div style='color: #E2E8F0; font-size: 0.9rem; margin-top: 6px; line-height: 1.6;'>{cr.get('description')}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
         # 2. Architecture Layers
         st.markdown(f"#### 🏗️ {'システムアーキテクチャ4層構造' if lang=='ja' else 'System Architecture Layers'}")
