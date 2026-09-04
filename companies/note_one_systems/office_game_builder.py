@@ -348,29 +348,33 @@ def get_office_game_html(lang: str = "en") -> str:
 
   .speech-bubble {{
     position: absolute;
-    bottom: 80px;
+    bottom: 85px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
     background: #FFFFFF;
     color: #0F172A;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 6px 12px;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
-    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.75), 0 2px 8px rgba(0,0,0,0.3);
     pointer-events: none;
     opacity: 0;
-    transform: translateY(10px) scale(0.85);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 9999 !important;
     border: 2px solid #38BDF8;
-    max-width: 340px;
+    min-width: 260px;
+    max-width: 380px;
+    width: max-content;
     white-space: normal;
-    line-height: 1.4;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
   }}
   .speech-bubble.grumble {{
     background: #FFF1F2 !important;
-    color: #9F1239 !important;
+    color: #881337 !important;
     border-color: #F43F5E !important;
+    box-shadow: 0 12px 36px rgba(244,63,94,0.35), 0 4px 12px rgba(0,0,0,0.5) !important;
   }}
   .speech-bubble.grumble::after {{
     border-color: #FFF1F2 transparent !important;
@@ -378,10 +382,10 @@ def get_office_game_html(lang: str = "en") -> str:
   .speech-bubble::after {{
     content: '';
     position: absolute;
-    bottom: -7px;
+    bottom: -9px;
     left: 50%;
     transform: translateX(-50%);
-    border-width: 7px 7px 0;
+    border-width: 9px 8px 0;
     border-style: solid;
     border-color: #FFFFFF transparent;
     display: block;
@@ -389,7 +393,40 @@ def get_office_game_html(lang: str = "en") -> str:
   }}
   .speech-bubble.show {{
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1);
+  }}
+
+  /* 画面端の吹き出し位置自動クランプ（はみ出し防止） */
+  #emp-ichijo .speech-bubble,
+  #emp-tachibana .speech-bubble,
+  #emp-ayase .speech-bubble {{
+    left: 20px;
+    transform: translateX(0) translateY(10px) scale(0.9);
+  }}
+  #emp-ichijo .speech-bubble.show,
+  #emp-tachibana .speech-bubble.show,
+  #emp-ayase .speech-bubble.show {{
+    transform: translateX(0) translateY(0) scale(1);
+  }}
+  #emp-ichijo .speech-bubble::after,
+  #emp-tachibana .speech-bubble::after,
+  #emp-ayase .speech-bubble::after {{
+    left: 25px;
+    transform: none;
+  }}
+
+  #emp-sasaki .speech-bubble {{
+    left: auto;
+    right: 20px;
+    transform: translateX(0) translateY(10px) scale(0.9);
+  }}
+  #emp-sasaki .speech-bubble.show {{
+    transform: translateX(0) translateY(0) scale(1);
+  }}
+  #emp-sasaki .speech-bubble::after {{
+    left: auto;
+    right: 25px;
+    transform: none;
   }}
 
   #emp-ichijo   {{ top: 100px; left: 100px; }}
@@ -595,14 +632,14 @@ def get_office_game_html(lang: str = "en") -> str:
     bubble.classList.add('show');
     setTimeout(() => {{
       bubble.classList.remove('show');
-    }}, 4500);
+    }}, 6500);
   }}
 
-  // Auto dialogue rotation every 5 seconds
+  // Auto dialogue rotation every 6 seconds
   setInterval(() => {{
     const randomId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
     triggerSpeak(randomId);
-  }}, 5000);
+  }}, 6000);
 </script>
 </body>
 </html>
