@@ -1,5 +1,25 @@
 [
   {
+    "id": "topic_20260905_023347_1",
+    "title": "【完全保存版】個人開発者のための『初期ユーザー100人を完全無料で集めるWeb集客プレイブック』",
+    "target_audience": "プロダクトやサービスを作ったが集客に困っているインディー開発者",
+    "category": "マーケティング・起業",
+    "demand_summary": "広告費ゼロで初動ユーザーを獲得する泥臭い実践ノウハウは希少価値が高い。",
+    "competitor_gap": "ProductHunt、X、コミュニティ活用など、実際に100人集めたチェックリストを公開。",
+    "recommended_price": 980,
+    "status": "Pending Owner Approval",
+    "created_at": "2026-09-05 02:33:47",
+    "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
+    "status_history": [
+      {
+        "status": "Pending Owner Approval",
+        "timestamp": "2026-09-05 02:33:47",
+        "actor": "風間 涼 (社内規定 Rule-RES-10)",
+        "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      }
+    ]
+  },
+  {
     "id": "topic_20260905_022117_1",
     "title": "【完全保存版】ChatGPT×企画書作成 10分で上司のOKが出る『プレゼン骨子ジェネレーター』",
     "target_audience": "新規事業や業務改善の企画書作成に毎回何日も悩んでいる会社員",
@@ -7,7 +27,7 @@
     "demand_summary": "『企画が通らない』悩みを解決する構造化プロンプトへの関心が非常に高い。",
     "competitor_gap": "課題提起から投資対効果（ROI）算出までのストーリーラインを自動生成するプロンプト群。",
     "recommended_price": 500,
-    "status": "Pending Owner Approval",
+    "status": "Approved",
     "created_at": "2026-09-05 02:21:17",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -16,6 +36,12 @@
         "timestamp": "2026-09-05 02:21:17",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 02:31:19",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
       }
     ]
   },
@@ -53,7 +79,7 @@
     "demand_summary": "『SNS副業』の中でも『運用代行』は再現性が高く、即戦力マニュアルの需要が高い。",
     "competitor_gap": "初回ヒアリングシートから月次報告レポートのテンプレートまで、そのまま使える実務一式を完備。",
     "recommended_price": 980,
-    "status": "Pending Owner Approval",
+    "status": "In Production",
     "created_at": "2026-09-05 02:21:14",
     "analyst": "風間 涼 (市場調査課・社内規定 Rule-RES-10)",
     "status_history": [
@@ -62,6 +88,18 @@
         "timestamp": "2026-09-05 02:21:14",
         "actor": "風間 涼 (社内規定 Rule-RES-10)",
         "note": "社内就業規則【Rule-RES-10】に基づき、常時10本ストック枠へ自律起票（ボタン操作不要の完全自動補充）。"
+      },
+      {
+        "status": "Approved",
+        "timestamp": "2026-09-05 02:33:47",
+        "actor": "Owner (オーナー)",
+        "note": "オーナー承認完了。記事制作課での本格執筆・構成設計を許可。"
+      },
+      {
+        "status": "In Production",
+        "timestamp": "2026-09-05 02:33:47",
+        "actor": "記事制作課 (結城・森川)",
+        "note": "記事制作課にて本格執筆に着手。企画ストック枠から制作パイプラインへ移行。"
       }
     ]
   },

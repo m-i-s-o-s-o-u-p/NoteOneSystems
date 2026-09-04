@@ -989,13 +989,16 @@ elif page_id == "office":
         col_dec1, col_dec2, col_dec3 = st.columns([2, 2, 1])
         
         with col_dec1:
-            if st.button("承認", type="primary", use_container_width=True, key="univ_btn_approve"):
+            if st.button("承認して業務移行" if item_type == "topic" else "承認", type="primary", use_container_width=True, key="univ_btn_approve"):
                 if item_type == "article":
                     workflow.approve_article(current_item["id"])
                     st.success("🎉 記事を承認しました！投稿ロックを解除しました。")
                 else:
                     market_manager.approve_topic(current_item["id"])
-                    st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
+                    market_manager.mark_topic_in_production(current_item["id"])
+                    st.session_state.prefill_topic = clean_txt(item_raw.get("title", ""))
+                    st.session_state.prefill_audience = clean_txt(item_raw.get("target_audience", ""))
+                    st.session_state.active_page_id = "content_creation"
                 st.session_state.show_univ_rev_form = False
                 if "univ_pending_radio_selector" in st.session_state:
                     del st.session_state["univ_pending_radio_selector"]
@@ -1426,7 +1429,7 @@ elif page_id == "market_research":
                     <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>企画承認待ち</span>
                 </div>
                 <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                    {t('mr_topic_locked_warning', lang)}
+                    {'🔒 【企画ロック中】「承認して記事作成課へ移行」を押すと、追加ボタン操作不要で自動的に記事制作課へ業務が引き継がれます。' if lang=='ja' else '🔒 [Topic Locked] Approving will automatically transfer this topic directly to Content Creation.'}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -1438,7 +1441,7 @@ elif page_id == "market_research":
                     <span style='background:#10B981; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>企画承認済み</span>
                 </div>
                 <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                    {t('mr_topic_unlocked_success', lang)}
+                    {'✅ オーナー承認完了。記事制作課へ業務が自動移行されています。' if lang=='ja' else '✅ Topic approved and transitioned to Content Creation.'}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -1446,9 +1449,14 @@ elif page_id == "market_research":
         # 👑 トピック決裁アクションボタン
         col_tpa1, col_tpa2, col_tpa3 = st.columns([2, 2, 1])
         with col_tpa1:
-            if st.button("承認", type="primary", use_container_width=True, key="mr_btn_app_topic"):
+            btn_app_label = "承認して記事作成課へ移行" if lang == "ja" else "Approve & Hand Over"
+            if st.button(btn_app_label, type="primary", use_container_width=True, key="mr_btn_app_topic"):
                 market_manager.approve_topic(tp["id"])
-                st.success("🎉 トピックを承認しました！記事制作課へ送ることができます。")
+                market_manager.mark_topic_in_production(tp["id"])
+                st.session_state.prefill_topic = clean_txt(tp.get("title", ""))
+                st.session_state.prefill_audience = clean_txt(tp.get("target_audience", ""))
+                st.session_state.active_page_id = "content_creation"
+                st.session_state.scroll_trigger += 1
                 st.rerun()
 
         with col_tpa2:
@@ -1459,7 +1467,7 @@ elif page_id == "market_research":
         with col_tpa3:
             if st.button("拒否", use_container_width=True, key="mr_btn_rej_topic"):
                 market_manager.reject_topic(tp["id"])
-                st.info("トピックを拒否（却下）しました。")
+                st.info("トピックを拒否（却下）しました。社内規定【Rule-RES-10】に基づき風間アナリストが代替トピックを自律起票しました。")
                 st.rerun()
 
         if st.session_state.show_mr_tp_rev:
@@ -1477,14 +1485,6 @@ elif page_id == "market_research":
                         else:
                             st.error("指示内容を入力してください。")
 
-        if not tp_locked:
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            if st.button(t("mr_btn_send_to_creation", lang), type="primary", use_container_width=True):
-                st.session_state.prefill_topic = clean_txt(tp.get("title", ""))
-                st.session_state.prefill_audience = clean_txt(tp.get("target_audience", ""))
-                st.session_state.active_page_id = "content_creation"
-                st.rerun()
-
         st.markdown("##### ⏱️ 企画ステータス遷移タイムスタンプ履歴")
         history = tp.get("status_history", [])
         for h in reversed(history):
@@ -1499,7 +1499,7 @@ elif page_id == "content_creation":
     st.markdown(f"<div class='sub-header'>{t('cc_sub', lang)}</div>", unsafe_allow_html=True)
 
     if st.session_state.prefill_topic:
-        st.success(f"📥 **市場調査課から承認済みトピックを引き継ぎました:** 『{clean_txt(st.session_state.prefill_topic)}』")
+        st.success(f"📥 **市場調査課の申請承認に伴い、業務が自動移行しました:** 『{clean_txt(st.session_state.prefill_topic)}』\n\nターゲット読者と価格設定を確認の上、そのまま執筆を開始できます。")
 
     st.markdown(f"#### {t('cc_form_title', lang)}")
     c_in1, c_in2 = st.columns([3, 1])
