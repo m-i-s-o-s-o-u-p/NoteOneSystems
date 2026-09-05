@@ -21,7 +21,7 @@ class MarketResearchManager:
                     "category": "AI×実務効率化",
                     "demand_summary": "note内で『残業削減』『ChatGPT実務』の検索ボリュームが急増中。コピペで動くプロンプトの需要が極めて高い。",
                     "competitor_gap": "一般的なプロンプト集は抽象的。当社は『メール返信』『議事録要約』『Excel関数生成』の即戦力3分野に特化して差別化。",
-                    "recommended_price": 500,
+                    "recommended_price": 300,
                     "status": "Pending Owner Approval",
                     "created_at": "2026-08-25 10:00:00",
                     "analyst": "風間 涼 (Ryo Kazama)",
@@ -39,9 +39,9 @@ class MarketResearchManager:
                     "title": "知識ゼロからのnote有料記事販売ロードマップ【初月5万円達成モデル】",
                     "target_audience": "副業でnote記事販売を始めたい初心者・クリエイター",
                     "category": "副業・マネタイズ",
-                    "demand_summary": "『note副業』『有料記事の書き方』の購買意欲が常に上位。特にワンコイン（500円）での入門記事が最もCVRが高い。",
+                    "demand_summary": "『note副業』『有料記事の書き方』の購買意欲が常に上位。特に300円の衝動買いしやすい入門記事が最もCVRが高い。",
                     "competitor_gap": "精神論ではなく、売れるテーマの選定方法、有料ラインの引き方、5大SNS告知の具体手順を網羅。",
-                    "recommended_price": 500,
+                    "recommended_price": 300,
                     "status": "Approved",
                     "created_at": "2026-08-25 09:30:00",
                     "analyst": "風間 涼 (Ryo Kazama)",
@@ -129,7 +129,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
   "target_audience": "明確なターゲット読者像",
   "demand_summary": "市場ニーズ・検索トレンドの分析結果",
   "competitor_gap": "競合記事との差別化ポイント・独自の付加価値",
-  "recommended_price": 500
+  "recommended_price": 300
 }}
 ```
 """
@@ -150,7 +150,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "target_audience": target_audience if target_audience else "関心を持つすべての読者",
                 "demand_summary": f"「{keyword_or_theme}」に関する実践的ノウハウの需要がnote上で堅調に推移しています。",
                 "competitor_gap": "コピペで即使えるテンプレートと実務フローを網羅することで差別化を図ります。",
-                "recommended_price": 500
+                "recommended_price": 300
             }
 
         topic_id = f"topic_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -161,7 +161,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
             "category": parsed_data.get("category", "実務ノウハウ"),
             "demand_summary": parsed_data.get("demand_summary", ""),
             "competitor_gap": parsed_data.get("competitor_gap", ""),
-            "recommended_price": parsed_data.get("recommended_price", 500),
+            "recommended_price": parsed_data.get("recommended_price", 300),
             "status": "Pending Owner Approval",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "analyst": "風間 涼 (Ryo Kazama)",
@@ -310,7 +310,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
         if needed <= 0:
             return []
 
-        # Curated candidate niches tailored for ¥500 - ¥980 note sales
+        # Curated candidate niches tailored for ¥300 - ¥980 note sales (Rule-PRC-300)
         candidate_niches = [
             {
                 "theme": "Excel×ChatGPT 経理・事務作業を半減させるコピペ関数＆マクロ自動化集",
@@ -318,7 +318,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "業務自動化・Excel",
                 "demand": "note内で『Excel時短』『事務効率化』は恒常的な高成約ジャンル。",
                 "gap": "複雑なVBAコードではなく、1行関数とプロンプトで動く初心者向け即戦力テンプレに特化。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "副業初心者が初月からnoteで3万円稼ぐ『売れる有料記事テーマ選定シート』",
@@ -326,7 +326,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "副業・コンテンツ販売",
                 "demand": "note副業の第一歩として『何を書けばいいか分からない』層の検索数がトップクラス。",
                 "gap": "抽象論を排し、10の質問に答えるだけで自分の売れ筋テーマが決まるワークシートを同梱。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "フリーランスのための『値上げ交渉＆トラブル防止契約書テンプレ集』",
@@ -342,7 +342,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "デザイン・SNSマーケティング",
                 "demand": "記事の売上を左右する『サムネイル・アイキャッチ』の自作ノウハウは需要絶大。",
                 "gap": "黄金比レイアウトの無料Canva共有リンクと、クリック率が跳ね上がるフォント配色集を提供。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "新任リーダーのための『部下の本音を引き出す1on1アジェンダ50選』",
@@ -350,7 +350,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "マネジメント・ビジネス実務",
                 "demand": "若手社員とのコミュニケーション課題に対する具体的な質問集への課金意欲が高い。",
                 "gap": "精神論ではなく、心理的安全性を担保しながら課題を特定する心理学的フレームワークを網羅。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "SNS運用代行で月10万円を堅実に稼ぐ『クライアント提案書＆業務マニュアル』",
@@ -366,7 +366,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "プログラミング・自動化",
                 "demand": "環境構築で挫折する層が多く、コピペで動くGoogle Colab完結型の需要が強い。",
                 "gap": "PCへのインストール不要、ブラウザ上で1クリック実行できる完成コードを提供。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "ChatGPT×企画書作成 10分で上司のOKが出る『プレゼン骨子ジェネレーター』",
@@ -374,7 +374,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "AI×企画力向上",
                 "demand": "『企画が通らない』悩みを解決する構造化プロンプトへの関心が非常に高い。",
                 "gap": "課題提起から投資対効果（ROI）算出までのストーリーラインを自動生成するプロンプト群。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "個人開発者のための『初期ユーザー100人を完全無料で集めるWeb集客プレイブック』",
@@ -390,7 +390,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "タイムマネジメント・生産性",
                 "demand": "『時間術』『タスク管理』は自己啓発・ビジネス両面で安定したベストセラージャンル。",
                 "gap": "時間割ブロック方式で1日のスケジュールを自動同期するNotion構築マニュアル。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "Google Apps Script (GAS) で毎朝のSlack＆メール通知を全自動化する時短コード集",
@@ -398,7 +398,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "業務自動化・GAS",
                 "demand": "完全無料で使えるGASによる通知自動化は中小企業・個人事業主で高い関心。",
                 "gap": "トリガー設定の画面付きマニュアルと、コピペですぐ動くエラー対策済みコードを完備。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "未経験から月5万円を稼ぐ『Kindle出版×noteクロス展開マーケティング戦略』",
@@ -414,7 +414,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "生成AI・画像制作",
                 "demand": "プロンプトの微調整で失敗する人が多く、高クオリティ出力の再現呪文が求められている。",
                 "gap": "審査に通る解像度・構図・照明の黄金パラメータをジャンル別に完全網羅。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "コンサル直伝！『読まれる提案書・報告書を作るロジカルシンキング7つの型』",
@@ -422,7 +422,7 @@ noteプラットフォームにおける最新の購買トレンド、競合記�
                 "category": "ドキュメント作成・論理思考",
                 "demand": "説得力のある資料作成スキルの向上は、全職種で普遍的な強いニーズ。",
                 "gap": "抽象的なピラミッドストラクチャーではなく、スライド1枚ずつの型式テンプレートを提供。",
-                "price": 500
+                "price": 300
             },
             {
                 "theme": "会社員のための『週末3時間で完成する確定申告・副業節税チェックシート』",
