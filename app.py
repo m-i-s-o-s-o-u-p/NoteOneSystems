@@ -1008,8 +1008,22 @@ elif page_id == "office":
     st.markdown(f"<div class='main-header'>{t('office_main_header', lang)}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='sub-header'>{t('office_sub_header', lang)}</div>", unsafe_allow_html=True)
 
-    # 👑 決裁待ち案件の集計（タブバッジ用）
+
+    st.markdown(f"<div class='section-title'>{t('office_sec_title', lang)}</div>", unsafe_allow_html=True)
+
+    game_html = get_office_game_html(lang)
+    components.html(game_html, height=545)
+
+
+    # -------------------------------------------------------------
+    # 👑 全社統合決裁センター (Universal Executive Approval Center)
+    # -------------------------------------------------------------
+    st.markdown("---")
+    st.markdown(f"<div class='section-title'>👑 {'全社統合決裁センター' if lang=='ja' else 'Universal Executive Approval Center'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 18px;'>{'全社各部門の決裁待ち申請を一覧（レコード）として並べています。ラジオボタンで1件選択し、単一の査読エリアで審査・決裁を行ってください。' if lang=='ja' else 'All pending submissions across departments are listed below. Select one submission via radio button to inspect and sign off in the single review dossier.'}</div>", unsafe_allow_html=True)
+
     pending_items = []
+    # 1. 記事制作課・品質管理課（記事・成果物）- 決裁待ち(Pending Owner Approval)のみ抽出
     for art in workflow.list_articles():
         if art.get("status") == "Pending Owner Approval":
             r_dept = art.get("routed_dept", "qa")
@@ -1026,6 +1040,8 @@ elif page_id == "office":
                 "status": art.get("status", "Pending Owner Approval"),
                 "data": art
             })
+            
+    # 2. 市場調査課（企画トピック）- 決裁待ち(Pending Owner Approval)のみ抽出
     for tp in market_manager.list_topics():
         if tp.get("status") == "Pending Owner Approval":
             pending_items.append({
@@ -1040,521 +1056,503 @@ elif page_id == "office":
                 "data": tp
             })
 
-    tab_approval_title = f"👑 全社統合決裁センター ({len(pending_items)}件)" if lang == "ja" else f"👑 Universal Approval Center ({len(pending_items)})"
-    tab_floor_title = "🏢 2Dオフィスフロア & 社員対話デスク" if lang == "ja" else "🏢 2D Virtual Office & Employee Desk"
+    if not pending_items:
+        st.success("✅ 現在、全社で決裁待ちの案件はありません（すべての部門の案件が承認・処理済みです）。" if lang=="ja" else "✅ All company-wide submissions have been reviewed and approved.")
+    else:
+        topic_items = [it for it in pending_items if it["type"] == "topic"]
+        art_items = [it for it in pending_items if it["type"] == "article"]
 
-    tab_app, tab_floor = st.tabs([tab_approval_title, tab_floor_title])
-    with tab_app:
-        # -------------------------------------------------------------
-        # 👑 全社統合決裁センター (Universal Executive Approval Center)
-        # -------------------------------------------------------------
-        st.markdown("---")
-        st.markdown(f"<div class='section-title'>👑 {'全社統合決裁センター' if lang=='ja' else 'Universal Executive Approval Center'}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div style='color: #94A3B8; margin-bottom: 18px;'>{'全社各部門の決裁待ち申請を一覧（レコード）として並べています。ラジオボタンで1件選択し、単一の査読エリアで審査・決裁を行ってください。' if lang=='ja' else 'All pending submissions across departments are listed below. Select one submission via radio button to inspect and sign off in the single review dossier.'}</div>", unsafe_allow_html=True)
+        # カテゴリー分類タブ・フィルター
+        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+        c_flt1, c_flt2 = st.columns([3, 1])
+        with c_flt1:
+            cat_options = []
+            if topic_items:
+                cat_options.append("topics")
+            if art_items:
+                cat_options.append("articles")
+            if topic_items and art_items:
+                cat_options.append("all")
 
-        if not pending_items:
-            st.success("✅ 現在、全社で決裁待ちの案件はありません（すべての部門の案件が承認・処理済みです）。" if lang=="ja" else "✅ All company-wide submissions have been reviewed and approved.")
-        else:
-            topic_items = [it for it in pending_items if it["type"] == "topic"]
-            art_items = [it for it in pending_items if it["type"] == "article"]
-
-            # カテゴリー分類タブ・フィルター
-            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-            c_flt1, c_flt2 = st.columns([3, 1])
-            with c_flt1:
-                cat_options = []
-                if topic_items:
-                    cat_options.append("topics")
-                if art_items:
-                    cat_options.append("articles")
-                if topic_items and art_items:
-                    cat_options.append("all")
-
-                filter_mode = st.radio(
-                    "📂 決裁カテゴリーの選択:",
-                    options=cat_options,
-                    format_func=lambda x: {
-                        "topics": f"🔍 市場調査課・企画決裁 ({len(topic_items)}件)",
-                        "articles": f"📄 記事・成果物最終決裁 ({len(art_items)}件)",
-                        "all": f"🌐 全社すべての申請 ({len(pending_items)}件)"
-                    }.get(x, x),
-                    horizontal=True,
-                    key="univ_cat_filter"
-                )
-            with c_flt2:
-                st.caption("🛡️ 社内規程【Rule-OPS-AUTO】準拠\n承認完了後は指定先部署へ自動連携されます。")
-
-            filtered_items = topic_items if filter_mode == "topics" else (art_items if filter_mode == "articles" else pending_items)
-            if not filtered_items:
-                filtered_items = pending_items
-
-            # レコード一覧（ラジオボタン直接組み込み型テーブル）
-            st.markdown(f"#### 📋 {'決裁待ち申請レコード一覧（行のラジオボタンで直接選択）' if lang=='ja' else 'Pending Submissions Queue (Direct Radio Selection)'}")
-
-            pending_key_map = {it["unique_key"]: it for it in pending_items}
-            valid_options = [it["unique_key"] for it in filtered_items]
-
-            if "univ_record_radio_table" in st.session_state and st.session_state.univ_record_radio_table not in valid_options:
-                del st.session_state["univ_record_radio_table"]
-
-            # テーブルヘッダー表示
-            st.html("""
-            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #334155; border-radius: 8px 8px 0 0; padding: 10px 16px; display: flex; align-items: center; font-size: 0.82rem; font-weight: 800; color: #94A3B8; border-bottom: 2px solid #1E293B; letter-spacing: 0.02em;">
-                <span style="width: 100px; display: inline-flex; align-items: center; gap: 4px;">🔘 選択 / No.</span>
-                <span style="width: 180px;">種別 / 所属</span>
-                <span style="flex: 1;">申請件名 / タイトル</span>
-                <span style="width: 120px; text-align: right;">申請日時</span>
-            </div>
-            """)
-
-            def format_table_radio_row(key):
-                it = pending_key_map[key]
-                idx = valid_options.index(key) + 1
-                date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
-                return f"**No.{idx:02d}**　{it['icon']} **[{it['dept']}]**　**{it['title']}**　`{date_str}`"
-
-            captions_list = [
-                f"📌 申請ステータス: {it['status']} ｜ 担当部署: {it['dept']}"
-                for it in filtered_items
-            ]
-
-            selected_key = st.radio(
-                "👇 査読・決裁を行う申請を選択してください:",
-                options=valid_options,
-                format_func=format_table_radio_row,
-                captions=captions_list,
-                key="univ_record_radio_table",
-                label_visibility="collapsed"
+            filter_mode = st.radio(
+                "📂 決裁カテゴリーの選択:",
+                options=cat_options,
+                format_func=lambda x: {
+                    "topics": f"🔍 市場調査課・企画決裁 ({len(topic_items)}件)",
+                    "articles": f"📄 記事・成果物最終決裁 ({len(art_items)}件)",
+                    "all": f"🌐 全社すべての申請 ({len(pending_items)}件)"
+                }.get(x, x),
+                horizontal=True,
+                key="univ_cat_filter"
             )
+        with c_flt2:
+            st.caption("🛡️ 社内規程【Rule-OPS-AUTO】準拠\n承認完了後は指定先部署へ自動連携されます。")
 
-            current_item = pending_key_map[selected_key]
-            item_type = current_item["type"]
-            item_raw = current_item["data"]
-            cur_status = current_item["status"]
+        filtered_items = topic_items if filter_mode == "topics" else (art_items if filter_mode == "articles" else pending_items)
+        if not filtered_items:
+            filtered_items = pending_items
 
-            # 3. 単一の査読エリア（選択された1件のプレビューを表示 - st.htmlによる完全クリーンレンダリング）
-            st.markdown("---")
-            st.markdown(f"<div class='section-title'>📄 {'審査書類・プレビュー（査読エリア）' if lang=='ja' else 'Review Dossier (Single Inspection Area)'}</div>", unsafe_allow_html=True)
+        # レコード一覧（ラジオボタン直接組み込み型テーブル）
+        st.markdown(f"#### 📋 {'決裁待ち申請レコード一覧（行のラジオボタンで直接選択）' if lang=='ja' else 'Pending Submissions Queue (Direct Radio Selection)'}")
 
-            if item_type == "article":
-                st.html(get_article_dossier_html(item_raw, lang))
-            elif item_type == "topic":
-                st.html(get_topic_dossier_html(item_raw, lang))
+        pending_key_map = {it["unique_key"]: it for it in pending_items}
+        valid_options = [it["unique_key"] for it in filtered_items]
 
-            # 4. 査読エリアの直下に「承認」「✍️ 否認」「拒否」ボタンを表示
-            st.markdown("---")
-            st.markdown(f"<div class='section-title'>👑 {'オーナー最終決裁欄' if lang=='ja' else 'Executive Decision Gateway'}</div>", unsafe_allow_html=True)
+        if "univ_record_radio_table" in st.session_state and st.session_state.univ_record_radio_table not in valid_options:
+            del st.session_state["univ_record_radio_table"]
 
-            # 💰 価格変更ウィジェット（記事の場合）
-            if item_type == "article":
-                cur_price = item_raw.get("price", 300)
-                c_pr1, c_pr2 = st.columns([3, 1])
-                with c_pr1:
-                    new_price_val = st.number_input(
-                        "💰 販売価格の変更・調整 (note販売価格):",
-                        min_value=100,
-                        max_value=50000,
-                        value=int(cur_price),
-                        step=50,
-                        key=f"univ_price_input_{item_raw['id']}",
-                        help="noteでの販売価格（100円〜50,000円）を設定できます。売上目標や財務試算に即時反映されます。"
-                    )
-                with c_pr2:
-                    st.write("")
-                    if st.button("💾 価格を更新", key=f"univ_price_btn_{item_raw['id']}", use_container_width=True):
-                        workflow.update_article_price(item_raw["id"], new_price_val)
-                        st.success(f"販売価格を ¥{new_price_val:,} に更新しました！")
-                        st.rerun()
+        # テーブルヘッダー表示
+        st.html("""
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid #334155; border-radius: 8px 8px 0 0; padding: 10px 16px; display: flex; align-items: center; font-size: 0.82rem; font-weight: 800; color: #94A3B8; border-bottom: 2px solid #1E293B; letter-spacing: 0.02em;">
+            <span style="width: 100px; display: inline-flex; align-items: center; gap: 4px;">🔘 選択 / No.</span>
+            <span style="width: 180px;">種別 / 所属</span>
+            <span style="flex: 1;">申請件名 / タイトル</span>
+            <span style="width: 120px; text-align: right;">申請日時</span>
+        </div>
+        """)
 
-            st.markdown(f"""
-            <div class='approval-box-locked'>
-                <div style='display: flex; justify-content: space-between; align-items: center;'>
-                    <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
-                    <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
-                </div>
-                <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
-                    {'上記査読エリアの申請内容を確認の上、「承認」「✍️ 否認」「拒否」の決裁を行ってください。' if lang=='ja' else 'Review the dossier above and select Approve, Deny, or Reject.'}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        def format_table_radio_row(key):
+            it = pending_key_map[key]
+            idx = valid_options.index(key) + 1
+            date_str = f" [{it['date'][5:16]}]" if it.get("date") else ""
+            return f"**No.{idx:02d}**　{it['icon']} **[{it['dept']}]**　**{it['title']}**　`{date_str}`"
 
-            col_dec1, col_dec2, col_dec3 = st.columns([2, 2, 1])
+        captions_list = [
+            f"📌 申請ステータス: {it['status']} ｜ 担当部署: {it['dept']}"
+            for it in filtered_items
+        ]
 
-            with col_dec1:
-                if st.button("承認", type="primary", use_container_width=True, key="univ_btn_approve"):
-                    if item_type == "article":
-                        workflow.approve_article(current_item["id"])
-                        st.success("🎉 記事を承認しました！投稿ロックを解除しました。")
-                    else:
-                        market_manager.approve_topic(current_item["id"])
-                        market_manager.mark_topic_in_production(current_item["id"])
-                        st.session_state.prefill_topic = clean_txt(item_raw.get("title", ""))
-                        st.session_state.prefill_audience = clean_txt(item_raw.get("target_audience", ""))
-                        st.session_state.auto_start_creation = True
-                        st.session_state.active_page_id = "content_creation"
-                    st.session_state.show_univ_rev_form = False
-                    if "univ_record_radio_table" in st.session_state:
-                        del st.session_state["univ_record_radio_table"]
-                    st.session_state.scroll_trigger += 1
-                    st.rerun()
+        selected_key = st.radio(
+            "👇 査読・決裁を行う申請を選択してください:",
+            options=valid_options,
+            format_func=format_table_radio_row,
+            captions=captions_list,
+            key="univ_record_radio_table",
+            label_visibility="collapsed"
+        )
 
-            with col_dec2:
-                if st.button("✍️ 否認", use_container_width=True, key="univ_btn_toggle_revision"):
-                    st.session_state.show_univ_rev_form = not st.session_state.show_univ_rev_form
-                    st.rerun()
+        current_item = pending_key_map[selected_key]
+        item_type = current_item["type"]
+        item_raw = current_item["data"]
+        cur_status = current_item["status"]
 
-            with col_dec3:
-                if st.button("拒否", use_container_width=True, key="univ_btn_reject"):
-                    if item_type == "article":
-                        workflow.reject_article(current_item["id"])
-                        st.info("記事を拒否（却下・アーカイブ）しました。")
-                    else:
-                        market_manager.reject_topic(current_item["id"])
-                        st.info("トピックを拒否（却下）しました。")
-                    st.session_state.show_univ_rev_form = False
-                    if "univ_record_radio_table" in st.session_state:
-                        del st.session_state["univ_record_radio_table"]
-                    st.session_state.scroll_trigger += 1
-                    st.rerun()
-
-            # 否認時の指示入力フォーム
-            if st.session_state.show_univ_rev_form:
-                with st.container():
-                    st.markdown(f"#### ✍️ {'否認・修正指示の入力（社内ルール【Rule-OPS-AUTO】）' if lang=='ja' else 'Denial & Revision Directives'}")
-                    with st.form("univ_revision_form", clear_on_submit=True):
-                        univ_target_dept = "content_creation"
-                        if item_type == "article":
-                            univ_target_dept = st.radio(
-                                "🎯 差し戻し・業務送付先を選択してください（社内ルール【Rule-OPS-AUTO】）:",
-                                options=["content_creation", "market_research", "pr"],
-                                format_func=lambda x: {
-                                    "content_creation": "✍️ 記事制作課（結城 紬 & 森川 拓真）- 構成案・執筆・有料テンプレートの再修正",
-                                    "market_research": "🔍 市場調査課（風間 涼）- ターゲット読者層・市場ニーズ・競合ギャップの再調査",
-                                    "pr": "📢 広報課（佐々木 翼）- 5大SNSプロモーション文・キャッチコピーの再考"
-                                }.get(x, x),
-                                index=0,
-                                help="社内業務連携規程に基づき、否認理由に応じてタスクを再送付する部署を選択します。"
-                            )
-                        fb_text = st.text_area(
-                            "修正・再調査の具体的な指示内容を入力してください:",
-                            placeholder="例: 有料部分のテンプレートの具体例をもう1つ追加してください。 / ターゲット層を20代若手社員向けに変更して再調査してください。",
-                            key="univ_feedback_input"
-                        )
-                        submit_univ_rev = st.form_submit_button("📨 否認指示を送信する", type="primary", use_container_width=True)
-                        if submit_univ_rev:
-                            if fb_text.strip():
-                                if item_type == "article":
-                                    workflow.request_revision(current_item["id"], fb_text, target_dept=univ_target_dept)
-                                    workflow.auto_revise_and_forward_to_qa(current_item["id"], fb_text, target_dept=univ_target_dept)
-                                    dept_label = {"content_creation": "記事制作課", "market_research": "市場調査課", "pr": "広報課"}.get(univ_target_dept, "担当課")
-                                    st.success(f"🎉 社内ルール【Rule-OPS-AUTO】に基づき、{dept_label}がご指摘に基づき加筆・修正を自律完了し、自動で品質管理課へ再送付しました！")
-                                else:
-                                    market_manager.request_revision(current_item["id"], fb_text)
-                                    st.success("🎉 社内ルール【Rule-OPS-AUTO】に基づき、市場調査課（風間アナリスト）が再調査を自律完了し、決裁待ちへ自動再申請しました！")
-                                st.session_state.show_univ_rev_form = False
-                                if "univ_record_radio_table" in st.session_state:
-                                    del st.session_state["univ_record_radio_table"]
-                                st.session_state.scroll_trigger += 1
-                                st.rerun()
-                            else:
-                                st.error("指示内容を入力してください。")
-
-        # -------------------------------------------------------------
-        # 🔄 担当課にて修正・再執筆対応中の案件 (Revision Queue)
-        # -------------------------------------------------------------
-        in_revision_items = []
-        for art in workflow.list_articles():
-            if art.get("status") == "Revision Requested":
-                r_dept = art.get("routed_dept", "content_creation")
-                r_icon = "🔍" if r_dept == "market_research" else ("📢" if r_dept == "pr" else "✍️")
-                r_name = art.get("routed_dept_name", "記事制作課 (結城 紬 & 森川 拓真)")
-                art_no_tag = f"[{art.get('article_no', 'No.01')}] " if art.get("article_no") else ""
-                in_revision_items.append({
-                    "id": art["id"],
-                    "type": "article",
-                    "dept": r_name,
-                    "icon": r_icon,
-                    "title": f"{art_no_tag}{clean_txt(art.get('title', ''))}",
-                    "feedback": clean_txt(art.get("latest_feedback", "修正対応中")),
-                    "date": art.get("created_at", "")
-                })
-        for tp in market_manager.list_topics():
-            if tp.get("status") == "Revision Requested":
-                in_revision_items.append({
-                    "id": tp["id"],
-                    "type": "topic",
-                    "dept": "市場調査課 (風間 涼)",
-                    "icon": "🔍",
-                    "title": clean_txt(tp.get("title", "")),
-                    "feedback": clean_txt(tp.get("latest_feedback", "再調査対応中")),
-                    "date": tp.get("created_at", "")
-                })
-
-        if in_revision_items:
-            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-            st.markdown(f"#### 🔄 {'各課にて修正・再調査対応中の案件 (Rule-OPS-AUTO)' if lang=='ja' else 'Revisions In-Progress by Departments'}")
-            for rev_it in in_revision_items:
-                with st.container():
-                    c_rv1, c_rv2 = st.columns([4, 1])
-                    with c_rv1:
-                        st.markdown(f"""
-                        <div style='background: #1E1B4B; border: 1px solid #6366F1; border-radius: 8px; padding: 14px; margin-bottom: 8px;'>
-                            <strong style='color: #A5B4FC; font-size: 0.95rem;'>{rev_it['icon']} [{rev_it['dept']}] {rev_it['title']}</strong>
-                            <div style='color: #E0E7FF; font-size: 0.88rem; margin-top: 4px;'><strong>💬 指示内容:</strong> {rev_it['feedback']}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    with c_rv2:
-                        st.write("")
-                        st.markdown("""
-                        <div style='text-align: center; margin-top: 4px;'>
-                            <span style='background: #312E81; color: #A5B4FC; border: 1px solid #6366F1; font-size: 0.76rem; font-weight: 700; padding: 6px 8px; border-radius: 6px; display: inline-block; line-height: 1.3;'>
-                                🤖 Rule-OPS-AUTO<br>自律修正中
-                            </span>
-                        </div>
-                        """, unsafe_allow_html=True)
-
-
-    with tab_floor:
-
-        st.markdown(f"<div class='section-title'>{t('office_sec_title', lang)}</div>", unsafe_allow_html=True)
-
-        game_html = get_office_game_html(lang)
-        components.html(game_html, height=545)
-
-        # -------------------------------------------------------------
-        # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
-        # -------------------------------------------------------------
+        # 3. 単一の査読エリア（選択された1件のプレビューを表示 - st.htmlによる完全クリーンレンダリング）
         st.markdown("---")
-        st.markdown(f"<div class='section-title'>{t('consult_title', lang)}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='section-title'>📄 {'審査書類・プレビュー（査読エリア）' if lang=='ja' else 'Review Dossier (Single Inspection Area)'}</div>", unsafe_allow_html=True)
 
-        # Load dynamic employees from company_info.json
-        comp_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/company_info.json")
-        if os.path.exists(comp_file):
-            with open(comp_file, "r", encoding="utf-8") as f:
-                all_c_info = json.load(f)
-            all_emps = all_c_info.get("employees", [])
-        else:
-            all_emps = []
+        if item_type == "article":
+            st.html(get_article_dossier_html(item_raw, lang))
+        elif item_type == "topic":
+            st.html(get_topic_dossier_html(item_raw, lang))
 
-        assign_options = [t("consult_assign_auto", lang)]
-        assignee_map = {t("consult_assign_auto", lang): "auto"}
-        for e in all_emps:
-            short_role = e.get("role", "AI").split("/")[0].strip()
-            opt_str = f"{e.get('icon', '👤')} {e['name']} ({short_role})"
-            assign_options.append(opt_str)
-            assignee_map[opt_str] = e["id"]
+        # 4. 査読エリアの直下に「承認」「✍️ 否認」「拒否」ボタンを表示
+        st.markdown("---")
+        st.markdown(f"<div class='section-title'>👑 {'オーナー最終決裁欄' if lang=='ja' else 'Executive Decision Gateway'}</div>", unsafe_allow_html=True)
 
-        with st.form("office_consultation_form", clear_on_submit=True):
-            c_in_q1, c_in_q2 = st.columns([4, 1])
-            with c_in_q1:
-                user_inquiry = st.text_input(
-                    t("consult_input_label", lang),
-                    placeholder=t("consult_placeholder", lang)
+        # 💰 価格変更ウィジェット（記事の場合）
+        if item_type == "article":
+            cur_price = item_raw.get("price", 300)
+            c_pr1, c_pr2 = st.columns([3, 1])
+            with c_pr1:
+                new_price_val = st.number_input(
+                    "💰 販売価格の変更・調整 (note販売価格):",
+                    min_value=100,
+                    max_value=50000,
+                    value=int(cur_price),
+                    step=50,
+                    key=f"univ_price_input_{item_raw['id']}",
+                    help="noteでの販売価格（100円〜50,000円）を設定できます。売上目標や財務試算に即時反映されます。"
                 )
-            with c_in_q2:
-                target_assignee = st.selectbox(t("consult_assign_label", lang), assign_options)
-            submit_inquiry = st.form_submit_button(t("consult_submit_btn", lang), type="primary", use_container_width=True)
+            with c_pr2:
+                st.write("")
+                if st.button("💾 価格を更新", key=f"univ_price_btn_{item_raw['id']}", use_container_width=True):
+                    workflow.update_article_price(item_raw["id"], new_price_val)
+                    st.success(f"販売価格を ¥{new_price_val:,} に更新しました！")
+                    st.rerun()
 
-        if submit_inquiry and user_inquiry.strip():
-            chosen_emp = assignee_map.get(target_assignee, "auto")
+        st.markdown(f"""
+        <div class='approval-box-locked'>
+            <div style='display: flex; justify-content: space-between; align-items: center;'>
+                <h3 style='color: #FCD34D !important; margin:0;'>🔒 Status: {cur_status}</h3>
+                <span style='background:#F59E0B; color:#000; font-weight:800; padding:4px 10px; border-radius:6px;'>{'決裁待ち' if lang=='ja' else 'Pending'}</span>
+            </div>
+            <div style='margin-top: 10px; font-size: 0.95rem; line-height: 1.6;'>
+                {'上記査読エリアの申請内容を確認の上、「承認」「✍️ 否認」「拒否」の決裁を行ってください。' if lang=='ja' else 'Review the dossier above and select Approve, Deny, or Reject.'}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            with st.spinner("担当者がデスクで回答を作成中..." if lang == "ja" else "Specialist is drafting the response..."):
-                response_data = chat_manager.generate_response(user_inquiry, chosen_emp)
-                st.session_state.office_chat_history.append({
-                    "user": user_inquiry,
-                    "response": response_data,
-                    "timestamp": datetime.now().strftime("%H:%M:%S")
-                })
+        col_dec1, col_dec2, col_dec3 = st.columns([2, 2, 1])
+
+        with col_dec1:
+            if st.button("承認", type="primary", use_container_width=True, key="univ_btn_approve"):
+                if item_type == "article":
+                    workflow.approve_article(current_item["id"])
+                    st.success("🎉 記事を承認しました！投稿ロックを解除しました。")
+                else:
+                    market_manager.approve_topic(current_item["id"])
+                    market_manager.mark_topic_in_production(current_item["id"])
+                    st.session_state.prefill_topic = clean_txt(item_raw.get("title", ""))
+                    st.session_state.prefill_audience = clean_txt(item_raw.get("target_audience", ""))
+                    st.session_state.auto_start_creation = True
+                    st.session_state.active_page_id = "content_creation"
+                st.session_state.show_univ_rev_form = False
+                if "univ_record_radio_table" in st.session_state:
+                    del st.session_state["univ_record_radio_table"]
+                st.session_state.scroll_trigger += 1
                 st.rerun()
 
-        if st.session_state.office_chat_history:
-            st.markdown(f"#### {t('consult_log_title', lang)}")
-            for item in reversed(st.session_state.office_chat_history):
-                resp = item["response"]
-                st.markdown(f"""
-                <div class='user-query-card'>
-                    <div style='font-size: 0.8rem; color: #94A3B8;'>🕒 {item.get('timestamp', '')} | <strong>{t('consult_user_prefix', lang)}</strong></div>
-                    <div style='font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-top: 4px;'>{clean_txt(item['user'])}</div>
-                </div>
-                <div class='chat-bubble'>
-                    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
-                        <div style='font-weight: 800; color: #FFFFFF; font-size: 1.1rem;'>
-                            {resp.get('icon', '🧑‍💼')} {resp.get('name', '担当社員')} <span style='font-size: 0.85rem; color: #93C5FD; font-weight: 600;'>（{resp.get('role', '')} / {resp.get('department', '')}）</span>
-                        </div>
-                        <span class='status-live'><span class='pulse-dot'></span>{t('consult_status_done', lang)}</span>
-                    </div>
-                    <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{clean_txt(resp.get('content', ''))}</div>
-                </div>
-                """, unsafe_allow_html=True)
+        with col_dec2:
+            if st.button("✍️ 否認", use_container_width=True, key="univ_btn_toggle_revision"):
+                st.session_state.show_univ_rev_form = not st.session_state.show_univ_rev_form
+                st.rerun()
 
-                if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "hire", "recruit"]):
-                    c_jump1, c_jump2 = st.columns([2, 1])
-                    with c_jump2:
-                        if st.button("👉 🤝 人事課（HR）の採用・雇用デスクへ移動", key=f"btn_jump_hr_{item.get('timestamp')}", use_container_width=True, type="primary"):
-                            st.session_state.active_page_id = "hr"
+        with col_dec3:
+            if st.button("拒否", use_container_width=True, key="univ_btn_reject"):
+                if item_type == "article":
+                    workflow.reject_article(current_item["id"])
+                    st.info("記事を拒否（却下・アーカイブ）しました。")
+                else:
+                    market_manager.reject_topic(current_item["id"])
+                    st.info("トピックを拒否（却下）しました。")
+                st.session_state.show_univ_rev_form = False
+                if "univ_record_radio_table" in st.session_state:
+                    del st.session_state["univ_record_radio_table"]
+                st.session_state.scroll_trigger += 1
+                st.rerun()
+
+        # 否認時の指示入力フォーム
+        if st.session_state.show_univ_rev_form:
+            with st.container():
+                st.markdown(f"#### ✍️ {'否認・修正指示の入力（社内ルール【Rule-OPS-AUTO】）' if lang=='ja' else 'Denial & Revision Directives'}")
+                with st.form("univ_revision_form", clear_on_submit=True):
+                    univ_target_dept = "content_creation"
+                    if item_type == "article":
+                        univ_target_dept = st.radio(
+                            "🎯 差し戻し・業務送付先を選択してください（社内ルール【Rule-OPS-AUTO】）:",
+                            options=["content_creation", "market_research", "pr"],
+                            format_func=lambda x: {
+                                "content_creation": "✍️ 記事制作課（結城 紬 & 森川 拓真）- 構成案・執筆・有料テンプレートの再修正",
+                                "market_research": "🔍 市場調査課（風間 涼）- ターゲット読者層・市場ニーズ・競合ギャップの再調査",
+                                "pr": "📢 広報課（佐々木 翼）- 5大SNSプロモーション文・キャッチコピーの再考"
+                            }.get(x, x),
+                            index=0,
+                            help="社内業務連携規程に基づき、否認理由に応じてタスクを再送付する部署を選択します。"
+                        )
+                    fb_text = st.text_area(
+                        "修正・再調査の具体的な指示内容を入力してください:",
+                        placeholder="例: 有料部分のテンプレートの具体例をもう1つ追加してください。 / ターゲット層を20代若手社員向けに変更して再調査してください。",
+                        key="univ_feedback_input"
+                    )
+                    submit_univ_rev = st.form_submit_button("📨 否認指示を送信する", type="primary", use_container_width=True)
+                    if submit_univ_rev:
+                        if fb_text.strip():
+                            if item_type == "article":
+                                workflow.request_revision(current_item["id"], fb_text, target_dept=univ_target_dept)
+                                workflow.auto_revise_and_forward_to_qa(current_item["id"], fb_text, target_dept=univ_target_dept)
+                                dept_label = {"content_creation": "記事制作課", "market_research": "市場調査課", "pr": "広報課"}.get(univ_target_dept, "担当課")
+                                st.success(f"🎉 社内ルール【Rule-OPS-AUTO】に基づき、{dept_label}がご指摘に基づき加筆・修正を自律完了し、自動で品質管理課へ再送付しました！")
+                            else:
+                                market_manager.request_revision(current_item["id"], fb_text)
+                                st.success("🎉 社内ルール【Rule-OPS-AUTO】に基づき、市場調査課（風間アナリスト）が再調査を自律完了し、決裁待ちへ自動再申請しました！")
+                            st.session_state.show_univ_rev_form = False
+                            if "univ_record_radio_table" in st.session_state:
+                                del st.session_state["univ_record_radio_table"]
+                            st.session_state.scroll_trigger += 1
                             st.rerun()
+                        else:
+                            st.error("指示内容を入力してください。")
 
-            if st.button(t("consult_clear_btn", lang)):
-                st.session_state.office_chat_history = []
-                st.rerun()
+    # -------------------------------------------------------------
+    # 🔄 担当課にて修正・再執筆対応中の案件 (Revision Queue)
+    # -------------------------------------------------------------
+    in_revision_items = []
+    for art in workflow.list_articles():
+        if art.get("status") == "Revision Requested":
+            r_dept = art.get("routed_dept", "content_creation")
+            r_icon = "🔍" if r_dept == "market_research" else ("📢" if r_dept == "pr" else "✍️")
+            r_name = art.get("routed_dept_name", "記事制作課 (結城 紬 & 森川 拓真)")
+            art_no_tag = f"[{art.get('article_no', 'No.01')}] " if art.get("article_no") else ""
+            in_revision_items.append({
+                "id": art["id"],
+                "type": "article",
+                "dept": r_name,
+                "icon": r_icon,
+                "title": f"{art_no_tag}{clean_txt(art.get('title', ''))}",
+                "feedback": clean_txt(art.get("latest_feedback", "修正対応中")),
+                "date": art.get("created_at", "")
+            })
+    for tp in market_manager.list_topics():
+        if tp.get("status") == "Revision Requested":
+            in_revision_items.append({
+                "id": tp["id"],
+                "type": "topic",
+                "dept": "市場調査課 (風間 涼)",
+                "icon": "🔍",
+                "title": clean_txt(tp.get("title", "")),
+                "feedback": clean_txt(tp.get("latest_feedback", "再調査対応中")),
+                "date": tp.get("created_at", "")
+            })
 
-        # -------------------------------------------------------------
-        # リアルタイム社員デスク一覧
-        # -------------------------------------------------------------
-        st.markdown("---")
-        st.markdown(f"<div class='section-title'>{t('floor_status_title', lang)}</div>", unsafe_allow_html=True)
-
-        st.markdown(f"#### {t('floor_exec_title', lang)}")
-        col_f1, col_f2, col_f3 = st.columns(3)
-        with col_f1:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>👩‍💼</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'執務中' if lang=='ja' else 'Active'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'一条 蓮' if lang=='ja' else 'Ren Ichijo'}</div>
-                <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>{'代表取締役CEO' if lang=='ja' else 'Chief Executive Officer'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 CEO Executive Suite</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「全社売上最大化と、完全無料運用の規律を監督しています。」' if lang=='ja' else '"Supervising overall revenue maximization and ensuring 100% zero-cost operations."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_f2:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>⚖️</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'法務監視中' if lang=='ja' else 'Monitoring'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'橘 律' if lang=='ja' else 'Ritsu Tachibana'}</div>
-                <div style='font-size: 0.85rem; color: #CBD5E1; font-weight: 700;'>{'法務課 / 法務顧問' if lang=='ja' else 'Legal & Compliance Counsel'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Legal Department</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「会社法・著作権法・note規約の適合性を常時スクリーニングしています。」' if lang=='ja' else '"Continuously screening compliance with corporate law, copyright, and platform terms."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_f3:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>🤝</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'負荷監視中' if lang=='ja' else 'Active'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'綾瀬 七海' if lang=='ja' else 'Nanami Ayase'}</div>
-                <div style='font-size: 0.85rem; color: #6EE7B7; font-weight: 700;'>{'人事課 / 人事責任者' if lang=='ja' else 'HR & Culture Director'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 HR Department</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「各社員の業務負荷スコアを測定し、過負荷を未然に防止しています。」' if lang=='ja' else '"Monitoring workload metrics across all specialists to prevent operational bottlenecks."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.markdown(f"#### {t('floor_edit_title', lang)}")
-        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        with col_c1:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>🔍</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'調査中' if lang=='ja' else 'Analyzing'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'風間 涼' if lang=='ja' else 'Ryo Kazama'}</div>
-                <div style='font-size: 0.85rem; color: #5EEAD4; font-weight: 700;'>{'市場調査課' if lang=='ja' else 'Market Research Analyst'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Research Desk</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「note売れ筋トレンドと読者ペルソナを分析中です。」' if lang=='ja' else '"Analyzing note sales trends and subscriber personas in real time."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_c2:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>📑</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'構成中' if lang=='ja' else 'Structuring'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'結城 紬' if lang=='ja' else 'Tsumugi Yuki'}</div>
-                <div style='font-size: 0.85rem; color: #FCD34D; font-weight: 700;'>{'記事制作課 (編集長)' if lang=='ja' else 'Editor-in-Chief'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Editorial Studio</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「購入率を高める有料ラインの境界線を設計しています。」' if lang=='ja' else '"Designing optimal paywall thresholds to maximize conversion rates."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_c3:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>✍️</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'執筆待機' if lang=='ja' else 'Drafting'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'森川 拓真' if lang=='ja' else 'Takuma Morikawa'}</div>
-                <div style='font-size: 0.85rem; color: #FDBA74; font-weight: 700;'>{'記事制作課 (ライター)' if lang=='ja' else 'Chief Content Writer'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Writer Studio</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「コピペで使える実践テンプレート執筆スタンバイ完了。」' if lang=='ja' else '"Drafting actionable copy-and-paste practical templates."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_c4:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>🛡️</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'QA待機' if lang=='ja' else 'QA Ready'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'神崎 玲奈' if lang=='ja' else 'Reina Kanzaki'}</div>
-                <div style='font-size: 0.85rem; color: #FCA5A5; font-weight: 700;'>{'品質管理課 (QA)' if lang=='ja' else 'Quality Assurance Director'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 QA Inspection Booth</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「信憑性と100点採点スコアリングの準備万全です。」' if lang=='ja' else '"Conducting rigorous fact-checking and automated 100-point quality scoring."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.markdown(f"#### {t('floor_pr_fin_title', lang)}")
-        col_m1, col_m2 = st.columns(2)
-        with col_m1:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>📢</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'5大SNS待機' if lang=='ja' else 'Broadcasting'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'佐々木 翼' if lang=='ja' else 'Tsubasa Sasaki'}</div>
-                <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>{'広報課' if lang=='ja' else 'Multi-SNS PR Specialist'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 PR Hub</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「X・IG・Threads・Bluesky・Mastodonへの自動プロモーション待機中。」' if lang=='ja' else '"Automated multi-channel syndication ready for X, Threads, IG, Bluesky, Mastodon."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_m2:
-            st.markdown(f"""
-            <div class='desk-card'>
-                <div style='display: flex; justify-content: space-between;'>
-                    <span style='font-size: 1.6rem;'>📊</span>
-                    <span class='status-live'><span class='pulse-dot'></span>{'財務・経理分析中' if lang=='ja' else 'Auditing'}</span>
-                </div>
-                <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'白石 葵' if lang=='ja' else 'Aoi Shiraishi'}</div>
-                <div style='font-size: 0.85rem; color: #C4B5FD; font-weight: 700;'>{'財務課 ＆ 経理課' if lang=='ja' else 'Financial Strategist & Chief Accountant'}</div>
-                <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Finance & Accounting</div>
-                <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」' if lang=='ja' else '"Verified ¥0 monthly fixed costs. Ready for price optimization models."'}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # -------------------------------------------------------------
-        # ✨ 新規配属・増員スペシャリストデスク (Newly Recruited AI Specialists)
-        # -------------------------------------------------------------
-        base_9_ids = {"ichijo", "tachibana", "ayase", "kazama", "yuki", "morikawa", "kanzaki", "sasaki", "shiraishi"}
-        new_hired = [e for e in all_emps if e.get("id") not in base_9_ids]
-
-        if new_hired:
-            st.markdown(f"#### ✨ {'新規配属・増員スペシャリストデスク (稼働中)' if lang=='ja' else 'Reinforcement & Newly Recruited Specialists (Active)'}")
-            cols_nh = st.columns(min(len(new_hired), 3))
-            for idx, emp in enumerate(new_hired):
-                c_nh = cols_nh[idx % len(cols_nh)]
-                with c_nh:
+    if in_revision_items:
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+        st.markdown(f"#### 🔄 {'各課にて修正・再調査対応中の案件 (Rule-OPS-AUTO)' if lang=='ja' else 'Revisions In-Progress by Departments'}")
+        for rev_it in in_revision_items:
+            with st.container():
+                c_rv1, c_rv2 = st.columns([4, 1])
+                with c_rv1:
                     st.markdown(f"""
-                    <div class='desk-card' style='border: 1px solid #38BDF8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15); border-left: 5px solid {emp.get("color", "#38BDF8")};'>
-                        <div style='display: flex; justify-content: space-between;'>
-                            <span style='font-size: 1.6rem;'>{emp.get('icon', '👤')}</span>
-                            <span class='status-live' style='color: #38BDF8; border-color: #38BDF8;'><span class='pulse-dot' style='background: #38BDF8;'></span>{'即時稼働中' if lang=='ja' else 'Active'}</span>
-                        </div>
-                        <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{emp.get('name')}</div>
-                        <div style='font-size: 0.85rem; color: #38BDF8; font-weight: 700;'>{emp.get('role')}</div>
-                        <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 {emp.get('department')}（増員配属ブース）</div>
-                        <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「{clean_txt(emp.get('motto', '業務稼働中'))}」</div>
+                    <div style='background: #1E1B4B; border: 1px solid #6366F1; border-radius: 8px; padding: 14px; margin-bottom: 8px;'>
+                        <strong style='color: #A5B4FC; font-size: 0.95rem;'>{rev_it['icon']} [{rev_it['dept']}] {rev_it['title']}</strong>
+                        <div style='color: #E0E7FF; font-size: 0.88rem; margin-top: 4px;'><strong>💬 指示内容:</strong> {rev_it['feedback']}</div>
                     </div>
                     """, unsafe_allow_html=True)
+                with c_rv2:
+                    st.write("")
+                    st.markdown("""
+                    <div style='text-align: center; margin-top: 4px;'>
+                        <span style='background: #312E81; color: #A5B4FC; border: 1px solid #6366F1; font-size: 0.76rem; font-weight: 700; padding: 6px 8px; border-radius: 6px; display: inline-block; line-height: 1.3;'>
+                            🤖 Rule-OPS-AUTO<br>自律修正中
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+
+
+    # -------------------------------------------------------------
+    # 💬 社員との直接対話・質問・指示デスク (Employee Consultation Desk)
+    # -------------------------------------------------------------
+    st.markdown("---")
+    st.markdown(f"<div class='section-title'>{t('consult_title', lang)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #94A3B8; margin-bottom: 14px;'>{t('consult_sub', lang)}</div>", unsafe_allow_html=True)
+
+    # Load dynamic employees from company_info.json
+    comp_file = os.path.join(os.path.dirname(__file__), "companies/note_one_systems/company_info.json")
+    if os.path.exists(comp_file):
+        with open(comp_file, "r", encoding="utf-8") as f:
+            all_c_info = json.load(f)
+        all_emps = all_c_info.get("employees", [])
+    else:
+        all_emps = []
+
+    assign_options = [t("consult_assign_auto", lang)]
+    assignee_map = {t("consult_assign_auto", lang): "auto"}
+    for e in all_emps:
+        short_role = e.get("role", "AI").split("/")[0].strip()
+        opt_str = f"{e.get('icon', '👤')} {e['name']} ({short_role})"
+        assign_options.append(opt_str)
+        assignee_map[opt_str] = e["id"]
+
+    with st.form("office_consultation_form", clear_on_submit=True):
+        c_in_q1, c_in_q2 = st.columns([4, 1])
+        with c_in_q1:
+            user_inquiry = st.text_input(
+                t("consult_input_label", lang),
+                placeholder=t("consult_placeholder", lang)
+            )
+        with c_in_q2:
+            target_assignee = st.selectbox(t("consult_assign_label", lang), assign_options)
+        submit_inquiry = st.form_submit_button(t("consult_submit_btn", lang), type="primary", use_container_width=True)
+
+    if submit_inquiry and user_inquiry.strip():
+        chosen_emp = assignee_map.get(target_assignee, "auto")
+
+        with st.spinner("担当者がデスクで回答を作成中..." if lang == "ja" else "Specialist is drafting the response..."):
+            response_data = chat_manager.generate_response(user_inquiry, chosen_emp)
+            st.session_state.office_chat_history.append({
+                "user": user_inquiry,
+                "response": response_data,
+                "timestamp": datetime.now().strftime("%H:%M:%S")
+            })
+            st.rerun()
+
+    if st.session_state.office_chat_history:
+        st.markdown(f"#### {t('consult_log_title', lang)}")
+        for item in reversed(st.session_state.office_chat_history):
+            resp = item["response"]
+            st.markdown(f"""
+            <div class='user-query-card'>
+                <div style='font-size: 0.8rem; color: #94A3B8;'>🕒 {item.get('timestamp', '')} | <strong>{t('consult_user_prefix', lang)}</strong></div>
+                <div style='font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-top: 4px;'>{clean_txt(item['user'])}</div>
+            </div>
+            <div class='chat-bubble'>
+                <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
+                    <div style='font-weight: 800; color: #FFFFFF; font-size: 1.1rem;'>
+                        {resp.get('icon', '🧑‍💼')} {resp.get('name', '担当社員')} <span style='font-size: 0.85rem; color: #93C5FD; font-weight: 600;'>（{resp.get('role', '')} / {resp.get('department', '')}）</span>
+                    </div>
+                    <span class='status-live'><span class='pulse-dot'></span>{t('consult_status_done', lang)}</span>
+                </div>
+                <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{clean_txt(resp.get('content', ''))}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "hire", "recruit"]):
+                c_jump1, c_jump2 = st.columns([2, 1])
+                with c_jump2:
+                    if st.button("👉 🤝 人事課（HR）の採用・雇用デスクへ移動", key=f"btn_jump_hr_{item.get('timestamp')}", use_container_width=True, type="primary"):
+                        st.session_state.active_page_id = "hr"
+                        st.rerun()
+
+        if st.button(t("consult_clear_btn", lang)):
+            st.session_state.office_chat_history = []
+            st.rerun()
+
+    # -------------------------------------------------------------
+    # リアルタイム社員デスク一覧
+    # -------------------------------------------------------------
+    st.markdown("---")
+    st.markdown(f"<div class='section-title'>{t('floor_status_title', lang)}</div>", unsafe_allow_html=True)
+
+    st.markdown(f"#### {t('floor_exec_title', lang)}")
+    col_f1, col_f2, col_f3 = st.columns(3)
+    with col_f1:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>👩‍💼</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'執務中' if lang=='ja' else 'Active'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'一条 蓮' if lang=='ja' else 'Ren Ichijo'}</div>
+            <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>{'代表取締役CEO' if lang=='ja' else 'Chief Executive Officer'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 CEO Executive Suite</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「全社売上最大化と、完全無料運用の規律を監督しています。」' if lang=='ja' else '"Supervising overall revenue maximization and ensuring 100% zero-cost operations."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_f2:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>⚖️</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'法務監視中' if lang=='ja' else 'Monitoring'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'橘 律' if lang=='ja' else 'Ritsu Tachibana'}</div>
+            <div style='font-size: 0.85rem; color: #CBD5E1; font-weight: 700;'>{'法務課 / 法務顧問' if lang=='ja' else 'Legal & Compliance Counsel'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Legal Department</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「会社法・著作権法・note規約の適合性を常時スクリーニングしています。」' if lang=='ja' else '"Continuously screening compliance with corporate law, copyright, and platform terms."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_f3:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>🤝</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'負荷監視中' if lang=='ja' else 'Active'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'綾瀬 七海' if lang=='ja' else 'Nanami Ayase'}</div>
+            <div style='font-size: 0.85rem; color: #6EE7B7; font-weight: 700;'>{'人事課 / 人事責任者' if lang=='ja' else 'HR & Culture Director'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 HR Department</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「各社員の業務負荷スコアを測定し、過負荷を未然に防止しています。」' if lang=='ja' else '"Monitoring workload metrics across all specialists to prevent operational bottlenecks."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown(f"#### {t('floor_edit_title', lang)}")
+    col_c1, col_c2, col_c3, col_c4 = st.columns(4)
+    with col_c1:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>🔍</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'調査中' if lang=='ja' else 'Analyzing'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'風間 涼' if lang=='ja' else 'Ryo Kazama'}</div>
+            <div style='font-size: 0.85rem; color: #5EEAD4; font-weight: 700;'>{'市場調査課' if lang=='ja' else 'Market Research Analyst'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Research Desk</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「note売れ筋トレンドと読者ペルソナを分析中です。」' if lang=='ja' else '"Analyzing note sales trends and subscriber personas in real time."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_c2:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>📑</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'構成中' if lang=='ja' else 'Structuring'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'結城 紬' if lang=='ja' else 'Tsumugi Yuki'}</div>
+            <div style='font-size: 0.85rem; color: #FCD34D; font-weight: 700;'>{'記事制作課 (編集長)' if lang=='ja' else 'Editor-in-Chief'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Editorial Studio</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「購入率を高める有料ラインの境界線を設計しています。」' if lang=='ja' else '"Designing optimal paywall thresholds to maximize conversion rates."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_c3:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>✍️</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'執筆待機' if lang=='ja' else 'Drafting'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'森川 拓真' if lang=='ja' else 'Takuma Morikawa'}</div>
+            <div style='font-size: 0.85rem; color: #FDBA74; font-weight: 700;'>{'記事制作課 (ライター)' if lang=='ja' else 'Chief Content Writer'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Writer Studio</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「コピペで使える実践テンプレート執筆スタンバイ完了。」' if lang=='ja' else '"Drafting actionable copy-and-paste practical templates."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_c4:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>🛡️</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'QA待機' if lang=='ja' else 'QA Ready'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.1rem; color: #FFFFFF; margin-top: 4px;'>{'神崎 玲奈' if lang=='ja' else 'Reina Kanzaki'}</div>
+            <div style='font-size: 0.85rem; color: #FCA5A5; font-weight: 700;'>{'品質管理課 (QA)' if lang=='ja' else 'Quality Assurance Director'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 QA Inspection Booth</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 8px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「信憑性と100点採点スコアリングの準備万全です。」' if lang=='ja' else '"Conducting rigorous fact-checking and automated 100-point quality scoring."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown(f"#### {t('floor_pr_fin_title', lang)}")
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>📢</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'5大SNS待機' if lang=='ja' else 'Broadcasting'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'佐々木 翼' if lang=='ja' else 'Tsubasa Sasaki'}</div>
+            <div style='font-size: 0.85rem; color: #93C5FD; font-weight: 700;'>{'広報課' if lang=='ja' else 'Multi-SNS PR Specialist'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 PR Hub</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「X・IG・Threads・Bluesky・Mastodonへの自動プロモーション待機中。」' if lang=='ja' else '"Automated multi-channel syndication ready for X, Threads, IG, Bluesky, Mastodon."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m2:
+        st.markdown(f"""
+        <div class='desk-card'>
+            <div style='display: flex; justify-content: space-between;'>
+                <span style='font-size: 1.6rem;'>📊</span>
+                <span class='status-live'><span class='pulse-dot'></span>{'財務・経理分析中' if lang=='ja' else 'Auditing'}</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{'白石 葵' if lang=='ja' else 'Aoi Shiraishi'}</div>
+            <div style='font-size: 0.85rem; color: #C4B5FD; font-weight: 700;'>{'財務課 ＆ 経理課' if lang=='ja' else 'Financial Strategist & Chief Accountant'}</div>
+            <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 Finance & Accounting</div>
+            <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 {'「システム維持費0円（完全無料）確認済。価格シミュレーション準備完了。」' if lang=='ja' else '"Verified ¥0 monthly fixed costs. Ready for price optimization models."'}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # -------------------------------------------------------------
+    # ✨ 新規配属・増員スペシャリストデスク (Newly Recruited AI Specialists)
+    # -------------------------------------------------------------
+    base_9_ids = {"ichijo", "tachibana", "ayase", "kazama", "yuki", "morikawa", "kanzaki", "sasaki", "shiraishi"}
+    new_hired = [e for e in all_emps if e.get("id") not in base_9_ids]
+
+    if new_hired:
+        st.markdown(f"#### ✨ {'新規配属・増員スペシャリストデスク (稼働中)' if lang=='ja' else 'Reinforcement & Newly Recruited Specialists (Active)'}")
+        cols_nh = st.columns(min(len(new_hired), 3))
+        for idx, emp in enumerate(new_hired):
+            c_nh = cols_nh[idx % len(cols_nh)]
+            with c_nh:
+                st.markdown(f"""
+                <div class='desk-card' style='border: 1px solid #38BDF8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15); border-left: 5px solid {emp.get("color", "#38BDF8")};'>
+                    <div style='display: flex; justify-content: space-between;'>
+                        <span style='font-size: 1.6rem;'>{emp.get('icon', '👤')}</span>
+                        <span class='status-live' style='color: #38BDF8; border-color: #38BDF8;'><span class='pulse-dot' style='background: #38BDF8;'></span>{'即時稼働中' if lang=='ja' else 'Active'}</span>
+                    </div>
+                    <div style='font-weight: 800; font-size: 1.15rem; color: #FFFFFF; margin-top: 4px;'>{emp.get('name')}</div>
+                    <div style='font-size: 0.85rem; color: #38BDF8; font-weight: 700;'>{emp.get('role')}</div>
+                    <div style='font-size: 0.75rem; color: #94A3B8; margin-top: 6px;'>📍 {emp.get('department')}（増員配属ブース）</div>
+                    <div style='font-size: 0.85rem; color: #F8FAFC; margin-top: 6px; background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;'>💬 「{clean_txt(emp.get('motto', '業務稼働中'))}」</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # 3. 🔍 Market Research Division
