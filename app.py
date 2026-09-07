@@ -2245,8 +2245,10 @@ elif page_id == "hr":
                     if st.button(f"🤝 この増員提案を承認して即時雇用する (0円)", key=f"btn_hire_prop_{prop['id']}", use_container_width=True, type="primary"):
                         try:
                             hired_emp = st.session_state.hr_manager.hire_from_proposal(prop["id"])
+                            emp_name = hired_emp.get("name", prop.get("recommended_candidate", "新規AI社員")) if isinstance(hired_emp, dict) else prop.get("recommended_candidate", "新規AI社員")
+                            emp_role = hired_emp.get("role", prop.get("proposed_role", "")) if isinstance(hired_emp, dict) else prop.get("proposed_role", "")
                             st.balloons()
-                            st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）\n{prop['target_name']}の業務負荷スコアが半減しました。")
+                            st.success(f"🎉 新規AI社員【{emp_name}（{emp_role}）】を正式雇用・配属しました！（費用0円）\n{prop['target_name']}の業務負荷スコアが半減しました。")
                             st.rerun()
                         except Exception as e:
                             st.error(f"雇用処理エラー: {e}")
@@ -2289,7 +2291,9 @@ elif page_id == "hr":
                 if st.button(f"❌ 解雇・オフボーディング (0円)", key=f"btn_offboard_{e_id}", type="secondary", use_container_width=True):
                     try:
                         record = st.session_state.hr_manager.offboard_employee(e_id, reason="代表者の経営判断による人員整理")
-                        st.warning(f"🚪 AI社員【{record['name']}（{record['role']}）】を解雇・オフボーディングしました（費用0円）。\n2Dオフィスから退場し、全社名簿から抹消されました。")
+                        r_name = record.get("name", e_id) if isinstance(record, dict) else e_id
+                        r_role = record.get("role", "") if isinstance(record, dict) else ""
+                        st.warning(f"🚪 AI社員【{r_name}（{r_role}）】を解雇・オフボーディングしました（費用0円）。\n2Dオフィスから退場し、全社名簿から抹消されました。")
                         st.rerun()
                     except Exception as e:
                         st.error(f"オフボーディング処理エラー: {e}")
@@ -2333,10 +2337,15 @@ elif page_id == "hr":
             with c_btn:
                 st.write("")
                 if st.button(f"🤝 採用する (0円)", key=f"btn_hire_preset_{cand['id']}_{idx}", use_container_width=True, type="primary"):
-                    hired_emp = st.session_state.hr_manager.hire_employee(cand)
-                    st.balloons()
-                    st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）")
-                    st.rerun()
+                    try:
+                        hired_emp = st.session_state.hr_manager.hire_employee(cand)
+                        emp_name = hired_emp.get("name", cand.get("name", "新規AI社員")) if isinstance(hired_emp, dict) else cand.get("name", "新規AI社員")
+                        emp_role = hired_emp.get("role", cand.get("role", "")) if isinstance(hired_emp, dict) else cand.get("role", "")
+                        st.balloons()
+                        st.success(f"🎉 新規AI社員【{emp_name}（{emp_role}）】を正式雇用・配属しました！（費用0円）")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"雇用処理エラー: {e}")
 
     with tab_custom:
         with st.form("form_custom_hire"):
@@ -2379,10 +2388,15 @@ elif page_id == "hr":
                         "skills": [s.strip() for s in custom_skills.split(",") if s.strip()] or ["業務迅速化"],
                         "prompt": custom_prompt.strip() or f"あなたはNoteOneSystems株式会社の{custom_role}『{custom_name}』です。"
                     }
-                    hired_emp = st.session_state.hr_manager.hire_employee(new_cand_data)
-                    st.balloons()
-                    st.success(f"🎉 新規AI社員【{hired_emp['name']}（{hired_emp['role']}）】を正式雇用・配属しました！（費用0円）")
-                    st.rerun()
+                    try:
+                        hired_emp = st.session_state.hr_manager.hire_employee(new_cand_data)
+                        emp_name = hired_emp.get("name", new_cand_data.get("name", "新規AI社員")) if isinstance(hired_emp, dict) else new_cand_data.get("name", "新規AI社員")
+                        emp_role = hired_emp.get("role", new_cand_data.get("role", "")) if isinstance(hired_emp, dict) else new_cand_data.get("role", "")
+                        st.balloons()
+                        st.success(f"🎉 新規AI社員【{emp_name}（{emp_role}）】を正式雇用・配属しました！（費用0円）")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"雇用処理エラー: {e}")
                 else:
                     st.error("社員名と役職名は必須入力です。")
 

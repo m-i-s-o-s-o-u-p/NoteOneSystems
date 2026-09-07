@@ -317,6 +317,8 @@ class HRManager:
         with open(HIRING_LEDGER_PATH, "w", encoding="utf-8") as f:
             json.dump(ledger, f, ensure_ascii=False, indent=2)
 
+        return profile_dict
+
     BASE_9_IDS = {"ichijo", "tachibana", "ayase", "kazama", "yuki", "morikawa", "kanzaki", "sasaki", "shiraishi"}
 
     def is_offboardable(self, employee_id: str) -> bool:

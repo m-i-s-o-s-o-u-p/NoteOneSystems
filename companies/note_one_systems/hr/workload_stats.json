@@ -18,7 +18,7 @@
     "role": "市場リサーチ担当",
     "tasks": 14,
     "words_generated": 9729,
-    "workload_score": 52
+    "workload_score": 40
   },
   "kanzaki": {
     "name": "神崎 玲奈",
@@ -72,6 +72,13 @@
   "misaki": {
     "name": "美咲 華 (Hana Misaki)",
     "role": "クリエイティブデザイナー / アイキャッチ制作",
+    "tasks": 1,
+    "words_generated": 0,
+    "workload_score": 15
+  },
+  "saotome": {
+    "name": "早乙女 律花 (Rikka Saotome)",
+    "role": "SEOアナリスト / 検索需要リサーチャー",
     "tasks": 1,
     "words_generated": 0,
     "workload_score": 15
