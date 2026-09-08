@@ -1386,10 +1386,40 @@ elif page_id == "office":
             </div>
             """, unsafe_allow_html=True)
 
-            if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "hire", "recruit"]):
+            if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "連れて", "雇", "hire", "recruit", "ライター", "社員"]):
+                u_txt = item.get("user", "").lower()
+                avail = st.session_state.hr_manager.get_candidate_presets(include_hired=False)
+                suggested_hires = []
+                if any(w in u_txt for w in ["女性", "女", "female", "girl"]) and any(w in u_txt for w in ["ライター", "執筆", "writer", "記事"]):
+                    suggested_hires = [p for p in avail if p["id"] in ["sakurai", "shirakawa"]]
+                elif any(w in u_txt for w in ["ライター", "執筆", "writer"]):
+                    suggested_hires = [p for p in avail if p["id"] in ["sakurai", "shirakawa", "kiryu"]]
+                elif any(w in u_txt for w in ["マーケ", "sns", "海外", "英語"]):
+                    suggested_hires = [p for p in avail if p["id"] in ["stewart"]]
+
+                if suggested_hires:
+                    st.markdown(f"""
+                    <div style='background: #0F172A; border: 1px solid #38BDF8; border-radius: 8px; padding: 10px 14px; margin-top: 10px; margin-bottom: 8px;'>
+                        <div style='color: #38BDF8; font-weight: 700; font-size: 0.92rem;'>🎯 綾瀬七海が選考した即戦力候補（今すぐこのオフィスに連れてくることができます）:</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    for s_cand in suggested_hires:
+                        sc_1, sc_2 = st.columns([3, 2])
+                        with sc_1:
+                            st.markdown(f"**{s_cand['icon']} {s_cand['name']}**<br><span style='color: #94A3B8; font-size: 0.83rem;'>{s_cand['role']}</span>", unsafe_allow_html=True)
+                        with sc_2:
+                            if st.button(f"🤝 {s_cand['name'].split(' ')[0]} を連れてくる (0円)", key=f"btn_chat_hire_{s_cand['id']}_{item.get('timestamp')}", type="primary", use_container_width=True):
+                                try:
+                                    hired_emp = st.session_state.hr_manager.hire_employee(s_cand)
+                                    st.balloons()
+                                    st.success(f"🎉 新規AI社員【{s_cand['name']}】を正式雇用し、2Dオフィスフロアに配属しました！")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"雇用エラー: {e}")
+
                 c_jump1, c_jump2 = st.columns([2, 1])
                 with c_jump2:
-                    if st.button("👉 🤝 人事課（HR）の採用・雇用デスクへ移動", key=f"btn_jump_hr_{item.get('timestamp')}", use_container_width=True, type="primary"):
+                    if st.button("👉 🤝 人事課（HR）の採用・雇用デスクへ移動", key=f"btn_jump_hr_{item.get('timestamp')}", use_container_width=True, type="secondary"):
                         st.session_state.active_page_id = "hr"
                         st.rerun()
 
@@ -2309,8 +2339,9 @@ elif page_id == "hr":
     if lang != 'ja':
         preset_tab_title = f"🎯 Recommended Specialists ({preset_count} Available)" if preset_count > 0 else "🎯 Recommended Specialists (All Hired)"
 
-    tab_preset, tab_custom = st.tabs([
+    tab_preset, tab_scout, tab_custom = st.tabs([
         preset_tab_title,
+        "🗣️ 綾瀬七海への採用オーダー（AIスカウト）" if lang=="ja" else "🗣️ Scout Order Desk",
         "✍️ オーナー自由指定 採用フォーム (完全カスタムAI社員)" if lang=="ja" else "✍️ Custom Recruitment Form"
     ])
 
@@ -2320,9 +2351,9 @@ elif page_id == "hr":
             <div style='background: #0F172A; border: 1px solid #10B981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 14px;'>
                 <div style='font-size: 1.25rem; margin-bottom: 8px; color: #10B981;'>🎉 <strong>おすすめ即戦力スペシャリストは全員採用・配属済みです！</strong></div>
                 <div style='color: #E2E8F0; font-size: 0.9rem; line-height: 1.6;'>
-                    現在、人事課が推薦する即戦力AI社員（桐生 蓮、美咲 華、早乙女 律花 等）はすべて雇用され、各部署および2Dオフィスフロアでフル稼働しています。<br>
+                    現在、人事課が推薦する即戦力AI社員（桐生 蓮、美咲 華、早乙女 律花、桜井 葵、白河 結月 等）はすべて雇用され、各部署および2Dオフィスフロアでフル稼働しています。<br>
                     現在の在籍状況の確認やオフボーディング（解雇・0円）は上部の「🚪 AI社員 在籍管理デスク」から行えます。<br>
-                    別領域のAI社員をさらに増員したい場合は、隣の「✍️ オーナー自由指定 採用フォーム」より自由な役職名・スキルで何名でも即時採用（永久0円）可能です。
+                    別領域のAI社員をさらに増員したい場合は、隣の「🗣️ 綾瀬七海への採用オーダー」または「✍️ 自由指定 採用フォーム」より自由な役職名・スキルで何名でも即時採用（永久0円）可能です。
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -2363,6 +2394,62 @@ elif page_id == "hr":
                             st.rerun()
                         except Exception as e:
                             st.error(f"雇用処理エラー: {e}")
+
+    with tab_scout:
+        st.markdown(f"##### {'🗣️ 綾瀬七海（人事責任者）への採用オーダーデスク' if lang=='ja' else '🗣️ AI Scout Order Desk'}")
+        st.markdown(f"<div style='color: #94A3B8; font-size: 0.88rem; margin-bottom: 12px;'>{'「女性ライターを雇いたい」「読者の共感を呼ぶ女性ストーリーテラー」「ノウハウ図解ライター」など、欲しい人材のイメージを伝えるだけで、綾瀬七海が即座に社内規程に適合するスペシャリストをスカウト・選考し、候補者プロファイルを作成します。' if lang=='ja' else 'Tell HR what kind of agent you want, and Ayase will scout and prepare them for instant onboarding.'}</div>", unsafe_allow_html=True)
+        
+        c_sc1, c_sc2 = st.columns([4, 1])
+        with c_sc1:
+            order_query = st.text_input(
+                "採用したいAI社員のイメージ・条件（自由入力）",
+                placeholder="例: 女性ライターを雇いたい / 読者の共感を呼ぶ女性執筆者 / ノウハウ図解ライター",
+                key="input_hr_scout_order"
+            )
+        with c_sc2:
+            st.write("")
+            btn_do_scout = st.button("🔍 スカウト依頼", key="btn_exec_scout", type="primary", use_container_width=True)
+
+        if btn_do_scout and order_query.strip():
+            with st.spinner("綾瀬七海が条件に適合するAI社員をスカウト中..."):
+                scouted_res = st.session_state.hr_manager.scout_custom_candidate(
+                    order_query,
+                    ai_client=st.session_state.ai_client
+                )
+                st.session_state.last_scouted_candidate = scouted_res
+
+        if st.session_state.get("last_scouted_candidate"):
+            sc = st.session_state.last_scouted_candidate
+            st.markdown(f"""
+            <div style='background: #0F172A; border: 2px solid {sc.get("color", "#F43F5E")}; border-radius: 8px; padding: 14px; margin-top: 10px; margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between;'>
+                    <div>
+                        <span style='font-size: 1.4rem;'>{sc.get("icon", "👩‍💻")}</span>
+                        <strong style='color: #FFFFFF; font-size: 1.1rem; margin-left: 8px;'>{sc.get("name", "スカウト候補")}</strong>
+                        <span style='color: #93C5FD; font-size: 0.88rem; margin-left: 8px;'>（{sc.get("role", "")} / {sc.get("department", "")}）</span>
+                    </div>
+                    <span style='color: #10B981; font-weight: 700; font-size: 0.85rem;'>スカウト費用: ¥0</span>
+                </div>
+                <div style='margin-top: 8px; color: #E2E8F0; font-size: 0.9rem;'>
+                    <strong>モットー:</strong> <em>「{sc.get("motto", "")}」</em>
+                </div>
+                <div style='margin-top: 6px; color: #38BDF8; font-size: 0.85rem;'>
+                    💡 <strong>綾瀬七海の選考・推薦理由:</strong> {sc.get("recommendation_reason", "")}
+                </div>
+                <div style='margin-top: 6px; color: #94A3B8; font-size: 0.82rem;'>
+                    🛠️ スキル: {', '.join(sc.get("skills", []))}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🤝 【{sc.get('name')}】を正式雇用してオフィスに連れてくる (0円)", key="btn_hire_scouted", type="primary", use_container_width=True):
+                try:
+                    hired_emp = st.session_state.hr_manager.hire_employee(sc)
+                    st.session_state.last_scouted_candidate = None
+                    st.balloons()
+                    st.success(f"🎉 新規AI社員【{hired_emp.get('name')}（{hired_emp.get('role')}）】を正式雇用し、2Dオフィスフロアに配属しました！（費用0円）")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"雇用処理エラー: {e}")
 
     with tab_custom:
         with st.form("form_custom_hire"):

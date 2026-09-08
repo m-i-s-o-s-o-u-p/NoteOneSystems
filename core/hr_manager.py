@@ -139,6 +139,32 @@ class HRManager:
             "recommendation_reason": "アイキャッチのCTR（クリック率）を劇的に向上させ、記事購入の購買意欲を刺激します。"
         },
         {
+            "id": "sakurai",
+            "name": "桜井 葵 (Aoi Sakurai)",
+            "role": "シニア・ストーリーライター / note共感ストーリーテラー",
+            "icon": "👩‍💻",
+            "color": "#F43F5E",
+            "department": "コンテンツ制作本部",
+            "motto": "読者の心に深く刺さるストーリーと共感の言葉で、最後まで夢中で読まれる原稿を紡ぎます。",
+            "skills": ["共感ストーリーテリング", "エモーショナルライティング", "読者心理分析", "note有料記事執筆"],
+            "prompt": "あなたはNoteOneSystems株式会社のシニア・ストーリーライター『桜井 葵』です。女性読者や共感を重視する読者の感情を動かし、購入満足度を極大化するストーリー性豊かな記事を執筆します。",
+            "assists": "yuki",
+            "recommendation_reason": "【代表者リクエスト完全対応】読者の感情を動かす共感・ストーリー構成に長け、購入意欲と読後満足度を最大化する実力派女性ライターです。"
+        },
+        {
+            "id": "shirakawa",
+            "name": "白河 結月 (Yuzuki Shirakawa)",
+            "role": "収益化・テクニカルライター / ノウハウ図解スペシャリスト",
+            "icon": "✍️",
+            "color": "#8B5CF6",
+            "department": "コンテンツ制作本部",
+            "motto": "複雑なノウハウも、誰でも即座に真似できる分かりやすいステップバイステップ解説に昇華します。",
+            "skills": ["実践ノウハウ言語化", "手順ステップ解説", "高CVRセールスライティング", "テンプレート設計"],
+            "prompt": "あなたはNoteOneSystems株式会社の収益化・テクニカルライター『白河 結月』です。実践的なノウハウやテンプレートを分かりやすく整理し、即行動につながる原稿を執筆します。",
+            "assists": "morikawa",
+            "recommendation_reason": "【女性テクニカルライター】論理的で丁寧なステップ解説により、購入者が迷わず成果を出せる信頼性の高い有料マニュアルを執筆します。"
+        },
+        {
             "id": "stewart",
             "name": "エドワード・スチュワート (Edward Stewart)",
             "role": "グローバルマーケター / 海外AI動向リサーチャー",
@@ -152,6 +178,94 @@ class HRManager:
             "recommendation_reason": "競合がまだ知らない海外の最新AIツールや実践手法をいち早く記事に取り入れます。"
         }
     ]
+
+    def scout_custom_candidate(self, order_text: str, ai_client=None) -> Dict[str, Any]:
+        """
+        Interprets natural language recruitment requirements from the owner and
+        scouts/generates a tailor-made AI employee candidate profile ready to hire.
+        """
+        q = order_text.strip().lower()
+        if ai_client and ai_client.is_configured():
+            try:
+                prompt = f"""
+あなたはNoteOneSystems株式会社の人事・労務責任者『綾瀬 七海』です。
+代表者（オーナー）から以下の採用リクエストを受け取りました：
+「{order_text}」
+
+この要望を満たす最高の人材を1名スカウトし、以下のJSON形式のみで出力してください（コードブロック不要、純粋なJSONのみ）。
+{{
+  "name": "氏名（漢字と読み）例: 桜井 葵 (Aoi Sakurai)",
+  "role": "具体的な役職名 例: シニア・ストーリーライター / note共感ストーリーテラー",
+  "icon": "アイコン絵文字1文字 例: 👩‍💻 または ✍️",
+  "color": "テーマカラー（HEXカラーコード）例: #F43F5E",
+  "department": "配属部署（コンテンツ制作本部 / マーケティング・リサーチ本部 / 広報・宣伝本部 / 内部統制・ガバナンス本部 / 財務・経理統括本部 いずれか）",
+  "motto": "モットー（読者目線の熱い一言）",
+  "skills": ["スキル1", "スキル2", "スキル3", "スキル4"],
+  "prompt": "あなたの人格・役割を定義するシステムプロンプト指示文（50〜100文字）",
+  "recommendation_reason": "綾瀬七海による推薦理由（なぜこの人材が要望にぴったりか）"
+}}
+"""
+                resp = ai_client.generate_text(prompt=prompt)
+                match = re.search(r'\{.*\}', resp, re.DOTALL)
+                if match:
+                    data = json.loads(match.group(0))
+                    data["id"] = f"scout_{int(datetime.now().timestamp())}"
+                    return data
+            except Exception:
+                pass
+
+        if any(k in q for k in ["女性", "女", "female", "girl", "woman"]) and any(k in q for k in ["ライター", "執筆", "writer", "記事"]):
+            return {
+                "id": f"scout_{int(datetime.now().timestamp())}",
+                "name": "桜井 葵 (Aoi Sakurai)",
+                "role": "シニア・ストーリーライター / note共感ストーリーテラー",
+                "icon": "👩‍💻",
+                "color": "#F43F5E",
+                "department": "コンテンツ制作本部",
+                "motto": "読者の心に深く刺さるストーリーと共感の言葉で、最後まで夢中で読まれる原稿を紡ぎます。",
+                "skills": ["共感ストーリーテリング", "エモーショナルライティング", "読者心理分析", "note有料記事執筆"],
+                "prompt": "あなたはNoteOneSystems株式会社のシニア・ストーリーライター『桜井 葵』です。女性読者や共感を重視する読者の感情を動かし、購入満足度を極大化するストーリー性豊かな記事を執筆します。",
+                "recommendation_reason": "代表者様のリクエスト『女性ライター』に完全合致。共感・心理描写に長け、note有料記事の読了率と成約率を跳ね上げる即戦力です！"
+            }
+        elif any(k in q for k in ["テクニカル", "ノウハウ", "実用", "解説", "図解", "手順"]):
+            return {
+                "id": f"scout_{int(datetime.now().timestamp())}",
+                "name": "白河 結月 (Yuzuki Shirakawa)",
+                "role": "収益化・テクニカルライター / ノウハウ図解スペシャリスト",
+                "icon": "✍️",
+                "color": "#8B5CF6",
+                "department": "コンテンツ制作本部",
+                "motto": "複雑なノウハウも、誰でも即座に真似できる分かりやすいステップバイステップ解説に昇華します。",
+                "skills": ["実践ノウハウ言語化", "手順ステップ解説", "高CVRセールスライティング", "テンプレート設計"],
+                "prompt": "あなたはNoteOneSystems株式会社の収益化・テクニカルライター『白河 結月』です。実践的なノウハウやテンプレートを分かりやすく整理し、即行動につながる原稿を執筆します。",
+                "recommendation_reason": "論理的で分かりやすい実践マニュアル執筆のスペシャリスト。購入者が即戦力化できる高品質記事を納品します！"
+            }
+        elif any(k in q for k in ["sns", "tiktok", "インスタ", "instagram", "広報", "マーケ"]):
+            return {
+                "id": f"scout_{int(datetime.now().timestamp())}",
+                "name": "星野 みやび (Miyabi Hoshino)",
+                "role": "ショート動画・SNSディレクター / バズ創出スペシャリスト",
+                "icon": "📱",
+                "color": "#EC4899",
+                "department": "広報・宣伝本部",
+                "motto": "TikTok・リール・Threadsのアルゴリズムを徹底攻略し、記事への導線を爆発的に増やします。",
+                "skills": ["ショート動画台本", "SNSアルゴリズム分析", "バイラル設計", "フックコピー制作"],
+                "prompt": "あなたはNoteOneSystems株式会社のショート動画・SNSディレクター『星野 みやび』です。若年層やSNSユーザーを引きつけるキャッチーな告知を仕掛けます。",
+                "recommendation_reason": "SNSからの新規読者獲得を急加速させる女性マーケター。noteへの流入チャネルを多角化します！"
+            }
+        else:
+            return {
+                "id": f"scout_{int(datetime.now().timestamp())}",
+                "name": "桜井 葵 (Aoi Sakurai)",
+                "role": f"特命AIスペシャリスト（{order_text[:16]}担当）",
+                "icon": "👩‍💻",
+                "color": "#F43F5E",
+                "department": "コンテンツ制作本部",
+                "motto": f"オーナーのご要望「{order_text}」に120%お応えするため、最高の成果物を創り出します。",
+                "skills": ["オーダー特化業務", "自律タスク推進", "迅速クオリティ納品"],
+                "prompt": f"あなたはNoteOneSystems株式会社の特命スペシャリスト『桜井 葵』です。代表者の指示「{order_text}」にコミットして業務を推進します。",
+                "recommendation_reason": f"代表者様からのご要望『{order_text}』に最適なスキルセットを持つ特命AI社員です！"
+            }
 
     def get_candidate_presets(self, include_hired: bool = False) -> List[Dict[str, Any]]:
         """Returns ready-to-hire candidate presets for instantaneous recruitment.
