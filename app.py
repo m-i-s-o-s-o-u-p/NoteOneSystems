@@ -376,8 +376,8 @@ def navigate_to(target_id: str):
 lang = st.session_state.language
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
-chat_manager = OfficeChatManager(ai_client)
 market_manager = MarketResearchManager(ai_client)
+chat_manager = OfficeChatManager(ai_client, hr_manager=st.session_state.hr_manager, market_manager=market_manager, workflow=workflow)
 
 # High-contrast UI Styling: Scoped Dark Theme & Pure White Review Dossier
 st.markdown("""
@@ -1385,6 +1385,23 @@ elif page_id == "office":
                 <div style='white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #F8FAFC;'>{clean_txt(resp.get('content', ''))}</div>
             </div>
             """, unsafe_allow_html=True)
+
+            action_exec = resp.get("action_executed")
+            if action_exec and action_exec.get("status") == "COMPLETED":
+                st.markdown(f"""
+                <div style='background: #064E3B; border: 1px solid #10B981; border-left: 5px solid #10B981; border-radius: 8px; padding: 12px 16px; margin-top: 8px; margin-bottom: 10px;'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <strong style='color: #34D399; font-size: 0.98rem;'>⚡ 【{action_exec.get("badge", "自律アクション執行完了")}】</strong>
+                        <span style='background: #047857; color: #ECFDF5; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;'>AUTONOMOUS ACTION EXECUTED</span>
+                    </div>
+                    <div style='font-size: 1.02rem; font-weight: 700; color: #FFFFFF; margin-top: 6px;'>{clean_txt(action_exec.get("title", ""))}</div>
+                    <div style='font-size: 0.88rem; color: #D1FAE5; margin-top: 4px; white-space: pre-wrap; line-height: 1.5;'>{clean_txt(action_exec.get("details", ""))}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if action_exec.get("type") == "CREATE_TOPIC":
+                    st.info("💡 起案された企画トピックは、画面上部の「👑 全社統合決裁センター」にてワンクリックで正式承認・執筆移行できます。")
+                elif action_exec.get("type") == "HIRE_EMPLOYEE":
+                    st.success("🎉 新規AI社員が2Dバーチャルオフィスフロアおよび全社名簿に正式出社・配属されました！")
 
             if resp.get("emp_id") == "ayase" or any(k in item.get("user", "") for k in ["雇用", "採用", "増員", "連れて", "雇", "hire", "recruit", "ライター", "社員"]):
                 u_txt = item.get("user", "").lower()
