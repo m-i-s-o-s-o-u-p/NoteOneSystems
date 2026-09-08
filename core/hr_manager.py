@@ -63,11 +63,25 @@ class HRManager:
             with open(self.workload_file, "w", encoding="utf-8") as f:
                 json.dump(stats, f, ensure_ascii=False, indent=2)
 
+    def get_hired_employee_ids(self) -> set:
+        """Returns the set of currently employed employee IDs from company_info.json."""
+        if os.path.exists(COMPANY_INFO_PATH):
+            try:
+                with open(COMPANY_INFO_PATH, "r", encoding="utf-8") as f:
+                    c_info = json.load(f)
+                return {e.get("id") for e in c_info.get("employees", []) if e.get("id")}
+            except Exception:
+                pass
+        return set()
+
     def get_staffing_proposals(self) -> List[Dict[str, Any]]:
         stats = self.get_workload_stats()
         proposals = []
+        hired_ids = self.get_hired_employee_ids()
         for emp_id, data in stats.items():
             if data.get("workload_score", 0) >= 80:
+                if emp_id == "morikawa" and "kiryu" in hired_ids:
+                    continue
                 proposed_role = f"アシスタント / サブ{data['role']}"
                 candidate_name = "桐生 蓮 (Ren Kiryu)" if emp_id == "morikawa" else f"{data['name']}補佐"
                 proposals.append({
@@ -84,62 +98,69 @@ class HRManager:
                 })
         return proposals
 
-    def get_candidate_presets(self) -> List[Dict[str, Any]]:
-        """Returns ready-to-hire candidate presets for instantaneous recruitment."""
-        return [
-            {
-                "id": "kiryu",
-                "name": "桐生 蓮 (Ren Kiryu)",
-                "role": "アシスタントライター / サブライター",
-                "icon": "🖋️",
-                "color": "#F97316",
-                "department": "コンテンツ制作本部",
-                "motto": "森川チーフライターと連携し、実践テンプレートの量産と執筆負荷を半減させます。",
-                "skills": ["実践テンプレート量産", "構成案ドラフト執筆", "速筆リライト", "ビジネス記事高速化"],
-                "prompt": "あなたはNoteOneSystems株式会社のアシスタントライター『桐生 蓮』です。森川チーフライターの執筆を強力にバックアップし、読者が即戦力として使える高品質なテンプレート原稿を作成します。",
-                "assists": "morikawa",
-                "recommendation_reason": "森川ライターの負荷（100%）を即座に半減させ、記事納期の遅延リスクをゼロにします。"
-            },
-            {
-                "id": "saotome",
-                "name": "早乙女 律花 (Rikka Saotome)",
-                "role": "SEOアナリスト / 検索需要リサーチャー",
-                "icon": "📈",
-                "color": "#10B981",
-                "department": "マーケティング・リサーチ本部",
-                "motto": "Google検索流入とnote内検索需要を科学し、検索順位1位を狙えるキーワードを設計します。",
-                "skills": ["SEOキーワード設計", "検索意図分析", "競合順位分析", "CTR改善"],
-                "prompt": "あなたはNoteOneSystems株式会社のSEOアナリスト『早乙女 律花』です。風間アナリストと連携し、検索エンジンから長期的に読者を呼び込める高CVRな企画キーワードを設計します。",
-                "assists": "kazama",
-                "recommendation_reason": "note内の検索流入だけでなくGoogleからのオーガニック流入を最大化し、長期自動販売を実現します。"
-            },
-            {
-                "id": "misaki",
-                "name": "美咲 華 (Hana Misaki)",
-                "role": "クリエイティブデザイナー / アイキャッチ制作",
-                "icon": "🎨",
-                "color": "#EC4899",
-                "department": "コンテンツ制作本部",
-                "motto": "一瞬で指を止めさせる最高品質のアイキャッチと、視覚的に伝わるインフォグラフィックを制作します。",
-                "skills": ["アイキャッチデザイン", "図解インフォグラフィック", "バナー制作", "Canva構成指示"],
-                "prompt": "あなたはNoteOneSystems株式会社のデザイナー『美咲 華』です。note記事のアイキャッチおよび本文中の図解・比較表を美しく魅力的に視覚化します。",
-                "assists": "yuki",
-                "recommendation_reason": "アイキャッチのCTR（クリック率）を劇的に向上させ、記事購入の購買意欲を刺激します。"
-            },
-            {
-                "id": "stewart",
-                "name": "エドワード・スチュワート (Edward Stewart)",
-                "role": "グローバルマーケター / 海外AI動向リサーチャー",
-                "icon": "🌐",
-                "color": "#6366F1",
-                "department": "広報・宣伝本部",
-                "motto": "海外の最新AIトレンドを秒速で輸入し、note記事の先進性と海外発信を推進します。",
-                "skills": ["海外AI動向調査", "英語コンテンツリサーチ", "多言語ローカライズ", "Xグローバル発信"],
-                "prompt": "あなたはNoteOneSystems株式会社のグローバルマーケター『エドワード・スチュワート』です。欧米の一次ソースから最新のAI実践ノウハウを収集し、佐々木広報と連携して発信します。",
-                "assists": "sasaki",
-                "recommendation_reason": "競合がまだ知らない海外の最新AIツールや実践手法をいち早く記事に取り入れます。"
-            }
-        ]
+    CANDIDATE_PRESETS = [
+        {
+            "id": "kiryu",
+            "name": "桐生 蓮 (Ren Kiryu)",
+            "role": "アシスタントライター / サブライター",
+            "icon": "🖋️",
+            "color": "#F97316",
+            "department": "コンテンツ制作本部",
+            "motto": "森川チーフライターと連携し、実践テンプレートの量産と執筆負荷を半減させます。",
+            "skills": ["実践テンプレート量産", "構成案ドラフト執筆", "速筆リライト", "ビジネス記事高速化"],
+            "prompt": "あなたはNoteOneSystems株式会社のアシスタントライター『桐生 蓮』です。森川チーフライターの執筆を強力にバックアップし、読者が即戦力として使える高品質なテンプレート原稿を作成します。",
+            "assists": "morikawa",
+            "recommendation_reason": "森川ライターの負荷（100%）を即座に半減させ、記事納期の遅延リスクをゼロにします。"
+        },
+        {
+            "id": "saotome",
+            "name": "早乙女 律花 (Rikka Saotome)",
+            "role": "SEOアナリスト / 検索需要リサーチャー",
+            "icon": "📈",
+            "color": "#10B981",
+            "department": "マーケティング・リサーチ本部",
+            "motto": "Google検索流入とnote内検索需要を科学し、検索順位1位を狙えるキーワードを設計します。",
+            "skills": ["SEOキーワード設計", "検索意図分析", "競合順位分析", "CTR改善"],
+            "prompt": "あなたはNoteOneSystems株式会社のSEOアナリスト『早乙女 律花』です。風間アナリストと連携し、検索エンジンから長期的に読者を呼び込める高CVRな企画キーワードを設計します。",
+            "assists": "kazama",
+            "recommendation_reason": "note内の検索流入だけでなくGoogleからのオーガニック流入を最大化し、長期自動販売を実現します。"
+        },
+        {
+            "id": "misaki",
+            "name": "美咲 華 (Hana Misaki)",
+            "role": "クリエイティブデザイナー / アイキャッチ制作",
+            "icon": "🎨",
+            "color": "#EC4899",
+            "department": "コンテンツ制作本部",
+            "motto": "一瞬で指を止めさせる最高品質のアイキャッチと、視覚的に伝わるインフォグラフィックを制作します。",
+            "skills": ["アイキャッチデザイン", "図解インフォグラフィック", "バナー制作", "Canva構成指示"],
+            "prompt": "あなたはNoteOneSystems株式会社のデザイナー『美咲 華』です。note記事のアイキャッチおよび本文中の図解・比較表を美しく魅力的に視覚化します。",
+            "assists": "yuki",
+            "recommendation_reason": "アイキャッチのCTR（クリック率）を劇的に向上させ、記事購入の購買意欲を刺激します。"
+        },
+        {
+            "id": "stewart",
+            "name": "エドワード・スチュワート (Edward Stewart)",
+            "role": "グローバルマーケター / 海外AI動向リサーチャー",
+            "icon": "🌐",
+            "color": "#6366F1",
+            "department": "広報・宣伝本部",
+            "motto": "海外の最新AIトレンドを秒速で輸入し、note記事の先進性と海外発信を推進します。",
+            "skills": ["海外AI動向調査", "英語コンテンツリサーチ", "多言語ローカライズ", "Xグローバル発信"],
+            "prompt": "あなたはNoteOneSystems株式会社のグローバルマーケター『エドワード・スチュワート』です。欧米の一次ソースから最新のAI実践ノウハウを収集し、佐々木広報と連携して発信します。",
+            "assists": "sasaki",
+            "recommendation_reason": "競合がまだ知らない海外の最新AIツールや実践手法をいち早く記事に取り入れます。"
+        }
+    ]
+
+    def get_candidate_presets(self, include_hired: bool = False) -> List[Dict[str, Any]]:
+        """Returns ready-to-hire candidate presets for instantaneous recruitment.
+        By default (include_hired=False), candidates who are already employed are excluded.
+        """
+        if include_hired:
+            return [dict(p) for p in self.CANDIDATE_PRESETS]
+        hired_ids = self.get_hired_employee_ids()
+        return [dict(p) for p in self.CANDIDATE_PRESETS if p["id"] not in hired_ids]
 
     def hire_from_proposal(self, proposal_id: str, custom_name: Optional[str] = None) -> Dict[str, Any]:
         """Approves a staffing proposal and executes instantaneous hiring."""
@@ -150,7 +171,8 @@ class HRManager:
 
         emp_id = target_prop["target_emp_id"]
         if emp_id == "morikawa":
-            preset = self.get_candidate_presets()[0] # kiryu
+            presets = [p for p in self.get_candidate_presets(include_hired=True) if p["id"] == "kiryu"]
+            preset = dict(presets[0]) if presets else dict(self.CANDIDATE_PRESETS[0])
             if custom_name:
                 preset["name"] = custom_name
             return self.hire_employee(preset)

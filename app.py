@@ -2303,49 +2303,66 @@ elif page_id == "hr":
     st.markdown(f"#### 🤝 {'新規AI専門社員 募集・採用管理デスク (即時雇用・費用0円)' if lang=='ja' else 'AI Employee Recruitment & Onboarding Desk (Zero Cost)'}")
     st.markdown(f"<div style='color: #94A3B8; font-size: 0.88rem; margin-bottom: 14px;'>{'オーナーの経営判断により、事業拡大や特定業務補佐のためのAIスペシャリストを即座に雇用・配属できます。完全無料API枠・純Python設計のため、何名採用しても追加費用は永久に0円です。' if lang=='ja' else 'Deploy specialized AI agents on-demand with zero additional marginal cost.'}</div>", unsafe_allow_html=True)
 
+    presets = st.session_state.hr_manager.get_candidate_presets(include_hired=False)
+    preset_count = len(presets)
+    preset_tab_title = f"🎯 人事課おすすめの即戦力スペシャリスト (未採用{preset_count}名)" if preset_count > 0 else "🎯 人事課おすすめの即戦力スペシャリスト (全員採用済み)"
+    if lang != 'ja':
+        preset_tab_title = f"🎯 Recommended Specialists ({preset_count} Available)" if preset_count > 0 else "🎯 Recommended Specialists (All Hired)"
+
     tab_preset, tab_custom = st.tabs([
-        "🎯 人事課おすすめの即戦力スペシャリスト (ワンクリック採用)" if lang=="ja" else "🎯 Recommended Specialists (1-Click Hire)",
+        preset_tab_title,
         "✍️ オーナー自由指定 採用フォーム (完全カスタムAI社員)" if lang=="ja" else "✍️ Custom Recruitment Form"
     ])
 
     with tab_preset:
-        presets = st.session_state.hr_manager.get_candidate_presets()
-        for idx, cand in enumerate(presets):
-            c_card, c_btn = st.columns([3, 1])
-            with c_card:
-                st.markdown(f"""
-                <div style='background: #0F172A; border: 1px solid #334155; border-left: 4px solid {cand["color"]}; border-radius: 8px; padding: 12px; margin-bottom: 10px;'>
-                    <div style='display: flex; justify-content: space-between;'>
-                        <div>
-                            <span style='font-size: 1.2rem;'>{cand["icon"]}</span>
-                            <strong style='color: #FFFFFF; font-size: 1.05rem; margin-left: 6px;'>{cand["name"]}</strong>
-                            <span style='color: #93C5FD; font-size: 0.85rem; margin-left: 8px;'>（{cand["role"]} / {cand["department"]}）</span>
-                        </div>
-                        <span style='color: #10B981; font-weight: 700; font-size: 0.8rem;'>費用: ¥0</span>
-                    </div>
-                    <div style='margin-top: 6px; color: #E2E8F0; font-size: 0.88rem;'>
-                        <strong>モットー:</strong> <em>「{cand['motto']}」</em>
-                    </div>
-                    <div style='margin-top: 4px; color: #94A3B8; font-size: 0.82rem;'>
-                        💡 <strong>採用メリット:</strong> {cand['recommendation_reason']}
-                    </div>
-                    <div style='margin-top: 4px; color: #64748B; font-size: 0.78rem;'>
-                        🛠️ スキル: {', '.join(cand['skills'])}
-                    </div>
+        if not presets:
+            st.markdown(f"""
+            <div style='background: #0F172A; border: 1px solid #10B981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 14px;'>
+                <div style='font-size: 1.25rem; margin-bottom: 8px; color: #10B981;'>🎉 <strong>おすすめ即戦力スペシャリストは全員採用・配属済みです！</strong></div>
+                <div style='color: #E2E8F0; font-size: 0.9rem; line-height: 1.6;'>
+                    現在、人事課が推薦する即戦力AI社員（桐生 蓮、美咲 華、早乙女 律花 等）はすべて雇用され、各部署および2Dオフィスフロアでフル稼働しています。<br>
+                    現在の在籍状況の確認やオフボーディング（解雇・0円）は上部の「🚪 AI社員 在籍管理デスク」から行えます。<br>
+                    別領域のAI社員をさらに増員したい場合は、隣の「✍️ オーナー自由指定 採用フォーム」より自由な役職名・スキルで何名でも即時採用（永久0円）可能です。
                 </div>
-                """, unsafe_allow_html=True)
-            with c_btn:
-                st.write("")
-                if st.button(f"🤝 採用する (0円)", key=f"btn_hire_preset_{cand['id']}_{idx}", use_container_width=True, type="primary"):
-                    try:
-                        hired_emp = st.session_state.hr_manager.hire_employee(cand)
-                        emp_name = hired_emp.get("name", cand.get("name", "新規AI社員")) if isinstance(hired_emp, dict) else cand.get("name", "新規AI社員")
-                        emp_role = hired_emp.get("role", cand.get("role", "")) if isinstance(hired_emp, dict) else cand.get("role", "")
-                        st.balloons()
-                        st.success(f"🎉 新規AI社員【{emp_name}（{emp_role}）】を正式雇用・配属しました！（費用0円）")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"雇用処理エラー: {e}")
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            for idx, cand in enumerate(presets):
+                c_card, c_btn = st.columns([3, 1])
+                with c_card:
+                    st.markdown(f"""
+                    <div style='background: #0F172A; border: 1px solid #334155; border-left: 4px solid {cand["color"]}; border-radius: 8px; padding: 12px; margin-bottom: 10px;'>
+                        <div style='display: flex; justify-content: space-between;'>
+                            <div>
+                                <span style='font-size: 1.2rem;'>{cand["icon"]}</span>
+                                <strong style='color: #FFFFFF; font-size: 1.05rem; margin-left: 6px;'>{cand["name"]}</strong>
+                                <span style='color: #93C5FD; font-size: 0.85rem; margin-left: 8px;'>（{cand["role"]} / {cand["department"]}）</span>
+                            </div>
+                            <span style='color: #10B981; font-weight: 700; font-size: 0.8rem;'>費用: ¥0</span>
+                        </div>
+                        <div style='margin-top: 6px; color: #E2E8F0; font-size: 0.88rem;'>
+                            <strong>モットー:</strong> <em>「{cand['motto']}」</em>
+                        </div>
+                        <div style='margin-top: 4px; color: #94A3B8; font-size: 0.82rem;'>
+                            💡 <strong>採用メリット:</strong> {cand['recommendation_reason']}
+                        </div>
+                        <div style='margin-top: 4px; color: #64748B; font-size: 0.78rem;'>
+                            🛠️ スキル: {', '.join(cand['skills'])}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with c_btn:
+                    st.write("")
+                    if st.button(f"🤝 採用する (0円)", key=f"btn_hire_preset_{cand['id']}_{idx}", use_container_width=True, type="primary"):
+                        try:
+                            hired_emp = st.session_state.hr_manager.hire_employee(cand)
+                            emp_name = hired_emp.get("name", cand.get("name", "新規AI社員")) if isinstance(hired_emp, dict) else cand.get("name", "新規AI社員")
+                            emp_role = hired_emp.get("role", cand.get("role", "")) if isinstance(hired_emp, dict) else cand.get("role", "")
+                            st.balloons()
+                            st.success(f"🎉 新規AI社員【{emp_name}（{emp_role}）】を正式雇用・配属しました！（費用0円）")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"雇用処理エラー: {e}")
 
     with tab_custom:
         with st.form("form_custom_hire"):
