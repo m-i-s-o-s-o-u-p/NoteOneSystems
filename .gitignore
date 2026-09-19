@@ -1,5 +1,30 @@
+# Python
 __pycache__/
-*.pyc
-.DS_Store
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
 .streamlit/secrets.toml
 .streamlit/credentials.toml
+
+# IDEs
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

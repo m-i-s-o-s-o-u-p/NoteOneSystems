@@ -3,7 +3,15 @@ import json
 
 class AIClient:
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        key = api_key or os.environ.get("GEMINI_API_KEY")
+        if not key:
+            try:
+                import streamlit as st
+                if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+                    key = st.secrets["GEMINI_API_KEY"]
+            except Exception:
+                pass
+        self.api_key = key
         self.client = None
         
         # google-genai または google-generativeai の安全な読み込み

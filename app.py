@@ -341,7 +341,13 @@ if "ringi_manager" not in st.session_state:
 if "hr_manager" not in st.session_state:
     st.session_state.hr_manager = HRManager()
 if "api_key" not in st.session_state:
-    st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
+    secret_key = ""
+    try:
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            secret_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+    st.session_state.api_key = secret_key or os.environ.get("GEMINI_API_KEY", "")
 if "active_page_id" not in st.session_state:
     st.session_state.active_page_id = "dashboard"
 if "scroll_trigger" not in st.session_state:
