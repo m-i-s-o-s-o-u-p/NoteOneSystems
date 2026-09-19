@@ -124,7 +124,13 @@ if "ringi_manager" not in st.session_state:
 if "hr_manager" not in st.session_state:
     st.session_state.hr_manager = HRManager()
 if "api_key" not in st.session_state:
-    st.session_state.api_key = os.environ.get("GEMINI_API_KEY", "")
+    secret_key = ""
+    try:
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            secret_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+    st.session_state.api_key = secret_key or os.environ.get("GEMINI_API_KEY", "")
 
 ai_client = AIClient(api_key=st.session_state.api_key)
 workflow = NoteOneWorkflow(ai_client)
